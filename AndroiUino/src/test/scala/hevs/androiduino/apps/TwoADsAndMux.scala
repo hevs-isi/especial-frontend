@@ -2,6 +2,7 @@ package hevs.androiduino.apps
 
 import java.io.PrintWriter
 
+import hevs.androiduino.apps.Constant2Led._
 import hevs.androiduino.dsl.CodeGenerator
 import hevs.androiduino.dsl.components.HW_Button
 import hevs.androiduino.dsl.components.HW_Led
@@ -17,7 +18,7 @@ object TwoADsAndMux extends TestGeneratorApp {
 
   // Generate code
   val code = CodeGenerator.generateCode
-  val writer = new PrintWriter(s"codeOutput/$appName.c")
+  val writer = new PrintWriter(s"codeOutput/$fileName.c")
   writer.print(code)
   writer.close()
 }

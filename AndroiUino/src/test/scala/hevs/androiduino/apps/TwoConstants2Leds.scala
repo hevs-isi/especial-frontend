@@ -1,8 +1,7 @@
 package hevs.androiduino.apps
 
 import hevs.androiduino.dsl.CodeGenerator
-import hevs.androiduino.dsl.components.Constant
-import hevs.androiduino.dsl.components.HW_Led
+import hevs.androiduino.dsl.components.{Constant, HW_Led}
 import hevs.androiduino.dsl.components.fundamentals.uint1
 
 object TwoConstant2Leds extends TestGeneratorApp {
@@ -18,7 +17,7 @@ object TwoConstant2Leds extends TestGeneratorApp {
 
   // Generate code
   val code = CodeGenerator.generateCode
-  CodeGenerator.outputToFile(s"codeOutput/$appName.c", code)
+  CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
 
   println(code)
 }

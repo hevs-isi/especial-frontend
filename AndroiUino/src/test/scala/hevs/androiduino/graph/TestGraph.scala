@@ -6,11 +6,6 @@ import scalax.collection.GraphPredef._
 import hevs.androiduino.dsl.components.fundamentals.hw_implemented
 import hevs.androiduino.dsl.components.fundamentals.Component
 
-case class Toto() extends Component("pouet") with hw_implemented {
-  def getInputs(): List[hevs.androiduino.dsl.components.fundamentals.InputPort] = { Nil }
-  def getOutputs(): List[hevs.androiduino.dsl.components.fundamentals.OutputPort] = { Nil }
-}
-
 object Test extends App {
   //var gr1 : Graph[Component, DiEdge] = Graph()
   val b1 = HW_Button(3)

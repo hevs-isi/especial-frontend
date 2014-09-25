@@ -16,7 +16,7 @@ object ChmTest extends TestGeneratorApp {
 
   // Generate code
   val code = CodeGenerator.generateCode
-  CodeGenerator.outputToFile(s"codeOutput/$appName.c", code)
+  CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
 
   println(code)
 }

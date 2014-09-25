@@ -74,6 +74,6 @@ case class Mux2[T<:CType](outputType : T) extends Component("a multiplexer") wit
 		}
 	}*/
 	
-	override def getOutputs() = out :: Nil
-	override def getInputs() = in1 :: in2 :: sel :: Nil
+	override def getOutputs = Some(Seq(out))
+	override def getInputs = Some(Seq(in1, in2, sel))
 }
