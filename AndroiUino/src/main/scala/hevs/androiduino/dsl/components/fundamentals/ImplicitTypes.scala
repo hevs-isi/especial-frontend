@@ -5,7 +5,7 @@ import scala.language.implicitConversions
 /**
  * Implicit conversions for `fundamentals.CType`.
  */
-object Implicits {
+object ImplicitTypes {
   implicit def uint1ToLong(v: uint1) = v.asLong
 
   implicit def uint8ToLong(v: uint8) = v.asLong

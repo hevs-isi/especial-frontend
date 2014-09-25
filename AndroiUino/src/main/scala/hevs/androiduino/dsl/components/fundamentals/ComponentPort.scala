@@ -10,12 +10,12 @@ abstract class InputPort(val t : CType, val owner: Component, val desc : Option[
 		w = in
 	}
 	
-	def isConnected() = (w != null)
+	def isConnected = w != null
 	
 	// Abstract function that should created to update the value
 	def updateValue(s : String) : String
 	
-	override def toString() : String = {
+	override def toString = {
 		if(isConnected)
 			"coming from component with [ID" + w.a.owner.id + "]"
 		else
@@ -32,21 +32,19 @@ abstract class OutputPort(val t : CType, val owner: Component, val desc: Option[
 		other.setInputWire(w)
 		wires ::= w
 		ComponentManager.gr1 += (owner~>other.owner)
-		
-//		logger.info("Creating a wire between \"" + this.owner + "\" and \"" + other.owner + "\"")
 	}
 
-	def updateConnected()  = {
+	def updateConnected() = {
 		for(wire <- wires){
-			wire.b.updateValue(wire.a.getValue);
+			wire.b.updateValue(wire.a.getValue)
 		}
 	}
 	
-	def getValue() : String
+	def getValue : String
 	
-	def isConnected() = (wires != null)
+	def isConnected = wires != null
 	
-	override def toString() : String ={
+	override def toString = {
 		var result = ""
 		for(wire <- wires){
 			result += "going to [ID" +  wire.b.owner.id + "]"
