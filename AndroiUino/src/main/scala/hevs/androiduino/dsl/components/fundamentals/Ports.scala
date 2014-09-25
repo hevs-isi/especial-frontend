@@ -3,7 +3,7 @@ import scalax.collection.GraphPredef._
 
 // This class represents an input of a component which can be updated
 // from a mixed-in trait
-abstract class InputPort(val t : C_Types, val owner: Component, val desc : Option[String] = None) {
+abstract class InputPort(val t : CType, val owner: Component, val desc : Option[String] = None) {
 	var w: Wire = null
 
 	def setInputWire(in: Wire) = {
@@ -23,7 +23,7 @@ abstract class InputPort(val t : C_Types, val owner: Component, val desc : Optio
 	}
 }
 
-abstract class OutputPort(val t : C_Types, val owner: Component, val desc: Option[String] = None) {
+abstract class OutputPort(val t : CType, val owner: Component, val desc: Option[String] = None) {
 	var wires: List[Wire] = List.empty[Wire]
 	
 	def -->(other: InputPort) = {			

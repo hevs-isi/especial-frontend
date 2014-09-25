@@ -9,16 +9,16 @@ object OSUtils {
 
   private var osName: String = null
 
-  def getOsName(): String = {
+  def getOsName: String = {
     if (osName == null)
       osName = System.getProperty("os.name").toLowerCase
     osName
   }
 
-  def getOsType(): Os = {
-    if (getOsName().startsWith("windows"))
+  def getOsType: Os = {
+    if (getOsName.startsWith("windows"))
       Windows()
-    else if (getOsName().contains("linux"))
+    else if (getOsName.contains("linux"))
       Linux()
     else
       Other()

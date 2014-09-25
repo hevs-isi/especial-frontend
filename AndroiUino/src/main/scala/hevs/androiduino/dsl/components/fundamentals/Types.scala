@@ -1,55 +1,175 @@
 package hevs.androiduino.dsl.components.fundamentals
 
-// Bake with spire ? https://github.com/non/spire
-// require(x > 0 && < x < 255)
+/**
+ * Abstract type that can be used in the native C code.
+ *
+ * A `CType` can be converted to a Scala type using `asBool`,
+ * `asString`, `asLong`, `asFloat` and `asDouble` methods.
+ * A `java.io.IOException` is thrown if the conversion is not implemented.
+ *
+ * @author Christopher Métrailler (christopher.metrailler@epfl.ch)
+ */
+sealed abstract class CType {
 
-// Not using inheritance but traits because it's not 
-// a good idea with case classes 
-// (see http://stackoverflow.com/questions/12289806/scala-extending-parameterized-abstract-class)
-// To make usable in case classes
-class C_Types(val v: AnyVal) {}
+  //TODO Bake with spire ? https://github.com/non/spire
 
-case class uint1(override val v: Boolean = false) extends C_Types(v)
-{
-	override def toString = "bool"
+  import hevs.androiduino.dsl.utils.Logger._
+
+  /**
+   * @return a `scala.Long` value
+   */
+  def asLong: Long = fatal("Conversion not available.")
+
+  /**
+   * @return a `scala.String` value
+   */
+  def asString: String = fatal("Conversion not available.")
+
+  /**
+   * @return a `scala.Boolean` value
+   */
+  def asBool: Boolean = fatal("Conversion not available.")
+
+  /**
+   * @return a `scala.Float` value
+   */
+  def asFloat: Float = fatal("Conversion not available.")
+
+  /**
+   * @return a `scala.Double` value
+   */
+  def asDouble: Double = fatal("Conversion not available.")
+
+  /**
+   * @return the C type as a `scala.String`
+   */
+  def getType: String
 }
 
-case class uint8(override val v: Byte = 0) extends C_Types(v)
-{
-	override def toString = "uint8_t"
+/**
+ * A boolean value, equivalent to `scala.Boolean`.
+ * Can be converted to a `scala.Int` or `scala.Boolean`.
+ *
+ * @param v the value
+ */
+case class uint1(private val v: Boolean = false) extends CType {
+  override def getType = "bool_t"
+
+  override def asBool = v
+
+  override def asLong = if (v) 1 else 0
 }
 
-case class uint16(override val v: Short = 0) extends C_Types(v)
-{
-	override def toString = "uint16_t"
+
+/**
+ * An unsigned 8-bit integer.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value, from `0x00` to `0xFF`
+ */
+case class uint8(private val v: Short = 0) extends CType {
+  require(v >= 0x00, "Unsigned number, must be positive.")
+  require(v <= 0xFF, "8-bit number max.")
+
+  override def getType = "uint8_t"
+
+  override def asLong = v.toLong
 }
 
-case class uint32(override val v: Int = 0) extends C_Types(v)
-{
-	override def toString = "uint32_t"
+/**
+ * An unsigned 16-bit integer.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value, from `0x00` to `0xFFFF`
+ */
+case class uint16(private val v: Int = 0) extends CType {
+  require(v >= 0x0000, "Unsigned number, must be positive.")
+  require(v <= 0xFFFF, "16-bit number max.")
+
+  override def getType = "uint16_t"
+
+  override def asLong = v.toLong
 }
 
-case class int8(override val v: Byte = 0) extends C_Types(v)
-{
-	override def toString = "int8_t"
+/**
+ * An unsigned 32-bit integer.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value, from `0x00` to `0xFFFFFFFF`
+ */
+case class uint32(private val v: Long = 0) extends CType {
+  require(v >= 0x00000000, "Unsigned number, must be positive.")
+  require(v <= 0xFFFFFFFF, "32-bit number max.")
+
+  override def getType = "uint32_t"
+
+  override def asLong = v.toLong
 }
 
-case class int16(override val v: Short = 0) extends C_Types(v)
-{
-	override def toString = "int16_t"
+/**
+ * A signed 8-bit integer, equivalent to `scala.Byte`.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value
+ */
+case class int8(private val v: Byte = 0) extends CType {
+  override def getType = "int8_t"
+
+  override def asLong = v.toLong
 }
 
-case class int32(override val v: Int = 0) extends C_Types(v)
-{
-	override def toString = "int32_t"
+/**
+ * A signed 16-bit integer, equivalent to `scala.Short`.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value
+ */
+case class int16(private val v: Short = 0) extends CType {
+  override def getType = "int16_t"
+
+  override def asLong = v.toLong
 }
 
-case class float(override val v: Float = 0) extends C_Types(v)
-{
-	override def toString = "float"
+/**
+ * A signed 32-bit integer, equivalent to `scala.Int`.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value
+ */
+case class int32(private val v: Int = 0) extends CType {
+  override def getType = "int32_t"
+
+  override def asLong = v.toLong
 }
 
-case class double(override val v: Double = 0) extends C_Types(v)
-{
-	override def toString = "double"
+/**
+ * A 32-bit IEEE-754 floating point number, equivalent to `scala.Float`.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value
+ */
+case class float(private val v: Float = 0) extends CType {
+  override def getType = "float"
+
+  override def asFloat = v
+
+  override def asLong = v.toLong
+
+  override def asDouble = v.toDouble
+}
+
+/**
+ * A 64-bit IEEE-754 floating point number, equivalent to `scala.Double`.
+ * Can be converted to a `scala.Long`.
+ *
+ * @param v the value
+ */
+case class double(private val v: Double = 0) extends CType {
+  override def getType = "double"
+
+  override def asDouble = v
+
+  override def asLong = v.toLong
+
+  override def asFloat = v.toFloat
 }

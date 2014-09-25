@@ -13,5 +13,5 @@ trait TestGeneratorApp extends App {
   println("*".*(60))
   println(s"AndroidUINO generator / mui 2013")
   println(s"Version $ver - Example $appName")
-  println("*".*(80))
+  println("*".*(60))
 }

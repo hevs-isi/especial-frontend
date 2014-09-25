@@ -2,7 +2,7 @@ package hevs.androiduino.dsl.components
 
 import hevs.androiduino.dsl.components.fundamentals.hw_implemented
 import hevs.androiduino.dsl.components.fundamentals.Component
-import hevs.androiduino.dsl.components.fundamentals.C_Types
+import hevs.androiduino.dsl.components.fundamentals.CType
 import hevs.androiduino.dsl.components.fundamentals.OutputPort
 import hevs.androiduino.dsl.components.fundamentals.InputPort
 
@@ -15,8 +15,8 @@ private object MuxID{
 	}
 }
 
-case class Mux2[T<:C_Types](outputType : T) extends Component("a multiplexer") with hw_implemented {
-	val selVal = "_selValMux" + UniqueID.getUniqueID
+case class Mux2[T<:CType](outputType : T) extends Component("a multiplexer") with hw_implemented {
+	val selVal = "_selValMux" + IdGenerator.getUniqueID
 	
 	override def getGlobalConstants() = {		
 		Some("")
