@@ -1,5 +1,8 @@
 package hevs.androiduino.dsl.components.fundamentals
 
+import grizzled.slf4j.Logging
+import scala.reflect.runtime.universe._
+
 // This class represents an input of a component which can be updated
 // from a mixed-in trait
 
@@ -10,21 +13,26 @@ package hevs.androiduino.dsl.components.fundamentals
 // Description of a port
 // Input ot output port of a component. Transport only one type of data.
 abstract class Port[T <: CType](owner: Component, desc: Option[String] = None) {
-  def getOwner = owner // Component owner
+  def getOwner = owner
+
+  // Component owner
   def getOwnerId = owner.id
 
   // def getType = portType
   def getDescription = desc
 
+  // def getType: String = this.t.getClass.getSimpleName // FIXME how to get the type of a generic class
+
   def isConnected: Boolean
 }
 
-abstract class InputPort[T <: CType](owner: Component, desc: Option[String] = None) extends Port[T](owner, desc) {
+abstract class InputPort[T <: CType](owner: Component, desc: Option[String] = None) extends Port[T](owner, desc) with Logging {
 
   // FIXME useful or not ? Le wire a 2 ports ou les port ont le wire ?
   var w: Option[Wire] = None
 
   def setInputWire(in: Wire) = {
+    assert(!isConnected, "The input is already connected !")
     w = Some(in)
   }
 
@@ -38,29 +46,35 @@ abstract class InputPort[T <: CType](owner: Component, desc: Option[String] = No
   def updateValue(s: String): String
 
   override def toString = w match {
-    case Some(wire) => s"coming from component ${wire.a.getOwnerId}"
-    case None => "NC"
+    case Some(wire) => s"Input connected from ${wire.from}"
+    case None => "Input NC"
   }
 }
 
+// FIXME +T with CType ??
 abstract class OutputPort[T <: CType](owner: Component, desc: Option[String] = None) extends Port[T](owner, desc) {
 
   // FIXME list of wires here ?
   var wires: List[Wire] = List.empty
 
-  def -->(other: InputPort[_]) = {
+  /**
+   * Connect and `OutputPort` to an `InputPort`.
+   * @param that
+   * @return
+   */
+  def -->(that: InputPort[_]) = {
     // Add a wire to the output port
-    val w = new Wire(this, other)
-    other.setInputWire(w)
+    val w = new Wire(this, that) // Create a wire from this (output) to that (input)
+    that.setInputWire(w)
     wires ::= w
 
     // Add the directed edge in the graph
-    ComponentManager.addWire(owner, other.getOwner)
+    ComponentManager.addWire(w)
   }
 
   def updateConnected() = {
     for (wire <- wires) {
-      wire.b.updateValue(wire.a.getValue)
+      wire.to.updateValue(wire.from.getValue)
     }
   }
 
@@ -69,11 +83,15 @@ abstract class OutputPort[T <: CType](owner: Component, desc: Option[String] = N
 
   def isConnected = !wires.isEmpty
 
-  override def toString = {
-    var result = ""
-    for (wire <- wires) {
-      result += "going to [ID" + wire.b.getOwnerId + "]"
+  /*override def toString = isConnected match {
+    case true => {
+      // FIXME not beautiful
+      var result = ""
+      for (wire <- wires) {
+        result += "going to [ID" + wire.to.getOwnerId + "]"
+      }
+      result
     }
-    result
-  }
+    case false => "Output NC"
+  }*/
 }

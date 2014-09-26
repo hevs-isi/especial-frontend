@@ -10,8 +10,6 @@ object Constant2Led extends TestGeneratorApp {
   val c = Constant(uint1(false)) // FIXME error if true, ok if false
   val led = HW_Led(4)
 
-  c.out -->()
-
   // Connecting stuff
   c.out --> led.in // FIXME check arguments here before compile with macro ?
 

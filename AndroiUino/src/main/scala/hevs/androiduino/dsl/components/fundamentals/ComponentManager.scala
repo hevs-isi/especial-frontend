@@ -32,13 +32,13 @@ object ComponentManager extends Logging {
     // info("Size of gr1: " + gr1.size)
   }
 
-  def addWire(from: Component, to: Component) = {
+  def addWire(w: Wire) = {
     //TODO check if node exist or error (assert)
     //assert((gr1.nodes.get(from) != null)
     //assert((gr1 get to).isIn == true)
 
     import scalax.collection.GraphPredef._
-    gr1 += (from ~> to)
+    gr1 += (w.from.getOwner ~> w.to.getOwner)
   }
 
   // TODO beautify all these methods with pattern matching

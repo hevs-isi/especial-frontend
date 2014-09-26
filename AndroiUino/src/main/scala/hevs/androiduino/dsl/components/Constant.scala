@@ -35,7 +35,7 @@ case class Constant[T<:CType](value: T) extends Component("Constant generator") 
     var result = "// Propagating constants\n"
 
     for (wire ← out.wires)
-      result += wire.b.updateValue(s"$valName") + ";\n"
+      result += wire.to.updateValue(s"$valName") + ";\n"
 
     Some(result)
   }

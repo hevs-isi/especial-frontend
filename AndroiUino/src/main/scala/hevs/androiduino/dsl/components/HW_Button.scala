@@ -30,7 +30,7 @@ case class HW_Button(pin: Int) extends Component("an hardware button on pin " + 
     result += "\tif(valueHasChanged){\n"
 
     for (wire ← out.wires) {
-      result += "\t\t" + wire.b.updateValue(s"buttonValue$pin") + ";\n"
+      result += "\t\t" + wire.to.updateValue(s"buttonValue$pin") + ";\n"
     }
 
     result += "\t}\n"
