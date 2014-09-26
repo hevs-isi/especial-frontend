@@ -8,7 +8,7 @@ import hevs.androiduino.dsl.components.fundamentals.OutputPort
 case class HW_Button(pin: Int) extends Component("an hardware button on pin " + pin) with hw_implemented {
 
   // Anonymous mixin of the trait
-  val out = new OutputPort(uint1(), this) {
+  val out = new OutputPort[uint1](this) {
     override def getValue: String = {
       //"Here is the code for getting the output of a button! // TODO\n" +
       s"pollButton$pin();"

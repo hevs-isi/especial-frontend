@@ -9,7 +9,7 @@ abstract class Led(description: String) extends Component(description) {
 case class HW_Led(pin: Int) extends Led("an hardware led on pin " + pin) with hw_implemented {
 
   // Anonymous mixin of the trait
-  val in = new InputPort(uint1(), this) {
+  val in = new InputPort[uint1](this) {
     override def updateValue(s: String): String = {
       // TODO: Here is the code for setting the LED !
       s"led$pin = $s"

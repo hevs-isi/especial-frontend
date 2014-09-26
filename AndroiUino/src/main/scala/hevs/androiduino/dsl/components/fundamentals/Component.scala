@@ -7,15 +7,18 @@ abstract class Component(val description: String) {
 
   val id = IdGenerator.newUniqueId
 
+  // Create a variable name for the component
+  def compVar(varName: String) = s"cmp${id}_$varName"
+
   ComponentManager.registerComponent(this)
 
   // List of outputs of the block, if any.
   // The default implementation of a Seq is a List.
-  def getOutputs: Option[Seq[OutputPort]]
+  def getOutputs: Option[Seq[OutputPort[_]]]
 
   // List of inputs of the block, if any.
   // The default implementation of a Seq is a List.
-  def getInputs: Option[Seq[InputPort]]
+  def getInputs: Option[Seq[InputPort[_]]]
 
   def getFullDescriptor = {
     toString +
@@ -33,7 +36,7 @@ abstract class Component(val description: String) {
   // For the graph
   override def hashCode = id.##
 
-  override def toString = s"[ID $id] $description"
+  override def toString = s"Cmp[$id]"
 }
 
 trait hw_implemented {

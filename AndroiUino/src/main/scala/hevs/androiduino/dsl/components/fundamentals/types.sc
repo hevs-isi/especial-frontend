@@ -1,7 +1,4 @@
 import hevs.androiduino.dsl.components.fundamentals._
-
-import hevs.androiduino.dsl.components.fundamentals.Implicits._
-
 object Test {
   println("Hello World 1 !")
   // val a = 42
@@ -22,9 +19,7 @@ object Test {
   h.getType
   double(1).getType
   double(1.256).asLong // crop: 1
-
-  import scala.language.implicitConversions
-
+  import ImplicitTypes._
   val lg: Long = uint16(1850)
   val toto = uint16(lg.toInt)
 }

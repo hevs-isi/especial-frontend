@@ -9,7 +9,6 @@ import scalax.collection.mutable.Graph
 object IdGenerator {
 
   //TODO declare a type Id ?
-
   private var id = 0
 
   def newUniqueId = {
@@ -28,9 +27,9 @@ object ComponentManager extends Logging {
   //var comps: List[Component] = List.empty[Component]
 
   def registerComponent(c: Component) = {
-    info(s"Register `$c` of type `${c.getClass.getSimpleName}`.")
+    // info(s"Register $c.")
     gr1 += c // Add the component node to the graph
-    info("Size of gr1: " + gr1.size)
+    // info("Size of gr1: " + gr1.size)
   }
 
   def addWire(from: Component, to: Component) = {

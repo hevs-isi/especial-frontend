@@ -8,9 +8,9 @@ object MuxApp1 extends TestGeneratorApp {
   val c = Constant(uint8())
   val d = Constant(uint8())
 
-  val m = Mux2(uint8())
-  val ext = BitExtractor(uint8())
-  val led = HW_Led(5);
+  val m = Mux2[uint8](uint8())
+  val ext = BitExtractor[uint8]()
+  val led = HW_Led(5)
 
   // Connecting stuff
   c.out --> m.in1

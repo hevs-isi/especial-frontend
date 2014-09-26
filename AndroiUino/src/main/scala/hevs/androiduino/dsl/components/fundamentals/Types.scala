@@ -9,7 +9,7 @@ package hevs.androiduino.dsl.components.fundamentals
  *
  * @author Christopher Métrailler (christopher.metrailler@epfl.ch)
  */
-sealed abstract class CType {
+sealed abstract class CType(private val v: Any) {
 
   //TODO Bake with spire ? https://github.com/non/spire
 
@@ -44,6 +44,8 @@ sealed abstract class CType {
    * @return the C type as a `scala.String`
    */
   def getType: String
+
+  override def toString = s"$getType:$v"
 }
 
 /**
@@ -52,7 +54,7 @@ sealed abstract class CType {
  *
  * @param v the value
  */
-case class uint1(private val v: Boolean = false) extends CType {
+case class uint1(private val v: Boolean = false) extends CType(v) {
   override def getType = "bool_t"
 
   override def asBool = v
@@ -67,7 +69,7 @@ case class uint1(private val v: Boolean = false) extends CType {
  *
  * @param v the value, from `0x00` to `0xFF`
  */
-case class uint8(private val v: Short = 0) extends CType {
+case class uint8(private val v: Short = 0) extends CType(v) {
   require(v >= 0x00, "Unsigned number, must be positive.")
   require(v <= 0xFF, "8-bit number max.")
 
@@ -82,7 +84,7 @@ case class uint8(private val v: Short = 0) extends CType {
  *
  * @param v the value, from `0x00` to `0xFFFF`
  */
-case class uint16(private val v: Int = 0) extends CType {
+case class uint16(private val v: Int = 0) extends CType(v) {
   require(v >= 0x0000, "Unsigned number, must be positive.")
   require(v <= 0xFFFF, "16-bit number max.")
 
@@ -97,7 +99,7 @@ case class uint16(private val v: Int = 0) extends CType {
  *
  * @param v the value, from `0x00` to `0xFFFFFFFF`
  */
-case class uint32(private val v: Long = 0) extends CType {
+case class uint32(private val v: Long = 0) extends CType(v) {
   require(v >= 0x00000000, "Unsigned number, must be positive.")
   require(v <= 0xFFFFFFFF, "32-bit number max.")
 
@@ -112,7 +114,7 @@ case class uint32(private val v: Long = 0) extends CType {
  *
  * @param v the value
  */
-case class int8(private val v: Byte = 0) extends CType {
+case class int8(private val v: Byte = 0) extends CType(v) {
   override def getType = "int8_t"
 
   override def asLong = v.toLong
@@ -124,7 +126,7 @@ case class int8(private val v: Byte = 0) extends CType {
  *
  * @param v the value
  */
-case class int16(private val v: Short = 0) extends CType {
+case class int16(private val v: Short = 0) extends CType(v) {
   override def getType = "int16_t"
 
   override def asLong = v.toLong
@@ -136,7 +138,7 @@ case class int16(private val v: Short = 0) extends CType {
  *
  * @param v the value
  */
-case class int32(private val v: Int = 0) extends CType {
+case class int32(private val v: Int = 0) extends CType(v) {
   override def getType = "int32_t"
 
   override def asLong = v.toLong
@@ -148,7 +150,7 @@ case class int32(private val v: Int = 0) extends CType {
  *
  * @param v the value
  */
-case class float(private val v: Float = 0) extends CType {
+case class float(private val v: Float = 0) extends CType(v) {
   override def getType = "float"
 
   override def asFloat = v
@@ -164,7 +166,7 @@ case class float(private val v: Float = 0) extends CType {
  *
  * @param v the value
  */
-case class double(private val v: Double = 0) extends CType {
+case class double(private val v: Double = 0) extends CType(v) {
   override def getType = "double"
 
   override def asDouble = v
