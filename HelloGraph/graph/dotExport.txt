@@ -1,0 +1,5 @@
+digraph "Dot export example" {
+	Obj1 -> Obj2
+	Obj1 -> Obj3
+	Obj2 -> Obj3
+}
