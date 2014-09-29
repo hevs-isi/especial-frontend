@@ -1,7 +1,9 @@
 package hevs.androiduino.apps
 
 import hevs.androiduino.dsl.CodeGenerator
-import hevs.androiduino.dsl.components.{BitExtractor, Constant, HW_Led, Mux2}
+import hevs.androiduino.dsl.components.core.{Mux2, Constant}
+import hevs.androiduino.dsl.components.digital.DigitalOutput
+import hevs.androiduino.dsl.components.BitExtractor
 import hevs.androiduino.dsl.components.fundamentals.{ComponentManager, uint8}
 
 object MuxApp1 extends TestGeneratorApp {
@@ -10,7 +12,7 @@ object MuxApp1 extends TestGeneratorApp {
 
   val m = Mux2[uint8](uint8())
   val ext = BitExtractor[uint8]()
-  val led = HW_Led(5)
+  val led = DigitalOutput(5)
 
   // Connecting stuff
   c.out --> m.in1

@@ -1,14 +1,13 @@
 package hevs.androiduino.apps
 
 import hevs.androiduino.dsl.CodeGenerator
-import hevs.androiduino.dsl.components.HW_Button
-import hevs.androiduino.dsl.components.HW_Led
+import hevs.androiduino.dsl.components.digital.{DigitalOutput, DigitalInput}
 import hevs.androiduino.dsl.components.fundamentals.ComponentManager
 
 object SingleButton2Leds extends TestGeneratorApp {
-  val b1 = HW_Button(3)
-  val l1 = HW_Led(4)
-  val l2 = HW_Led(2)
+  val b1 = DigitalInput(3)
+  val l1 = DigitalOutput(4)
+  val l2 = DigitalOutput(2)
 
   // Connecting stuff
   b1.out --> l2.in

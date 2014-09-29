@@ -1,6 +1,7 @@
 package hevs.androiduino.dsl.components.fundamentals
 
 import grizzled.slf4j.Logging
+import hevs.androiduino.dsl.utils.WireException
 import scala.reflect.runtime.universe._
 
 // This class represents an input of a component which can be updated
@@ -12,21 +13,28 @@ import scala.reflect.runtime.universe._
 
 // Description of a port
 // Input ot output port of a component. Transport only one type of data.
-abstract class Port[T <: CType](owner: Component, desc: Option[String] = None) {
+abstract class Port[T <: CType : TypeTag](owner: Component) {
+
+  // Port description (optional)
+  val description: String = ""
+
   def getOwner = owner
 
   // Component owner
   def getOwnerId = owner.id
 
-  // def getType = portType
-  def getDescription = desc
-
-  // def getType: String = this.t.getClass.getSimpleName // FIXME how to get the type of a generic class
-
   def isConnected: Boolean
+
+  // Helper method to check if two `Port` contains the same type of data.
+  def isSameTypeAs[A <: CType : TypeTag](that: Port[A]): Boolean = {
+    // TODO check and remove debug print
+    // println("this is of type: " + typeOf[T])
+    // println("that is of type: " + typeOf[A])
+    typeOf[T] == typeOf[A]
+  }
 }
 
-abstract class InputPort[T <: CType](owner: Component, desc: Option[String] = None) extends Port[T](owner, desc) with Logging {
+abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {
 
   // FIXME useful or not ? Le wire a 2 ports ou les port ont le wire ?
   var w: Option[Wire] = None
@@ -51,8 +59,7 @@ abstract class InputPort[T <: CType](owner: Component, desc: Option[String] = No
   }
 }
 
-// FIXME +T with CType ??
-abstract class OutputPort[T <: CType](owner: Component, desc: Option[String] = None) extends Port[T](owner, desc) {
+abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
   // FIXME list of wires here ?
   var wires: List[Wire] = List.empty
@@ -62,14 +69,25 @@ abstract class OutputPort[T <: CType](owner: Component, desc: Option[String] = N
    * @param that
    * @return
    */
-  def -->(that: InputPort[_]) = {
+  def -->(that: InputPort[T]) = {
     // Add a wire to the output port
-    val w = new Wire(this, that) // Create a wire from this (output) to that (input)
-    that.setInputWire(w)
-    wires ::= w
+    // val w = new Wire // Create a wire from this (output) to that (input)
+    // w.setFrom(this)
+    // w.setTo(that)
+
+    val sameType = isSameTypeAs(that)
+    sameType match {
+      case false => throw new WireException("miaou")
+      case _ =>
+    }
+
+    // TODO: add the connection in the graph here
+
+    //that.setInputWire(that)
+    //wires ::= w
 
     // Add the directed edge in the graph
-    ComponentManager.addWire(w)
+    // ComponentManager.addWire(w)
   }
 
   def updateConnected() = {

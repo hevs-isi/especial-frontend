@@ -3,7 +3,7 @@ package hevs.androiduino.apps
 import hevs.androiduino.dsl.utils.Version
 
 /**
- * Trait for all test cases
+ * Trait for all test cases.
  */
 trait TestGeneratorApp extends App {
 

@@ -1,11 +1,12 @@
 package hevs.androiduino.dsl.components.fundamentals
 
-// TODO: un composant est sotcké dans un graph, doit avoir
-// override def equals et override def hashCode
-// ID du composant doit être unique
-abstract class Component(val description: String) {
+// TODO: un composant est sotcké dans un graph, doit avoir `override def equals` et `override def hashCode`
+abstract class Component {
 
-  val id = IdGenerator.newUniqueId
+  val id = IdGenerator.newUniqueId // Must be unique
+
+  // Component description (optional)
+  val description: String = ""
 
   // Create a variable name for the component
   def compVar(varName: String) = s"cmp${id}_$varName"

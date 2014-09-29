@@ -1,14 +1,18 @@
-package hevs.androiduino.dsl.components
+package hevs.androiduino.dsl.components.digital
 
-import hevs.androiduino.dsl.components.fundamentals.hw_implemented
-import hevs.androiduino.dsl.components.fundamentals.Component
-import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.components.fundamentals.OutputPort
+import hevs.androiduino.dsl.components.fundamentals.{OutputPort, hw_implemented, uint1}
 
-case class HW_Button(pin: Int) extends Component("an hardware button on pin " + pin) with hw_implemented {
+case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_implemented {
 
-  // Anonymous mixin of the trait
-  val out = new OutputPort[uint1](this) {
+  override val description = s"Digital input on pin $pin"
+
+  /**
+   * The `uint1` value of this digital input.
+   */
+  val out = new OutputPort[T](this) {
+
+    override val description = "Digital input value"
+
     override def getValue: String = {
       //"Here is the code for getting the output of a button! // TODO\n" +
       s"pollButton$pin();"

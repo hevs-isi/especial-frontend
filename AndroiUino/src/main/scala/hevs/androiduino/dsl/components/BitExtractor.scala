@@ -2,14 +2,27 @@ package hevs.androiduino.dsl.components
 
 import hevs.androiduino.dsl.components.fundamentals.{CType, Component, InputPort, OutputPort, hw_implemented, uint1}
 
-case class BitExtractor[T <: CType]() extends Component("a bit extractor") with hw_implemented {
-  val in1 = new InputPort[T](this, Some("All bits input")) {
+import scala.reflect.runtime.universe._
+
+@Deprecated
+case class BitExtractor[T <: CType : TypeTag]() extends Component with hw_implemented {
+
+  override val description = "A bit extractor"
+
+  val in1 = new InputPort[T](this) {
+
+    override val description = "All bits input"
+
     override def updateValue(s: String): String = {
       // TODO: Here is the code for setting the first input
       s"input1 = $s" // TODO: tbd
     }
   }
-  val out = new OutputPort[uint1](this, Some("Extracted bit")) {
+
+  val out = new OutputPort[uint1](this) {
+
+    override val description = "Extracted bit"
+
     override def getValue(): String = {
       //"Here is the code for getting the output of the extractor
       s"// extracted bit code" // TODO
