@@ -21,22 +21,23 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_im
 
   def getInputs = None
 
-  override def toString = super.toString + s", constant `${value}`."
-
   /**
    * Constant declaration in the C code.
-   * @return the constant declaration as boolean
+   * @return the constant declaration as boolean if the constant is connected
    */
-  override def getGlobalConstants = {
-    // const bool_t cstComp1 = true;
-    Some(s"const ${value.getType} $valName = ${value.asBool};")
+  override def getGlobalConstants = out.isConnected match {
+    case true => {
+      // const bool_t cstComp1 = true;
+      Some(s"const ${value.getType} $valName = ${value.asBool};")
+    }
+    case false => None
   }
 
   override def getBeginOfMainAfterInit = {
-    var result = "// Propagating constants\n"
+    val result = "// TODO: Propagating constants\n\n"
 
-    for (wire ← out.wires)
-      result += wire.to.updateValue(s"$valName") + ";\n"
+    /*for (wire ← out.wires)
+      result += wire.to.updateValue(s"$valName") + ";\n"*/
 
     Some(result)
   }

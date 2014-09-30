@@ -1,7 +1,8 @@
 package hevs.androiduino.dsl.components.fundamentals
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.utils.WireException
+import hevs.androiduino.dsl.utils.WireConnection
+
 import scala.reflect.runtime.universe._
 
 // This class represents an input of a component which can be updated
@@ -24,6 +25,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   def getOwnerId = owner.id
 
   def isConnected: Boolean
+  def isNotConnected = !isConnected
 
   // Helper method to check if two `Port` contains the same type of data.
   def isSameTypeAs[A <: CType : TypeTag](that: Port[A]): Boolean = {
@@ -37,69 +39,72 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {
 
   // FIXME useful or not ? Le wire a 2 ports ou les port ont le wire ?
-  var w: Option[Wire] = None
+  //var w: Option[Wire] = None
 
-  def setInputWire(in: Wire) = {
+  /*def setInputWire(in: Wire) = {
     assert(!isConnected, "The input is already connected !")
     w = Some(in)
   }
 
   def clearInputWire() = {
     w = None
-  }
+  }*/
 
-  def isConnected = w.isDefined
+  private var connected = false
+
+  def connect() = {
+    assert(isNotConnected, "Input already connected !")
+    connected = true
+  }
+  def disconnect() = connected = false
+
+
+  def isConnected = connected
 
   // Abstract function that should created to update the value
   def updateValue(s: String): String
 
-  override def toString = w match {
-    case Some(wire) => s"Input connected from ${wire.from}"
-    case None => "Input NC"
+  override def toString = isConnected match {
+    case true => s"Input connected"
+    case _ => "Input NC"
   }
 }
 
 abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
   // FIXME list of wires here ?
-  var wires: List[Wire] = List.empty
+  // var wires: List[Wire] = List.empty
 
   /**
-   * Connect and `OutputPort` to an `InputPort`.
+   * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
    * @param that
    * @return
    */
   def -->(that: InputPort[T]) = {
-    // Add a wire to the output port
-    // val w = new Wire // Create a wire from this (output) to that (input)
-    // w.setFrom(this)
-    // w.setTo(that)
 
+    // Check the type of the connection
     val sameType = isSameTypeAs(that)
     sameType match {
-      case false => throw new WireException("miaou")
+      case false => throw new WireConnection("Connection types error !")
       case _ =>
     }
 
-    // TODO: add the connection in the graph here
-
-    //that.setInputWire(that)
-    //wires ::= w
+    that.connect()
 
     // Add the directed edge in the graph
-    // ComponentManager.addWire(w)
+    ComponentManager.addWire(this, that)
   }
 
-  def updateConnected() = {
+  /*def updateConnected() = {
     for (wire <- wires) {
       wire.to.updateValue(wire.from.getValue)
     }
-  }
+  }*/
 
   // Abstract function
   def getValue: String
 
-  def isConnected = !wires.isEmpty
+  def isConnected = false //!wires.isEmpty // FIXME
 
   /*override def toString = isConnected match {
     case true => {

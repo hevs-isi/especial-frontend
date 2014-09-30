@@ -5,6 +5,8 @@ abstract class Component {
 
   val id = IdGenerator.newUniqueId // Must be unique
 
+  def getId = id
+
   // Component description (optional)
   val description: String = ""
 
@@ -37,7 +39,7 @@ abstract class Component {
   // For the graph
   override def hashCode = id.##
 
-  override def toString = s"Cmp[$id]"
+  override def toString = s"Cmp[$id] $description"
 }
 
 trait hw_implemented {

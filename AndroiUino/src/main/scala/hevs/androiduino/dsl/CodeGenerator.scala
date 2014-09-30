@@ -9,7 +9,21 @@ import hevs.androiduino.dsl.utils.OSUtils
 import hevs.androiduino.dsl.utils.OSUtils._
 
 object CodeGenerator extends Logging {
+
+  def checkWarnings(): Boolean = {
+    val c = ComponentManager.findUnconnectedComponents
+    if(c.size > 0) {
+      println("WARN: Unconnected component(s) found:")
+      println("\t- " + c.mkString("\n\t- "))
+      return true
+    }
+    false // No warnings
+  }
+
   def generateCode(): String = {
+
+    checkWarnings()
+
     val result =
       preamble() +
         ComponentManager.generateConstantsCode +

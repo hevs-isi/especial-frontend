@@ -33,9 +33,10 @@ case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_im
 
     result += "\tif(valueHasChanged){\n"
 
-    for (wire ← out.wires) {
+    // FIXME
+    /*for (wire ← out.wires) {
       result += "\t\t" + wire.to.updateValue(s"buttonValue$pin") + ";\n"
-    }
+    }*/
 
     result += "\t}\n"
     result += "} // End of function def for HW_Button\n"

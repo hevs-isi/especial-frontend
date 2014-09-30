@@ -17,8 +17,7 @@ object f {
   val b3 = uint8(254)
   println(b1, b2, b3)
   println(c1.out)
-  // println("Type: " + c1.out.getType)
-  c1.out
-  c1.out.getValue
-  c1.out.sameTypeAs(c2.out)
+
+  val led
+
 }

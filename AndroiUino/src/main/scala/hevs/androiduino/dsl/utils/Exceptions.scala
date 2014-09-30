@@ -1,7 +1,9 @@
 package hevs.androiduino.dsl.utils
 
-import grizzled.slf4j.Logging
+class WireConnection(msg: String) extends RuntimeException(msg)
 
-case class WireException(msg: String) extends Exception with Logging {
-  error("Unable to create this wire.")
+class ComponentNotFound(msg: String) extends RuntimeException(msg)
+
+object ComponentNotFound {
+  def apply(id: Int) = new ComponentNotFound(s"Component id $id not found !")
 }

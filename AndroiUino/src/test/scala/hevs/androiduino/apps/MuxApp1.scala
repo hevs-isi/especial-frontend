@@ -25,5 +25,5 @@ object MuxApp1 extends TestGeneratorApp {
   CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
 
   //	println(code)
-  println(ComponentManager.gr1)
+  println(ComponentManager.cpGraph)
 }

@@ -1,14 +1,12 @@
 package hevs.androiduino.dsl.components.fundamentals
 
 import grizzled.slf4j.Logging
+import hevs.androiduino.dsl.utils.ComponentNotFound
 
 import scalax.collection.GraphEdge.DiEdge
 import scalax.collection.mutable.Graph
 
-// FIXME utiliser uniquement 1 generateur de ID pour tout. Avoir un convexte. Exemple, un composant doit avori un ID et ses contanstes internes aussi...
 object IdGenerator {
-
-  //TODO declare a type Id ?
   private var id = 0
 
   def newUniqueId = {
@@ -19,27 +17,58 @@ object IdGenerator {
 
 object ComponentManager extends Logging {
 
-  // This contains a graph representation of the components
+  // This contains a (mutable) graph representation of the components
   // that can be skimmed later on
-  var gr1: Graph[Component, DiEdge] = Graph.empty[Component, DiEdge]
+  val cpGraph: Graph[Component, DiEdge] = Graph.empty[Component, DiEdge]
 
-  // TODO : this can be removed by using directly the gr1 graph
-  //var comps: List[Component] = List.empty[Component]
-
+  /**
+   * Insert a component in the graph. Each component has a unique ID. It cannot appears more than once in the graph.
+   * If it is already in the graph,  it will not be added.
+   * @param c the component to add as node in the graph
+   */
   def registerComponent(c: Component) = {
-    // info(s"Register $c.")
-    gr1 += c // Add the component node to the graph
-    // info("Size of gr1: " + gr1.size)
+    info(s"Register component $c with id ${c.id}.")
+    cpGraph += c // Add the component as a node to the graph
   }
 
-  def addWire(w: Wire) = {
-    //TODO check if node exist or error (assert)
-    //assert((gr1.nodes.get(from) != null)
-    //assert((gr1 get to).isIn == true)
+  /**
+   * Add a connection between two `Port`s.
+   * 1) Owners of port must be in the graph
+   * 2) The input must be unconnected
+   *
+   * @param from port from
+   * @param to port to
+   * @return
+   */
+  def addWire(from: OutputPort[_], to: InputPort[_]) = {
+    // Get components "from" and "to". These components must be in the graph, or an exception is thrown.
+    val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
+    // Add the connection (wire) between these to ports
     import scalax.collection.GraphPredef._
-    gr1 += (w.from.getOwner ~> w.to.getOwner)
+    cpGraph += (cpFrom ~> cpTo)
   }
+
+  /**
+   * Search for a component the graph nodes by id. If the component is not found, an exception is thrown.
+   * @param cpId the component id to search
+   * @return the component node or an exception if not found
+   */
+  private def cp(cpId: Int): Component = {
+    // Find a component by ID. Exist once only.
+    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].id == cpId)
+    cp match {
+      case Some(c) => c
+      case None => throw ComponentNotFound(cpId)
+    }
+  }
+
+  def findUnconnectedComponents: Seq[Component] = {
+    val nc = cpGraph.nodes filter (c => c.degree == 0)
+    // Return a seq of components
+    nc.map(x => x.value.asInstanceOf[Component]).toList
+  }
+
 
   // TODO beautify all these methods with pattern matching
 
@@ -47,7 +76,7 @@ object ComponentManager extends Logging {
   def generateInitCode() = {
     var result = ""
 
-    for (c ← gr1.nodes.toList) {
+    for (c ← cpGraph.nodes.toList) {
       // In the graph we have nodes. Each node has a content which is a component
       val comp = c.value.asInstanceOf[Component]
       assert(comp.isInstanceOf[Component])
@@ -64,7 +93,7 @@ object ComponentManager extends Logging {
   def generateBeginMainCode() = {
     var result = ""
 
-    for (c ← gr1.nodes.toList) {
+    for (c ← cpGraph.nodes.toList) {
       val comp = c.value
       assert(comp.isInstanceOf[Component])
 
@@ -81,9 +110,22 @@ object ComponentManager extends Logging {
   //TODO Move all generate code to others class
   //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
   def generateConstantsCode() = {
+
+    val cp = cpGraph.nodes filter (c => c.value.isInstanceOf[hw_implemented])
+    // Return a seq of components
+    val hwCp = cp.map(x => x.value.asInstanceOf[Component]).toList
+
+    println("Cst CP: " + cp.mkString("--"))
+    println("Cst hw CP: " + hwCp.mkString("--"))
+
+    //TODO: check this
+
+
+
+
     var result = ""
 
-    for (c ← gr1.nodes.toList) {
+    for (c ← cpGraph.nodes.toList) {
       val comp = c.value
       assert(comp.isInstanceOf[Component])
 
@@ -104,7 +146,7 @@ object ComponentManager extends Logging {
     //		val filteredInstances : List[hw_implemented] = comps.filter(_.isInstanceOf[hw_implemented]).map(_.asInstanceOf[hw_implemented])
     //		val functionCode = filteredInstances.map(x => x.getFunctionsDefinitions()).foldLeft("")(_ + _)
 
-    for (c ← gr1.nodes.toList) {
+    for (c ← cpGraph.nodes.toList) {
       val comp = c.value
       assert(comp.isInstanceOf[Component])
 
@@ -123,7 +165,7 @@ object ComponentManager extends Logging {
     var result = ""
     // TODO find a guard for making writable on a single line (for refactoring)
     //for (c ← gr1.nodes.toList; if c.value.isInstanceOf[hw_implemented]) { // TODO Does not work, why ?
-    for (c ← gr1.nodes.toList) {
+    for (c ← cpGraph.nodes.toList) {
       val comp = c.value
       assert(comp.isInstanceOf[Component])
 
