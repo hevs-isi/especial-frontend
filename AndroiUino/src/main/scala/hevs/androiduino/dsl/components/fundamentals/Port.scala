@@ -17,15 +17,20 @@ import scala.reflect.runtime.universe._
 abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   // Port description (optional)
-  val description: String = ""
+  protected val description: String = ""
+  protected var connected = false
+
+  def getOwnerId = getOwner.id
 
   def getOwner = owner
 
-  // Component owner
-  def getOwnerId = owner.id
+  def connect() = connected = true
 
-  def isConnected: Boolean
   def isNotConnected = !isConnected
+
+  def isConnected = connected
+
+  def disconnect() = connected = false
 
   // Helper method to check if two `Port` contains the same type of data.
   def isSameTypeAs[A <: CType : TypeTag](that: Port[A]): Boolean = {
@@ -50,23 +55,17 @@ abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T]
     w = None
   }*/
 
-  private var connected = false
-
-  def connect() = {
+  override def connect() = {
     assert(isNotConnected, "Input already connected !")
     connected = true
   }
-  def disconnect() = connected = false
 
-
-  def isConnected = connected
-
-  // Abstract function that should created to update the value
-  def updateValue(s: String): String
+  // C code to read the value of this input port
+  def readValue(s: String): String
 
   override def toString = isConnected match {
-    case true => s"Input connected"
-    case _ => "Input NC"
+    case true => "InputPort"
+    case _ => "InputPort (NC)"
   }
 }
 
@@ -90,6 +89,7 @@ abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T
     }
 
     that.connect()
+    this.connect()
 
     // Add the directed edge in the graph
     ComponentManager.addWire(this, that)
@@ -103,8 +103,6 @@ abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T
 
   // Abstract function
   def getValue: String
-
-  def isConnected = false //!wires.isEmpty // FIXME
 
   /*override def toString = isConnected match {
     case true => {

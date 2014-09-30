@@ -28,17 +28,23 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_im
   override def getGlobalConstants = out.isConnected match {
     case true => {
       // const bool_t cstComp1 = true;
-      Some(s"const ${value.getType} $valName = ${value.asBool};")
+      Some(s"const ${value.getType} $valName = ${value.v};")
     }
     case false => None
   }
 
-  override def getBeginOfMainAfterInit = {
-    val result = "// TODO: Propagating constants\n\n"
+  override def getBeginOfMainAfterInit = out.isConnected match {
+    case true => {
 
-    /*for (wire ← out.wires)
-      result += wire.to.updateValue(s"$valName") + ";\n"*/
+      val in = ComponentManager.findConnection(out.getOwnerId)
 
-    Some(result)
+      val result = "// TODO: Propagating constants\n\n"
+
+      /*for (wire ← out.wires)
+        result += wire.to.readValue(s"$valName") + ";\n"*/
+
+      Some(result + "// " + in + "\n")
+    }
+    case false => None
   }
 }

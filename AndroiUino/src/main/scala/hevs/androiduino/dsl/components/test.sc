@@ -18,6 +18,7 @@ object f {
   println(b1, b2, b3)
   println(c1.out)
 
-  val led
+  var c: Option[String] = None //Some("test")
+  c.getOrElse("") + "dd\n"
 
 }

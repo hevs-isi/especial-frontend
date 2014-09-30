@@ -13,7 +13,7 @@ case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with hw_i
 
     override val description = "Digital output value"
 
-    override def updateValue(s: String): String = {
+    override def readValue(s: String): String = {
       // TODO: Here is the code for setting the LED !
       s"led$pin = $s"
     }

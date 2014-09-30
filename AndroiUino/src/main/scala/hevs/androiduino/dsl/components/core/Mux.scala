@@ -32,7 +32,7 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
 
     override val description = "Input 1"
 
-    override def updateValue(s: String): String = {
+    override def readValue(s: String): String = {
       // TODO: Here is the code for setting the first input
       s"input1 = $s"
     }
@@ -40,7 +40,7 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
   val in2 = new InputPort[T](this) {
 
 
-    override def updateValue(s: String): String = {
+    override def readValue(s: String): String = {
       // TODO: Here is the code for setting the second input
       s"input2 = $s"
     }
@@ -49,7 +49,7 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
 
     override val description = "Input selector"
 
-    override def updateValue(s: String): String = {
+    override def readValue(s: String): String = {
       // Here is the code to set the selector value
       s"sel = $s"
     }

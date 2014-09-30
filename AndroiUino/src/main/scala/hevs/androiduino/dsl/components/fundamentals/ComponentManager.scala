@@ -1,10 +1,17 @@
 package hevs.androiduino.dsl.components.fundamentals
 
+import java.io.IOException
+
 import grizzled.slf4j.Logging
+import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.utils.ComponentNotFound
 
-import scalax.collection.GraphEdge.DiEdge
+import scalax.collection.edge.Implicits._
+import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
+
+import scalax.collection.GraphPredef._, scalax.collection.GraphEdge.{DiEdge, EdgeCopy, NodeProduct}
+import scala.reflect.runtime.universe
 
 object IdGenerator {
   private var id = 0
@@ -19,7 +26,7 @@ object ComponentManager extends Logging {
 
   // This contains a (mutable) graph representation of the components
   // that can be skimmed later on
-  val cpGraph: Graph[Component, DiEdge] = Graph.empty[Component, DiEdge]
+  val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
 
   /**
    * Insert a component in the graph. Each component has a unique ID. It cannot appears more than once in the graph.
@@ -45,8 +52,12 @@ object ComponentManager extends Logging {
     val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
     // Add the connection (wire) between these to ports
-    import scalax.collection.GraphPredef._
-    cpGraph += (cpFrom ~> cpTo)
+    val outer = (cpFrom ~+> cpTo)("toto") // Component to component with input (right) as label
+    cpGraph += outer
+
+    // ~>   directed
+    // ~+>  directed with label
+    // ~+#> directed with key label
   }
 
   /**
@@ -67,6 +78,26 @@ object ComponentManager extends Logging {
     val nc = cpGraph.nodes filter (c => c.degree == 0)
     // Return a seq of components
     nc.map(x => x.value.asInstanceOf[Component]).toList
+  }
+
+  def findConnection(fromId: Int): InputPort[_] = {
+    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].id == fromId)
+    println("CP out: " + cp)
+    println("diSuccessors: " + cp.get.diSuccessors)
+    println("head: " + cp.get.diSuccessors.head)
+
+    println("Edges: " + cp.get.edges)
+
+    // TODO test me
+    // Comment avoir le label du egde ?
+    // Chercher les edges de la source et filter celle qui va vers la destination connue
+    // Ensuite prendre son label...
+    // !! Peut aller vers le même composant plusieurs fois !!
+    val to = cp.get.diSuccessors.head.value.asInstanceOf[Component]
+    println(to.getInputs)
+
+    throw new IOException("test here")
+    // cp.get.diSuccessors.head.value.asInstanceOf[InputPort[_]]
   }
 
 
@@ -111,32 +142,15 @@ object ComponentManager extends Logging {
   //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
   def generateConstantsCode() = {
 
-    val cp = cpGraph.nodes filter (c => c.value.isInstanceOf[hw_implemented])
-    // Return a seq of components
-    val hwCp = cp.map(x => x.value.asInstanceOf[Component]).toList
+    val cst = cpGraph.nodes filter (c => c.value.isInstanceOf[hw_implemented] && c.value.isInstanceOf[Constant[_]])
+    // Return a seq of Constant as Component
+    val hwCst = cst.map(x => x.value.asInstanceOf[hw_implemented]).toList
 
-    println("Cst CP: " + cp.mkString("--"))
-    println("Cst hw CP: " + hwCp.mkString("--"))
-
-    //TODO: check this
-
-
-
-
-    var result = ""
-
-    for (c ← cpGraph.nodes.toList) {
-      val comp = c.value
-      assert(comp.isInstanceOf[Component])
-
-      if (comp.isInstanceOf[hw_implemented]) {
-        val hw_c = comp.asInstanceOf[hw_implemented]
-
-        if (hw_c.getGlobalConstants.isDefined)
-          result += hw_c.getGlobalConstants.get + "\n"
-      }
+    var result = "//*// generateConstantsCode\n"
+    for (c <- hwCst if c.getGlobalConstants.isDefined) {
+      result += c.getGlobalConstants.get + "\n"
     }
-    result
+    result + "\n"
   }
 
   def generateFunctionsCode() = {
