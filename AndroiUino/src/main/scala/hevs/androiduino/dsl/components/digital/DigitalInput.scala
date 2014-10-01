@@ -1,50 +1,53 @@
 package hevs.androiduino.dsl.components.digital
 
+import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.fundamentals.{OutputPort, hw_implemented, uint1}
+
+import scala.collection.mutable.ListBuffer
 
 case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_implemented {
 
-  override val description = s"Digital input on pin $pin"
+  override val description = s"digital input on pin $pin"
 
   /**
    * The `uint1` value of this digital input.
    */
   val out = new OutputPort[T](this) {
 
-    override val description = "Digital input value"
+    override val description = "digital input value"
 
-    override def getValue: String = {
-      //"Here is the code for getting the output of a button! // TODO\n" +
-      s"pollButton$pin();"
-    }
+    override def getValue: String = s"pollButton$pin();"
   }
+  val fctName = s"pollDigitalInput$pin"
 
   def getOutputs = Some(Seq(out))
 
   def getInputs = None
 
-
-  override def getLoopableCode: Option[String] = {
-    Some(s"pollButton$pin();")
+  override def getInitCode = out.isConnected match {
+    case true => Some(s"DigitalInput($pin).init(); // Init of $this")
+    case _ => None
   }
 
-  override def getFunctionsDefinitions: Option[String] = {
-    var result = s"void pollButton$pin(){\n"
-
-    result += "\tif(valueHasChanged){\n"
-
-    // FIXME
-    /*for (wire ← out.wires) {
-      result += "\t\t" + wire.to.updateValue(s"buttonValue$pin") + ";\n"
-    }*/
-
-    result += "\t}\n"
-    result += "} // End of function def for HW_Button\n"
-
-    Some(result)
+  override def getLoopableCode = out.isConnected match {
+    case true => Some(s"$fctName();")
+    case _ => None
   }
 
-  override def getInitCode = {
-    Some(s"\t// This is the init code for the init of a button\n\tbutton$pin.setAsOutput; // TODO replace this with real code")
+  override def getFunctionsDefinitions = out.isConnected match {
+    case true =>
+      val result: ListBuffer[String] = ListBuffer()
+      result += s"void $fctName() {"
+      result += "if(valueHasChanged) {"
+      result += s"${uint1().getType} val = DigitalInput($pin).read();"
+
+      val in = ComponentManager.findConnections(out)
+      for (inPort ← in)
+        result += inPort.setInputValue("val") + "; // " + inPort
+
+      result += "}"
+      result += "}"
+      Some(result.mkString("\n"))
+    case _ => None
   }
 }

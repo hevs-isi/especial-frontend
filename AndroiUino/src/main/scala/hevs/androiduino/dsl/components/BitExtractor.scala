@@ -13,7 +13,7 @@ case class BitExtractor[T <: CType : TypeTag]() extends Component with hw_implem
 
     override val description = "All bits input"
 
-    override def updateValue(s: String): String = {
+    override def setInputValue(s: String): String = {
       // TODO: Here is the code for setting the first input
       s"input1 = $s" // TODO: tbd
     }
@@ -23,7 +23,7 @@ case class BitExtractor[T <: CType : TypeTag]() extends Component with hw_implem
 
     override val description = "Extracted bit"
 
-    override def getValue(): String = {
+    override def getValue: String = {
       //"Here is the code for getting the output of the extractor
       s"// extracted bit code" // TODO
     }

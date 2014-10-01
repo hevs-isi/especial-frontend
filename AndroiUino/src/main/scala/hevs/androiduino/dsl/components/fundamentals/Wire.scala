@@ -6,7 +6,7 @@ import grizzled.slf4j.Logging
 // FIXME: InputPort[CType] or InputPort[_] ??
 
 @Deprecated
-class Wire extends Logging {
+class WireOld extends Logging {
 
   // FIXME do not work...
   type Z <: CType

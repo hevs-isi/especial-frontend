@@ -1,9 +1,9 @@
 package hevs.androiduino.apps
 
-import hevs.androiduino.dsl.CodeGenerator
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
-import hevs.androiduino.dsl.components.fundamentals.{uint8, uint1}
+import hevs.androiduino.dsl.components.fundamentals.uint1
+import hevs.androiduino.dsl.generator.CodeGenerator
 
 object Sch1Code {
 
@@ -26,7 +26,7 @@ object Sch1Code {
 object Sch1Test extends TestGeneratorApp {
   // Generate code
   val source = Sch1Code
-  val code = CodeGenerator.generateCode()
+  val code = CodeGenerator.generateCode(fileName)
   CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
 
   println(code)

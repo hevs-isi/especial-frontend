@@ -17,12 +17,12 @@ import scala.reflect.runtime.universe._
 
 case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_implemented {
 
-  override val description = "a multiplexer with wto inputs"
+  override val description = "multiplexer with wto inputs"
 
   // val selVal = uniqueVarName("selValMux")
   val out = new OutputPort[T](this) {
 
-    override val description = "Mux output"
+    override val description = "mux output"
 
     override def getValue: String = {
       s"mux();"
@@ -30,9 +30,9 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
   }
   val in1 = new InputPort[T](this) {
 
-    override val description = "Input 1"
+    override val description = "input 1"
 
-    override def readValue(s: String): String = {
+    override def setInputValue(s: String): String = {
       // TODO: Here is the code for setting the first input
       s"input1 = $s"
     }
@@ -40,16 +40,16 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
   val in2 = new InputPort[T](this) {
 
 
-    override def readValue(s: String): String = {
+    override def setInputValue(s: String): String = {
       // TODO: Here is the code for setting the second input
       s"input2 = $s"
     }
   }
   val sel = new InputPort[T](this) {
 
-    override val description = "Input selector"
+    override val description = "input selector"
 
-    override def readValue(s: String): String = {
+    override def setInputValue(s: String): String = {
       // Here is the code to set the selector value
       s"sel = $s"
     }

@@ -1,17 +1,13 @@
-package hevs.androiduino.dsl.components.fundamentals
-
-import java.io.IOException
+package hevs.androiduino.dsl.components
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.core.Constant
+import hevs.androiduino.dsl.components.fundamentals.{hw_implemented, InputPort, OutputPort, Component}
 import hevs.androiduino.dsl.utils.ComponentNotFound
 
 import scalax.collection.edge.Implicits._
 import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
-
-import scalax.collection.GraphPredef._, scalax.collection.GraphEdge.{DiEdge, EdgeCopy, NodeProduct}
-import scala.reflect.runtime.universe
 
 object IdGenerator {
   private var id = 0
@@ -34,7 +30,6 @@ object ComponentManager extends Logging {
    * @param c the component to add as node in the graph
    */
   def registerComponent(c: Component) = {
-    info(s"Register component $c with id ${c.id}.")
     cpGraph += c // Add the component as a node to the graph
   }
 
@@ -51,8 +46,13 @@ object ComponentManager extends Logging {
     // Get components "from" and "to". These components must be in the graph, or an exception is thrown.
     val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
+    val w = new Wire(from, to)
+
+    assert(from.isConnected, "From port not connected !")
+    assert(to.isConnected, "To port not connected !")
+
     // Add the connection (wire) between these to ports
-    val outer = (cpFrom ~+> cpTo)("toto") // Component to component with input (right) as label
+    val outer = (cpFrom ~+> cpTo)(w) // Component to component with input (right) as label
     cpGraph += outer
 
     // ~>   directed
@@ -67,7 +67,7 @@ object ComponentManager extends Logging {
    */
   private def cp(cpId: Int): Component = {
     // Find a component by ID. Exist once only.
-    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].id == cpId)
+    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].getId == cpId)
     cp match {
       case Some(c) => c
       case None => throw ComponentNotFound(cpId)
@@ -80,28 +80,30 @@ object ComponentManager extends Logging {
     nc.map(x => x.value.asInstanceOf[Component]).toList
   }
 
-  def findConnection(fromId: Int): InputPort[_] = {
-    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].id == fromId)
-    println("CP out: " + cp)
-    println("diSuccessors: " + cp.get.diSuccessors)
-    println("head: " + cp.get.diSuccessors.head)
+  // Return a list of `InputPort`s that are connected
+  def findConnections(port: OutputPort[_]): Seq[InputPort[_]] = {
+    val cpFrom = cpGraph.nodes find (c => c.value.asInstanceOf[Component].equals(port.getOwner))
+    val edges = cpFrom.get.edges
 
-    println("Edges: " + cp.get.edges)
+    // Find all connections (wires/edges) of this component
+    val connections = edges filter {
+      w => w.label.asInstanceOf[Wire].from == port
+    }
+    // Return only the InputPort of the connected component, extracted from the label of the edge
+    val tos = connections.map(x => x.label.asInstanceOf[Wire].to)
+    tos.toSeq
 
     // TODO test me
     // Comment avoir le label du egde ?
     // Chercher les edges de la source et filter celle qui va vers la destination connue
     // Ensuite prendre son label...
     // !! Peut aller vers le même composant plusieurs fois !!
-    val to = cp.get.diSuccessors.head.value.asInstanceOf[Component]
-    println(to.getInputs)
+    //val to = cpFrom.get.diSuccessors.head.value.asInstanceOf[Component]
+    //println(to.getInputs)
 
-    throw new IOException("test here")
+    // throw new IOException("test here")
     // cp.get.diSuccessors.head.value.asInstanceOf[InputPort[_]]
   }
-
-
-  // TODO beautify all these methods with pattern matching
 
   // TODO beautify this (factorize it)
   def generateInitCode() = {
@@ -120,6 +122,9 @@ object ComponentManager extends Logging {
     }
     result
   }
+
+
+  // TODO beautify all these methods with pattern matching
 
   def generateBeginMainCode() = {
     var result = ""
@@ -154,12 +159,11 @@ object ComponentManager extends Logging {
   }
 
   def generateFunctionsCode() = {
-    var result = ""
-
     // Works but not really clearer
     //		val filteredInstances : List[hw_implemented] = comps.filter(_.isInstanceOf[hw_implemented]).map(_.asInstanceOf[hw_implemented])
     //		val functionCode = filteredInstances.map(x => x.getFunctionsDefinitions()).foldLeft("")(_ + _)
 
+    var result = "//*// generateFunctionsCode\n"
     for (c ← cpGraph.nodes.toList) {
       val comp = c.value
       assert(comp.isInstanceOf[Component])
@@ -168,7 +172,7 @@ object ComponentManager extends Logging {
         val hw_c = comp.asInstanceOf[hw_implemented]
 
         if (hw_c.getFunctionsDefinitions.isDefined)
-          result += hw_c.getFunctionsDefinitions.get + "\n"
+          result += hw_c.getFunctionsDefinitions.get + "\n\n"
       }
     }
 
@@ -176,9 +180,7 @@ object ComponentManager extends Logging {
   }
 
   def generateLoopingCode() = {
-    var result = ""
-    // TODO find a guard for making writable on a single line (for refactoring)
-    //for (c ← gr1.nodes.toList; if c.value.isInstanceOf[hw_implemented]) { // TODO Does not work, why ?
+    var result = "//*// generateLoopingCode\n"
     for (c ← cpGraph.nodes.toList) {
       val comp = c.value
       assert(comp.isInstanceOf[Component])
@@ -188,10 +190,14 @@ object ComponentManager extends Logging {
 
         if (hw_c.getLoopableCode.isDefined)
           result += "\t\t" + hw_c.getLoopableCode.get + "\n"
-
       }
-
     }
     result
   }
+
+  // This a basically a Tuple2, but they cannot be override
+  private class Wire(val from: OutputPort[_], val to: InputPort[_]) {
+    override def toString = "MyWire " + from + "~" + to
+  }
+
 }

@@ -1,17 +1,26 @@
 package hevs.androiduino.dsl.components.fundamentals
 
+import hevs.androiduino.dsl.components.{ComponentManager, IdGenerator}
+
 // TODO: un composant est sotcké dans un graph, doit avoir `override def equals` et `override def hashCode`
 abstract class Component {
 
-  val id = IdGenerator.newUniqueId // Must be unique
+  private val id = IdGenerator.newUniqueId // Id component (must be unique)
+
+  private var nbrOfPorts = 0 // Used to generate a unique ID for each port
+
+  def newUniquePortId = {
+    nbrOfPorts += 1
+    nbrOfPorts
+  }
 
   def getId = id
 
   // Component description (optional)
-  val description: String = ""
+  protected val description: String = ""
 
   // Create a variable name for the component
-  def compVar(varName: String) = s"cmp${id}_$varName"
+  // def compVar(varName: String) = s"cmp${id}_$varName"
 
   ComponentManager.registerComponent(this)
 
@@ -23,10 +32,12 @@ abstract class Component {
   // The default implementation of a Seq is a List.
   def getInputs: Option[Seq[InputPort[_]]]
 
+  def getDescription = description
+
   def getFullDescriptor = {
     toString +
-      "\n\tInputs:  " + getInputs.mkString(", ") +
-      "\n\tOutputs: " + getOutputs.mkString(", ")
+      "\n\tInputs:  " + getInputs.getOrElse("None") +
+      "\n\tOutputs: " + getOutputs.getOrElse("None")
   }
 
   // For the graph
@@ -39,7 +50,7 @@ abstract class Component {
   // For the graph
   override def hashCode = id.##
 
-  override def toString = s"Cmp[$id] $description"
+  override def toString = s"Cmp[$id] '$getDescription'"
 }
 
 trait hw_implemented {

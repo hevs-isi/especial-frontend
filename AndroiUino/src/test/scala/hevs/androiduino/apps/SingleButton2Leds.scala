@@ -1,8 +1,8 @@
 package hevs.androiduino.apps
 
-import hevs.androiduino.dsl.CodeGenerator
+import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.digital.{DigitalOutput, DigitalInput}
-import hevs.androiduino.dsl.components.fundamentals.ComponentManager
+import hevs.androiduino.dsl.generator.CodeGenerator
 
 object SingleButton2Leds extends TestGeneratorApp {
   val b1 = DigitalInput(3)
@@ -20,7 +20,7 @@ object SingleButton2Leds extends TestGeneratorApp {
   //	HW_Button(5).out --> HW_Led(13).in
 
   // Generate code
-  val code = CodeGenerator.generateCode
+  val code = CodeGenerator.generateCode(fileName)
   CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
   println(code)
 

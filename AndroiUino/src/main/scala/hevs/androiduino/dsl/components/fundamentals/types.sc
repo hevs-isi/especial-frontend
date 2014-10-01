@@ -22,4 +22,7 @@ object Test {
   import ImplicitTypes._
   val lg: Long = uint16(1850)
   val toto = uint16(lg.toInt)
+
+
+
 }

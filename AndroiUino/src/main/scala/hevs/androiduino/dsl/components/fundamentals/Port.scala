@@ -1,6 +1,7 @@
 package hevs.androiduino.dsl.components.fundamentals
 
 import grizzled.slf4j.Logging
+import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.utils.WireConnection
 
 import scala.reflect.runtime.universe._
@@ -16,11 +17,12 @@ import scala.reflect.runtime.universe._
 // Input ot output port of a component. Transport only one type of data.
 abstract class Port[T <: CType : TypeTag](owner: Component) {
 
-  // Port description (optional)
   protected val description: String = ""
+  // Optional description
+  private val id = owner.newUniquePortId
   protected var connected = false
 
-  def getOwnerId = getOwner.id
+  def getOwnerId = getOwner.getId
 
   def getOwner = owner
 
@@ -32,6 +34,16 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   def disconnect() = connected = false
 
+  override def equals(other: Any) = other match {
+    // A port ID must be unique. The type of the Port is not checked here.
+    case that: Port[_] => that.getId == this.id
+    case _ => false
+  }
+
+  def getId = id
+
+  override def hashCode = id.##
+
   // Helper method to check if two `Port` contains the same type of data.
   def isSameTypeAs[A <: CType : TypeTag](that: Port[A]): Boolean = {
     // TODO check and remove debug print
@@ -39,6 +51,8 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
     // println("that is of type: " + typeOf[A])
     typeOf[T] == typeOf[A]
   }
+
+  override def toString = s"Port[$id] of $getOwner"
 }
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {
@@ -60,13 +74,10 @@ abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T]
     connected = true
   }
 
-  // C code to read the value of this input port
-  def readValue(s: String): String
+  // C code to set the value of an input port
+  def setInputValue(s: String): String
 
-  override def toString = isConnected match {
-    case true => "InputPort"
-    case _ => "InputPort (NC)"
-  }
+  override def toString = "Input" + super.toString
 }
 
 abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
@@ -103,6 +114,8 @@ abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T
 
   // Abstract function
   def getValue: String
+
+  override def toString = "Output" + super.toString
 
   /*override def toString = isConnected match {
     case true => {

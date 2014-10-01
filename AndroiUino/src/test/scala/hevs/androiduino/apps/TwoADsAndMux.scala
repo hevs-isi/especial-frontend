@@ -3,8 +3,8 @@ package hevs.androiduino.apps
 import java.io.PrintWriter
 
 import hevs.androiduino.apps.Constant2Led._
-import hevs.androiduino.dsl.CodeGenerator
 import hevs.androiduino.dsl.components.digital.{DigitalOutput, DigitalInput}
+import hevs.androiduino.dsl.generator.CodeGenerator
 
 object TwoADsAndMux extends TestGeneratorApp {
   val b1 = DigitalInput(3)
@@ -16,7 +16,7 @@ object TwoADsAndMux extends TestGeneratorApp {
   b1.out --> l1.in
 
   // Generate code
-  val code = CodeGenerator.generateCode
+  val code = CodeGenerator.generateCode(fileName)
   val writer = new PrintWriter(s"codeOutput/$fileName.c")
   writer.print(code)
   writer.close()
