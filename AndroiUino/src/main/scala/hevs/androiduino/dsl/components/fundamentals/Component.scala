@@ -1,6 +1,7 @@
 package hevs.androiduino.dsl.components.fundamentals
 
 import hevs.androiduino.dsl.components.{ComponentManager, IdGenerator}
+import scala.reflect.runtime.universe._
 
 // TODO: un composant est sotcké dans un graph, doit avoir `override def equals` et `override def hashCode`
 abstract class Component {
@@ -18,9 +19,6 @@ abstract class Component {
 
   // Component description (optional)
   protected val description: String = ""
-
-  // Create a variable name for the component
-  // def compVar(varName: String) = s"cmp${id}_$varName"
 
   ComponentManager.registerComponent(this)
 

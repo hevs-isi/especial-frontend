@@ -9,6 +9,8 @@ case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_im
 
   override val description = s"digital input on pin $pin"
 
+  private val fctName = s"pollDigitalInput$pin"
+
   /**
    * The `uint1` value of this digital input.
    */
@@ -18,7 +20,6 @@ case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_im
 
     override def getValue: String = s"pollButton$pin();"
   }
-  val fctName = s"pollDigitalInput$pin"
 
   def getOutputs = Some(Seq(out))
 

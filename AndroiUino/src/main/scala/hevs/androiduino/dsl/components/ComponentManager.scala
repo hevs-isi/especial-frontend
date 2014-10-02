@@ -2,7 +2,7 @@ package hevs.androiduino.dsl.components
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.core.Constant
-import hevs.androiduino.dsl.components.fundamentals.{hw_implemented, InputPort, OutputPort, Component}
+import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, hw_implemented}
 import hevs.androiduino.dsl.utils.ComponentNotFound
 
 import scalax.collection.edge.Implicits._
@@ -83,26 +83,17 @@ object ComponentManager extends Logging {
   // Return a list of `InputPort`s that are connected
   def findConnections(port: OutputPort[_]): Seq[InputPort[_]] = {
     val cpFrom = cpGraph.nodes find (c => c.value.asInstanceOf[Component].equals(port.getOwner))
-    val edges = cpFrom.get.edges
+    val edges = cpFrom.get.edges // all connections of this component (from and to components)
 
-    // Find all connections (wires/edges) of this component
+    // Find all connections (wires/edges) of this component to OTHER components. This test must be included because
+    // it is not a filter on successors but on edges (because we need the label of the edge).
     val connections = edges filter {
-      w => w.label.asInstanceOf[Wire].from == port
+      w => w.label.asInstanceOf[Wire].from == port && // Filter the OutputPort id
+        w.label.asInstanceOf[Wire].to.getOwnerId != port.getOwnerId // Must be another component
     }
     // Return only the InputPort of the connected component, extracted from the label of the edge
-    val tos = connections.map(x => x.label.asInstanceOf[Wire].to)
-    tos.toSeq
-
-    // TODO test me
-    // Comment avoir le label du egde ?
-    // Chercher les edges de la source et filter celle qui va vers la destination connue
-    // Ensuite prendre son label...
-    // !! Peut aller vers le même composant plusieurs fois !!
-    //val to = cpFrom.get.diSuccessors.head.value.asInstanceOf[Component]
-    //println(to.getInputs)
-
-    // throw new IOException("test here")
-    // cp.get.diSuccessors.head.value.asInstanceOf[InputPort[_]]
+    val tos = connections.toSeq.map(x => x.label.asInstanceOf[Wire].to)
+    tos
   }
 
   // TODO beautify this (factorize it)
@@ -123,9 +114,6 @@ object ComponentManager extends Logging {
     result
   }
 
-
-  // TODO beautify all these methods with pattern matching
-
   def generateBeginMainCode() = {
     var result = ""
 
@@ -143,19 +131,26 @@ object ComponentManager extends Logging {
     result
   }
 
-  //TODO Move all generate code to others class
-  //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
-  def generateConstantsCode() = {
 
-    val cst = cpGraph.nodes filter (c => c.value.isInstanceOf[hw_implemented] && c.value.isInstanceOf[Constant[_]])
-    // Return a seq of Constant as Component
-    val hwCst = cst.map(x => x.value.asInstanceOf[hw_implemented]).toList
+  // TODO beautify all these methods with pattern matching
 
-    var result = "//*// generateConstantsCode\n"
-    for (c <- hwCst if c.getGlobalConstants.isDefined) {
+  def generateGlobalCode() = {
+    val cp = findConnectedHardware // Connected nodes only
+
+    var result = "//*// generateGlobalCode\n"
+    for (c <- cp if c.getGlobalConstants.isDefined) {
       result += c.getGlobalConstants.get + "\n"
     }
     result + "\n"
+  }
+
+  //TODO Move all generate code to others class
+  //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
+
+  private def findConnectedHardware: Seq[hw_implemented] = {
+    val nc = cpGraph.nodes filter (c => c.degree > 0)
+    // Return a seq of components
+    nc.map(x => x.value.asInstanceOf[hw_implemented]).toList
   }
 
   def generateFunctionsCode() = {
@@ -189,7 +184,7 @@ object ComponentManager extends Logging {
         val hw_c = comp.asInstanceOf[hw_implemented]
 
         if (hw_c.getLoopableCode.isDefined)
-          result += "\t\t" + hw_c.getLoopableCode.get + "\n"
+          result += hw_c.getLoopableCode.get + "\n"
       }
     }
     result

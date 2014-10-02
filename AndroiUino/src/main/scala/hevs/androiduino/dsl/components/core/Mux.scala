@@ -4,17 +4,9 @@ import hevs.androiduino.dsl.components.fundamentals.{CType, Component, InputPort
 
 import scala.reflect.runtime.universe._
 
-/*private object MuxID{
-	private var id = 0
-
-	def getUniqueID() = {
-		id = id + 1
-		id
-	}
-}*/
-
 // FIXME remove outputType and use template (how ?)
 
+@Deprecated
 case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_implemented {
 
   override val description = "multiplexer with wto inputs"
