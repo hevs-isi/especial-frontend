@@ -1,6 +1,6 @@
 package hevs.androiduino.dsl.generator
 
-import java.io.PrintWriter
+import java.io.File
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
@@ -30,6 +30,25 @@ object CodeGenerator extends Logging {
         endMain(progName)
 
     result
+  }
+
+  def generateCodeFile(progName: String, fileName: String): String = {
+    val code = generateCode(progName)
+    // Create the file in the folder "output/dot/"
+    val path = s"output/code/$fileName.c"
+    info(s"Code generated to '$path'.")
+    val file: RichFile = new File(path)
+    file.write(code)
+
+    // Call the AStyle conversion program
+    info("Running Astyle.")
+    OSUtils.getOsType match {
+      case _: Windows => s"./lib/AStyle.exe --style=kr -Y $path".!!
+      case _: Linux => s"./lib/astyle --style=kr -Y $path".!!
+      case _ => error("OS not supported. Cannot run `astyle`.")
+    }
+
+    code // Return the non-formatted code
   }
 
   def checkWarnings(): Boolean = {
@@ -64,23 +83,4 @@ object CodeGenerator extends Logging {
   def endLoopMain() = "}\n"
 
   def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
-
-  def outputToFile(fileName: String, code: String) = {
-    val writer = new PrintWriter(fileName)
-    writer.print(code)
-    writer.close()
-
-    println()
-    info("Running Astyle...")
-    OSUtils.getOsType match {
-      case _: Windows => {
-        // Call the AStyle conversion program on windows
-        s"./lib/AStyle.exe --style=kr -Y $fileName".!!
-      }
-      case _: Linux => {
-        s"./lib/astyle --style=kr -Y $fileName".!!
-      }
-      case _ => error("OS not supported. Cannot run `astyle`.")
-    }
-  }
 }

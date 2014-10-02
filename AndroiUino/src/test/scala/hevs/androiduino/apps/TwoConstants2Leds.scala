@@ -5,7 +5,7 @@ import hevs.androiduino.dsl.components.digital.DigitalOutput
 import hevs.androiduino.dsl.components.fundamentals.uint1
 import hevs.androiduino.dsl.generator.CodeGenerator
 
-object TwoConstant2Leds extends TestGeneratorApp {
+object TwoConstants2Leds extends TestGeneratorApp {
   val c1 = Constant(uint1())
   val c2 = Constant(uint1())
 
@@ -17,8 +17,6 @@ object TwoConstant2Leds extends TestGeneratorApp {
   c2.out --> led1.in
 
   // Generate code
-  val code = CodeGenerator.generateCode(fileName)
-  CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
-
+  val code = CodeGenerator.generateCodeFile(fileName, fileName)
   println(code)
 }

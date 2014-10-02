@@ -1,5 +1,8 @@
 target/
-codeOutput/
+
+# Ignore generate files
+output/code/
+output/dot
 
 # Eclipse
 .settings

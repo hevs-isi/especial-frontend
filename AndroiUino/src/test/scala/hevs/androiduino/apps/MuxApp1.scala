@@ -1,8 +1,8 @@
 package hevs.androiduino.apps
 
-import hevs.androiduino.dsl.components.core.{Mux2, Constant}
+import hevs.androiduino.dsl.components.BitExtractor
+import hevs.androiduino.dsl.components.core.{Constant, Mux2}
 import hevs.androiduino.dsl.components.digital.DigitalOutput
-import hevs.androiduino.dsl.components.{ComponentManager, BitExtractor}
 import hevs.androiduino.dsl.components.fundamentals.uint8
 import hevs.androiduino.dsl.generator.CodeGenerator
 
@@ -21,9 +21,7 @@ object MuxApp1 extends TestGeneratorApp {
   ext.out --> led.in
 
   // Generate code
-  val code = CodeGenerator.generateCode(fileName)
-  CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
-
-  //	println(code)
-  println(ComponentManager.cpGraph)
+  // Generate code
+  val code = CodeGenerator.generateCodeFile(fileName, fileName)
+  println(code)
 }

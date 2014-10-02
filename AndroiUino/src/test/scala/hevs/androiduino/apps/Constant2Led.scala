@@ -17,8 +17,6 @@ object Constant2Led extends TestGeneratorApp {
   // d.out --> led.in
 
   // Generate code
-  val code = CodeGenerator.generateCode(fileName)
-  CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
-
+  val code = CodeGenerator.generateCodeFile(fileName, fileName)
   println(code)
 }
