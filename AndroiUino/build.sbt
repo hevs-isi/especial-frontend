@@ -6,7 +6,10 @@ scalaVersion := "2.11.1"	// Required by the graph librairies
 
 // Graph for Scala
 // http://www.scala-graph.org/
-libraryDependencies += "com.assembla.scala-incubator" %% "graph-core" % "1.9.0"
+libraryDependencies ++= Seq(
+  "com.assembla.scala-incubator" %% "graph-core" % "1.9.0",
+  "com.assembla.scala-incubator" %% "graph-dot" % "1.9.0"
+)
 
 // Grizzled-SLF4J, a Scala-friendly SLF4J Wrapper
 libraryDependencies ++= Seq(

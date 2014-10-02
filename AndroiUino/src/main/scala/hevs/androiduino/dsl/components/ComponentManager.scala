@@ -196,7 +196,8 @@ object ComponentManager extends Logging {
   }
 
   // This a basically a Tuple2, but they cannot be override
-  private class Wire(val from: OutputPort[_], val to: InputPort[_]) {
+  // Also used by the DotGenerator
+  class Wire(val from: OutputPort[_], val to: InputPort[_]) {
     override def toString = "MyWire " + from + "~" + to
   }
 

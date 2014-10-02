@@ -1,9 +1,10 @@
 package hevs.androiduino.apps
 
+import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.generator.CodeGenerator
+import hevs.androiduino.dsl.generator.{DotGenerator, CodeGenerator}
 
 object Sch1Code {
 
@@ -30,4 +31,8 @@ object Sch1Test extends TestGeneratorApp {
   CodeGenerator.outputToFile(s"codeOutput/$fileName.c", code)
 
   println(code)
+
+  val dot = new DotGenerator().generate(ComponentManager.cpGraph)
+  println("** DOT FILE **\n\n")
+  println(dot)
 }

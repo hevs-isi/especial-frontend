@@ -17,8 +17,10 @@ import scala.reflect.runtime.universe._
 // Input ot output port of a component. Transport only one type of data.
 abstract class Port[T <: CType : TypeTag](owner: Component) {
 
-  protected val description: String = ""
   // Optional description
+  protected val description: String = ""
+  def getDescription = description
+
   private val id = owner.newUniquePortId
   protected var connected = false
 
