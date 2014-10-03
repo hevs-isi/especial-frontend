@@ -1,42 +1,81 @@
 package hevs.androiduino.resolver
 
 import hevs.androiduino.apps.TestGeneratorApp
+import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.components.fundamentals.uint1
+import hevs.androiduino.dsl.components.logic.And
 import hevs.androiduino.dsl.generator.{CodeGenerator, Resolver}
 
-object ResolverCode {
-
-  // Inputs
+class ResolverCode1 {
+  // Nothing to do, no inputs
   val btn1 = DigitalInput(4)
-  val cst1 = Constant(uint1(true))
-
-  // Outputs
-  val led1 = DigitalOutput(7)
-  val led2 = DigitalOutput(8)
-  val led3 = DigitalOutput(9)
-
-  // Connecting stuff
-  btn1.out --> led1.in
-  btn1.out --> led2.in
-
-  cst1.out --> led3.in
 }
 
-object ResolverTest extends TestGeneratorApp {
+// 1 pass, 1 unconnected
+class ResolverCode2 {
+  val cst1 = Constant(uint1(false))
+  val btn1 = DigitalInput(4)
+  val led1 = DigitalOutput(7)
+  cst1.out --> led1.in
+}
 
-  val source = ResolverCode // The the main code
+// 3 passes without warning
+class ResolverCode3 {
+  val cst1 = Constant(uint1(false))
+  val btn1 = DigitalInput(4)
+  val led1 = DigitalOutput(7)
+  val and1 = And()
 
-  CodeGenerator.printWarnings()
-  Resolver.resolveCode()
+  cst1.out --> and1.in1
+  btn1.out --> and1.in2
+  and1.out --> led1.in
+}
 
-  // Generate the C code and the DOT graph
-  //val code = CodeGenerator.generateCodeFile(fileName, fileName)
-  //val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
+class ResolverTest extends TestGeneratorApp {
 
-  // Print code and dot as result
-  //println(code)
-  //println("\n***\n")
-  //println(dot)
+  test("1 unconnected component") {
+    ComponentManager.unregisterComponents()
+    val c = new ResolverCode1()
+    val r = new Resolver()
+    val warns = CodeGenerator.printWarnings()
+    r.resolveGraph()
+
+    assert(warns)
+    assert(ComponentManager.numberOfUnconnectedHardware() == 1)
+    assert(ComponentManager.numberOfConnectedHardware() == 0)
+    assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
+    assert(r.getNumberOfPasses == 0)
+    assert(r.getNumberOfCodes == 0)
+  }
+
+  test("1 wire with 1 unconnected component") {
+    ComponentManager.unregisterComponents()
+    val c = new ResolverCode2()
+    val r = new Resolver()
+    val warns = CodeGenerator.printWarnings()
+    r.resolveGraph()
+
+    assert(warns)
+    assert(ComponentManager.numberOfUnconnectedHardware() == 1)
+    assert(ComponentManager.numberOfConnectedHardware() == 2)
+    assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
+    assert(r.getNumberOfPasses == 2)
+    assert(r.getNumberOfCodes == 2)
+  }
+
+  test("3 passes without warning") {
+    ComponentManager.unregisterComponents()
+    new ResolverCode3()
+    val r = new Resolver()
+    val warns = CodeGenerator.printWarnings()
+    r.resolveGraph()
+
+    assert(!warns)
+    assert(ComponentManager.numberOfUnconnectedHardware() == 0)
+    assert(ComponentManager.numberOfConnectedHardware() == 4)
+    assert(r.getNumberOfPasses == 3)
+    assert(r.getNumberOfCodes == 4)
+  }
 }

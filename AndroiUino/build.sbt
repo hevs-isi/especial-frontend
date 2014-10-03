@@ -18,5 +18,8 @@ libraryDependencies ++= Seq(
 	"org.clapper" %% "grizzled-slf4j" % "1.0.2"
 )
 
+// Scala tests
+libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
+
 // Scala compiler options
-scalacOptions ++= Seq("-unchecked", "-deprecation")
+scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
