@@ -1,11 +1,10 @@
 package hevs.androiduino.resolver
 
 import hevs.androiduino.apps.TestGeneratorApp
-import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.generator.{Resolver, CodeGenerator, DotGenerator}
+import hevs.androiduino.dsl.generator.{CodeGenerator, Resolver}
 
 object ResolverCode {
 
