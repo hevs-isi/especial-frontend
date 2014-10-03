@@ -8,20 +8,13 @@ import scalax.collection.edge.Implicits._
 import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
 
-object IdGenerator {
-  private var id = 0
-
-  def newUniqueId = {
-    id += 1
-    id
-  }
-}
-
 object ComponentManager extends Logging {
 
   // This contains a (mutable) graph representation of the components
   // that can be skimmed later on
   val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
+
+  def createComponentId() = IdGenerator.newUniqueId
 
   /**
    * Insert a component in the graph. Each component has a unique ID. It cannot appears more than once in the graph.
@@ -30,6 +23,14 @@ object ComponentManager extends Logging {
    */
   def registerComponent(c: Component) = {
     cpGraph += c // Add the component as a node to the graph
+  }
+
+  /**
+   * Remove all components from the graph.
+   */
+  def unregisterComponents() = {
+    cpGraph.clear()
+    IdGenerator.reset() // Restart id generation from 0
   }
 
   /**
@@ -176,10 +177,6 @@ object ComponentManager extends Logging {
 
   def numberOfUnconnectedHardware() = cpGraph.nodes count (c => c.degree == 0)
 
-  // TODO beautify all these methods with pattern matching
-  //TODO Move all generate code to others class
-  //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
-
   def generateFunctionsCode() = {
     // Works but not really clearer
     //		val filteredInstances : List[hw_implemented] = comps.filter(_.isInstanceOf[hw_implemented]).map(_.asInstanceOf[hw_implemented])
@@ -201,6 +198,10 @@ object ComponentManager extends Logging {
     result
   }
 
+  // TODO beautify all these methods with pattern matching
+  //TODO Move all generate code to others class
+  //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
+
   def generateLoopingCode() = {
     var result = "//*// generateLoopingCode\n"
     for (c ← cpGraph.nodes.toList) {
@@ -221,6 +222,17 @@ object ComponentManager extends Logging {
   // Also used by the DotGenerator
   class Wire(val from: OutputPort[_], val to: InputPort[_]) {
     override def toString = "MyWire " + from + "~" + to
+  }
+
+  private object IdGenerator {
+    private var id = 0
+
+    def newUniqueId = {
+      id += 1
+      id
+    }
+
+    def reset() = id = 0
   }
 
 }

@@ -8,6 +8,7 @@ import hevs.androiduino.dsl.components.fundamentals.Component
 import hevs.androiduino.dsl.utils.OSUtils
 import hevs.androiduino.dsl.utils.OSUtils.Linux
 
+import scala.language.existentials
 import scala.sys.process._
 import scalax.collection.Graph
 import scalax.collection.edge.LDiEdge

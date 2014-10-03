@@ -1,12 +1,11 @@
 package hevs.androiduino.dsl.components.fundamentals
 
-import hevs.androiduino.dsl.components.{ComponentManager, IdGenerator}
-import scala.reflect.runtime.universe._
+import hevs.androiduino.dsl.components.ComponentManager
 
 // TODO: un composant est sotcké dans un graph, doit avoir `override def equals` et `override def hashCode`
 abstract class Component {
 
-  private val id = IdGenerator.newUniqueId // Id component (must be unique)
+  private val id = ComponentManager.createComponentId() // Id of component (must be unique)
 
   private var nbrOfPorts = 0 // Used to generate a unique ID for each port
 

@@ -7,13 +7,13 @@ import hevs.androiduino.dsl.components.fundamentals.{Component, hw_implemented}
 import scala.collection.mutable
 
 // Unconnected components are ignored !!
-object Resolver extends Logging {
+class Resolver extends Logging {
 
   // All id of components that are generated
   private val generatedCpId = mutable.Set.empty[Int]
 
   // Number of connected components in the graph
-  private val nbrOfConnectedCp = ComponentManager.numberOfConnectedHardware()
+  private def nbrOfConnectedCp = ComponentManager.numberOfConnectedHardware()
 
   // Define the maximum number of passes. After that, the resolver will stop.
   private val MaxPasses = 20
@@ -22,7 +22,10 @@ object Resolver extends Logging {
   // Current number of passes to generate the code
   private var nbrOfPasses = 0
 
-  def resolveCode(): Boolean = {
+  def getNumberOfPasses = nbrOfPasses
+  def getNumberOfCodes = generatedCpId.size
+
+  def resolveGraph(): Boolean = {
 
     val unconnected = ComponentManager.numberOfUnconnectedHardware()
 
@@ -40,11 +43,11 @@ object Resolver extends Logging {
     } while (generatedCpId.size != nbrOfConnectedCp && nbrOfPasses < MaxPasses)
 
     if (generatedCpId.size == nbrOfConnectedCp) {
-      info(s"Resolver ended successfully after $nbrOfPasses passes")
+      info(s"Resolver ended successfully after $getNumberOfPasses passes for $getNumberOfCodes components")
       return true
     }
 
-    error(s"Resolver stopped after $nbrOfPasses passes")
+    error(s"Resolver stopped after $getNumberOfPasses passes")
     false
   }
 
@@ -62,38 +65,37 @@ object Resolver extends Logging {
           codeGeneratedFor(cp.getId)
         }
         endPass()
-        in
+        in  // HW component to generate
 
       // From the second passe, the code of all direct successors of the components is generated.
       case _ =>
-
         val genCp = mutable.Set.empty[hw_implemented]
-        val curId = nextPassCpId // Save component of the current phase
+        val genId = nextPassCpId.clone()
         nextPassCpId.clear()
 
-        for (id <- curId) {
+        for (id <- genId) {
           // Find direct successors for all components of the previous phase
-          for (n <- ComponentManager.getNode(id).diSuccessors) {
+          val successors = ComponentManager.getNode(id).diSuccessors
+          for (n <- successors) {
             val cp = n.value.asInstanceOf[Component]
             val gen = isCodeGenerated(cp.getId)
-            if (gen) {
+            if (!gen) {
               info(s" > Generate code for: $cp")
               codeGeneratedFor(cp.getId)
               genCp += cp.asInstanceOf[hw_implemented]
             }
             else {
+              // Code of this component already generated
               info(s" > Done for: $cp")
             }
           }
         }
         endPass()
-        genCp.toSeq
+        genCp.toSeq // HW component to generate
     }
   }
 
   private def startPass() = {
-    // TODO check if it is finish or not
-    // if(nbrOfCpnts == maxComponent) return
     info("Pass [%03d]".format(nbrOfPasses + 1))
   }
 
@@ -103,7 +105,7 @@ object Resolver extends Logging {
 
   private def codeGeneratedFor(cpId: Int) = {
     generatedCpId += cpId // Add ID to the global list
-    nextPassCpId += cpId // Add ID for the next phase
+    nextPassCpId += cpId // Code to generate on the next pass
   }
 
   // Check if the code of the component has been already generated or not
