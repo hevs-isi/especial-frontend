@@ -51,7 +51,7 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
 
   def getInputs = Some(Seq(in1, in2, sel))
 
-  override def getGlobalConstants = None
+  override def getGlobalCode = None
 
   override def getFunctionsDefinitions: Option[String] = {
     var result = s"$outputType mux(){\n"

@@ -26,7 +26,7 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_im
    * Constant declaration in the C code.
    * @return the constant declaration as boolean if the constant is connected
    */
-  override def getGlobalConstants = out.isConnected match {
+  override def getGlobalCode = out.isConnected match {
     case true =>
       // const bool_t cstComp1 = true;
       Some(s"const ${value.getType} $valName = ${value.v}; // $out")

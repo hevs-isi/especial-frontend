@@ -11,27 +11,6 @@ import scala.sys.process._
 
 object CodeGenerator extends Logging {
 
-  def generateCode(progName: String): String = {
-
-    checkWarnings()
-
-    val result =
-      preamble(progName) +
-        ComponentManager.generateGlobalCode +
-        ComponentManager.generateFunctionsCode +
-        preInit() +
-        ComponentManager.generateInitCode +
-        postInit() +
-        beginMain() +
-        ComponentManager.generateBeginMainCode +
-        beginLoopMain() +
-        ComponentManager.generateLoopingCode +
-        endLoopMain() +
-        endMain(progName)
-
-    result
-  }
-
   def generateCodeFile(progName: String, fileName: String): String = {
     val code = generateCode(progName)
     // Create the file in the folder "output/dot/"
@@ -51,10 +30,31 @@ object CodeGenerator extends Logging {
     code // Return the non-formatted code
   }
 
-  def checkWarnings(): Boolean = {
+  def generateCode(progName: String): String = {
+
+    printWarnings()
+
+    val result =
+      preamble(progName) +
+        ComponentManager.generateGlobalCode +
+        ComponentManager.generateFunctionsCode +
+        preInit() +
+        ComponentManager.generateInitCode +
+        postInit() +
+        beginMain() +
+        ComponentManager.generateBeginMainCode +
+        beginLoopMain() +
+        ComponentManager.generateLoopingCode +
+        endLoopMain() +
+        endMain(progName)
+
+    result
+  }
+
+  def printWarnings(): Boolean = {
     val c = ComponentManager.findUnconnectedComponents
-    if (c.size > 0) {
-      println("WARN: Unconnected component(s) found:")
+    if (c.nonEmpty) {
+      println(s"WARN: ${c.size} unconnected component(s) found:")
       println("\t- " + c.mkString("\n\t- "))
       return true
     }

@@ -1,7 +1,6 @@
 package hevs.androiduino.dsl.components
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, hw_implemented}
 import hevs.androiduino.dsl.utils.ComponentNotFound
 
@@ -61,22 +60,43 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Search for a component the graph nodes by id. If the component is not found, an exception is thrown.
-   * @param cpId the component id to search
+   * Get a Component from a node graph by its id.
+   * @see cp
+   * @param cpId the component id to search for
    * @return the component node or an exception if not found
    */
   private def cp(cpId: Int): Component = {
-    // Find a component by ID. Exist once only.
-    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].getId == cpId)
-    cp match {
+    getNode(cpId).value.asInstanceOf[Component]
+  }
+
+  /**
+   * Search for a node in the graph by a component ID. If the component is not
+   * found, an exception is thrown. The component id is unique. At most one component can be found.
+   * @param cpId the component id to search for
+   * @return the graph node (with the Component as value)
+   */
+  def getNode(cpId: Int): cpGraph.NodeT = {
+    cpGraph.nodes find (c => c.value.asInstanceOf[Component].getId == cpId) match {
       case Some(c) => c
-      case None => throw ComponentNotFound(cpId)
+      case None => throw ComponentNotFound(cpId) // Fatal exception: must be in the graph
     }
   }
 
+  /**
+   * Find all connected inputs nodes. An input node is a node without direct predecessor.
+   * @return list of hardware without direct predecessor (considered as an input)
+   */
+  def findConnectedInputHardware: Seq[hw_implemented] = {
+    val in = cpGraph.nodes.filter(c => c.diPredecessors.isEmpty && c.edges.size > 0)
+    in.map(x => x.value.asInstanceOf[hw_implemented]).toSeq
+  }
+
+  /**
+   * Return all unconnected nodes of the graph in a Seq of `Component`.
+   * @return all unconnected nodes
+   */
   def findUnconnectedComponents: Seq[Component] = {
     val nc = cpGraph.nodes filter (c => c.degree == 0)
-    // Return a seq of components
     nc.map(x => x.value.asInstanceOf[Component]).toList
   }
 
@@ -131,27 +151,34 @@ object ComponentManager extends Logging {
     result
   }
 
-
-  // TODO beautify all these methods with pattern matching
-
   def generateGlobalCode() = {
     val cp = findConnectedHardware // Connected nodes only
 
     var result = "//*// generateGlobalCode\n"
-    for (c <- cp if c.getGlobalConstants.isDefined) {
-      result += c.getGlobalConstants.get + "\n"
+    for (c <- cp if c.getGlobalCode.isDefined) {
+      result += c.getGlobalCode.get + "\n"
     }
     result + "\n"
   }
 
+  /**
+   * Return all connected nodes of the graph in a Seq of `hw_implemented`.
+   * All nodes with a degree of o are ignored.
+   * @return all connected nodes
+   */
+  private def findConnectedHardware: Seq[hw_implemented] = {
+    // TODO encore utile ou pas ?
+    val nc = cpGraph.nodes filter (c => c.degree > 0)
+    nc.map(x => x.value.asInstanceOf[hw_implemented]).toList // FIXME to seq ?
+  }
+
+  def numberOfConnectedHardware() = cpGraph.nodes count (c => c.degree > 0)
+
+  def numberOfUnconnectedHardware() = cpGraph.nodes count (c => c.degree == 0)
+
+  // TODO beautify all these methods with pattern matching
   //TODO Move all generate code to others class
   //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
-
-  private def findConnectedHardware: Seq[hw_implemented] = {
-    val nc = cpGraph.nodes filter (c => c.degree > 0)
-    // Return a seq of components
-    nc.map(x => x.value.asInstanceOf[hw_implemented]).toList
-  }
 
   def generateFunctionsCode() = {
     // Works but not really clearer

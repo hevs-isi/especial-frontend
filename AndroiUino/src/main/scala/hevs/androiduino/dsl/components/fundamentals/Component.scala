@@ -52,24 +52,19 @@ abstract class Component {
 }
 
 trait hw_implemented {
-  // Code inserted to init the component (executed
-  // once in C++)
-  def getInitCode: Option[String] = None
 
-  def getBeginOfMainAfterInit: Option[String] = None
-
-  // Code inserted in the main loop of the C++
-  def getLoopableCode: Option[String] = None
-
-  // Code inserted in the global section of the C++
-  def getGlobalConstants: Option[String] = None
+  // Code inserted in the global section to declare global variables, constants, etc.
+  def getGlobalCode: Option[String] = None
 
   // Code inserted in for function definitions (pre-main)
   def getFunctionsDefinitions: Option[String] = None
 
+  // Code inserted to init the component (executed once)
+  def getInitCode: Option[String] = None
+
+
+  def getBeginOfMainAfterInit: Option[String] = None
+
+  // Code inserted in the main loop
+  def getLoopableCode: Option[String] = None
 }
-
-//abstract class Button(description: String) extends Component(description)
-//class SW_Button(pin: Int) extends Button("A software button")
-//class HW_Button(pin: Int) extends Button("An hardware button")
-

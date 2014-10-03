@@ -37,7 +37,7 @@ case class And() extends Component with hw_implemented {
 
   def getInputs = Some(Seq(in1, in2))
 
-  override def getGlobalConstants = out.isConnected match {
+  override def getGlobalCode = out.isConnected match {
     // Input variables declarations of the gate
     case true => Some(s"$tpe $valName1, $valName2; // $this")
     case _ => None
