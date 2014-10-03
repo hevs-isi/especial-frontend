@@ -2,12 +2,10 @@ package hevs.androiduino.graph
 
 import hevs.androiduino.dsl.components.digital.DigitalInput
 
-import scalax.collection.mutable.Graph
 import scalax.collection.GraphPredef._
-import hevs.androiduino.dsl.components.fundamentals.hw_implemented
-import hevs.androiduino.dsl.components.fundamentals.Component
+import scalax.collection.mutable.Graph
 
-object Test extends App {
+object TestGraph extends App {
   //var gr1 : Graph[Component, DiEdge] = Graph()
   val b1 = DigitalInput(3)
   val b2 = DigitalInput(4)
