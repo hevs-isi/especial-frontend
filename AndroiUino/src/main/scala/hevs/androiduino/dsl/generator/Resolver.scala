@@ -9,47 +9,55 @@ import scala.collection.mutable
 // Unconnected components are ignored !!
 class Resolver extends Logging {
 
-  // All id of components that are generated
+  // IDs of components that are generated. Order not valid !
   private val generatedCpId = mutable.Set.empty[Int]
-
-  // Number of connected components in the graph
-  private def nbrOfConnectedCp = ComponentManager.numberOfConnectedHardware()
 
   // Define the maximum number of passes. After that, the resolver will stop.
   private val MaxPasses = 20
+
   // Component code already generated or not
   private val nextPassCpId = mutable.Set.empty[Int]
-  // Current number of passes to generate the code
+
+  // Count the number of passes to generate the code
   private var nbrOfPasses = 0
 
-  def getNumberOfPasses = nbrOfPasses
-  def getNumberOfCodes = generatedCpId.size
+  /**
+   * Resolve a graph of components. Unconnected components are ignored.
+   * The resolver do nothing if there is less than two connected components. After a maximum of `MaxPasses` iterations,
+   * the `Resolver` stops automatically. `None` is returned if there is nothing to resolve or if it fails.
+   * @return the list of hardware to resolve, in the right order, or `None` if it fails
+   */
+  def resolveGraph(): Option[Seq[hw_implemented]] = {
 
-  def resolveGraph(): Boolean = {
-
-    val unconnected = ComponentManager.numberOfUnconnectedHardware()
+    val connectedNbr = ComponentManager.numberOfConnectedHardware()
+    val unconnectedNbr = ComponentManager.numberOfUnconnectedHardware()
 
     // At least two connected components, or nothing to do...
-    if (nbrOfConnectedCp < 2) {
-      info(s"Nothing to resolve: $nbrOfConnectedCp components ($unconnected unconnected)")
-      return false
+    if (connectedNbr < 2) {
+      info(s"Nothing to resolve: $connectedNbr components ($unconnectedNbr unconnected)")
+      return None // Nothing to resolve
+    }
+    else {
+      info(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
     }
 
-    info(s"Resolver started for $nbrOfConnectedCp components ($unconnected unconnected)")
-
-    var cp = Seq.empty[hw_implemented]
+    val cp = mutable.ArrayBuffer.empty[hw_implemented]
     do {
-      cp = nextPass
-    } while (generatedCpId.size != nbrOfConnectedCp && nbrOfPasses < MaxPasses)
+      cp ++= nextPass
+    } while (generatedCpId.size != connectedNbr && nbrOfPasses < MaxPasses)
 
-    if (generatedCpId.size == nbrOfConnectedCp) {
-      info(s"Resolver ended successfully after $getNumberOfPasses passes for $getNumberOfCodes components")
-      return true
+    if (generatedCpId.size == connectedNbr) {
+      info(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
+        s"components")
+      info("Result is: " + cp.mkString(", "))
+      return Some(cp)
     }
 
     error(s"Resolver stopped after $getNumberOfPasses passes")
-    false
+    None // Infinite loop
   }
+
+  def getNumberOfPasses = nbrOfPasses
 
   private def nextPass: Seq[hw_implemented] = {
 
@@ -65,7 +73,7 @@ class Resolver extends Logging {
           codeGeneratedFor(cp.getId)
         }
         endPass()
-        in  // HW component to generate
+        in // HW component to generate
 
       // From the second passe, the code of all direct successors of the components is generated.
       case _ =>
