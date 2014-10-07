@@ -51,14 +51,29 @@ object CodeGenerator extends Logging {
     result
   }
 
-  def printWarnings(): Boolean = {
+  /**
+   * Check and display warnings.
+   */
+  def printWarnings() = checkWarnings() match {
+    case Some(w) =>
+      info(w)
+    case _ =>
+  }
+
+  /**
+   * Run some checks to detect warnings.
+   * @return list of warnings or `None` if no warnings.
+   */
+  private def checkWarnings(): Option[String] = {
+    val out = new StringBuilder
     val c = ComponentManager.findUnconnectedComponents
     if (c.nonEmpty) {
-      println(s"WARN: ${c.size} unconnected component(s) found:")
-      println("\t- " + c.mkString("\n\t- "))
-      return true
+      out ++= s"WARN: ${c.size} unconnected component(s) found:"
+      out ++= "\t- " + c.mkString("\n\t- ")
+      Some(out.toString())
     }
-    false // No warnings
+    else
+      None // No warnings
   }
 
   def preamble(progName: String) = {
@@ -82,4 +97,16 @@ object CodeGenerator extends Logging {
   def endLoopMain() = "}\n"
 
   def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
+
+  /**
+   * A program without warning.
+   * @return true if no warnings found, false otherwise
+   */
+  def hasNoWarning = !hasWarnings
+  
+  /**
+   * A program with warnings.
+   * @return true if warnings found, false otherwise
+   */
+  def hasWarnings: Boolean = checkWarnings().isDefined
 }

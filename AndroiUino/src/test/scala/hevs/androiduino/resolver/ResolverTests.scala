@@ -68,13 +68,12 @@ class ResolverTest extends ResolverTestSpec {
   test("1 unconnected component") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode1()
-    val warns = CodeGenerator.printWarnings()
     val hw = testResolver()
 
-    assert(warns)
+    assert(CodeGenerator.hasWarnings)
+    assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 0)
-    assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(r.getNumberOfPasses == 0) // Optimized, nothing to do
     assert(hw.isEmpty) // Nothing to resolve
   }
@@ -82,10 +81,9 @@ class ResolverTest extends ResolverTestSpec {
   test("1 wire with 1 unconnected component") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode2()
-    val warns = CodeGenerator.printWarnings()
     val res = testResolver()
 
-    assert(warns)
+    assert(CodeGenerator.hasWarnings)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 2)
     assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
@@ -98,10 +96,9 @@ class ResolverTest extends ResolverTestSpec {
   test("3 passes without warning") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode3()
-    val warns = CodeGenerator.printWarnings()
     val res = testResolver()
 
-    assert(!warns)
+    assert(CodeGenerator.hasNoWarning)
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
     assert(r.getNumberOfPasses == 3)
@@ -114,10 +111,9 @@ class ResolverTest extends ResolverTestSpec {
   test("3 passes without warning in a different order") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode4()
-    val warns = CodeGenerator.printWarnings()
     val res = testResolver()
 
-    assert(!warns)
+    assert(CodeGenerator.hasNoWarning)
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
     assert(r.getNumberOfPasses == 3)
@@ -130,10 +126,9 @@ class ResolverTest extends ResolverTestSpec {
   test("5 passes with wait") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode5()
-    val warns = CodeGenerator.printWarnings()
     val res = testResolver()
 
-    assert(!warns)
+    assert(CodeGenerator.hasNoWarning)
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 6)
     assert(r.getNumberOfPasses == 5)

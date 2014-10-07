@@ -52,11 +52,11 @@ object Resolver extends Logging {
 
     // At least two components must be connected together, or nothing to resolve...
     if (connectedNbr < 2) {
-      info(s"Nothing to resolve: $connectedNbr components ($unconnectedNbr unconnected)")
+      trace(s"Nothing to resolve: $connectedNbr components ($unconnectedNbr unconnected)")
       return Map.empty // Nothing to resolve
     }
 
-    info(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
+    trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
 
     val map = mutable.Map.empty[Int, Set[hw_implemented]]
     do {
@@ -64,7 +64,7 @@ object Resolver extends Logging {
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < MaxPasses)
 
     if (generatedCpId.size == connectedNbr) {
-      info(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
+      trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
         s"components")
       return map.toMap // Return all components in the right order (immutable Map)
     }
@@ -93,7 +93,7 @@ object Resolver extends Logging {
       case 0 =>
         val in = ComponentManager.findConnectedInputHardware
         for (c <- in) {
-          info(s" > Generate code for: $c")
+          trace(s" > Generate code for: $c")
           val cp = c.asInstanceOf[Component]
           codeGeneratedFor(cp.getId)
         }
@@ -118,17 +118,17 @@ object Resolver extends Logging {
               val pIds = predecessors.map(x => x.value.asInstanceOf[Component].getId)
               val ready = isCodeGenerated(pIds)
               if (!ready) {
-                info(s" > Not ready: $cp")
+                trace(s" > Not ready: $cp")
               }
               else {
-                info(s" > Generate code for: $cp")
+                trace(s" > Generate code for: $cp")
                 codeGeneratedFor(cp.getId)
                 genCp += cp.asInstanceOf[hw_implemented]
               }
             }
             else {
               // Code of this component already generated
-              info(s" > Already done for: $cp")
+              trace(s" > Already done for: $cp")
             }
           }
         }
@@ -139,7 +139,7 @@ object Resolver extends Logging {
 
   // Debug only. Print the nex phase number
   private def startPass() = {
-    info("Pass [%03d]".format(nbrOfPasses + 1))
+    trace("Pass [%03d]".format(nbrOfPasses + 1))
   }
 
   // Count the number of phase

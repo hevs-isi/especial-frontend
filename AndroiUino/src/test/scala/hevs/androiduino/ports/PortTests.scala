@@ -1,5 +1,6 @@
 package hevs.androiduino.ports
 
+import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.components.fundamentals.uint1
@@ -27,6 +28,7 @@ class PortTests extends FunSuite with Matchers {
 
   test("Input to output") {
     new PortCode1()
+    ComponentManager.unregisterComponents()
   }
 
   test("Input short circuit") {
@@ -34,5 +36,6 @@ class PortTests extends FunSuite with Matchers {
       new PortCode2()
     }
     info("Short circuit detected")
+    ComponentManager.unregisterComponents()
   }
 }
