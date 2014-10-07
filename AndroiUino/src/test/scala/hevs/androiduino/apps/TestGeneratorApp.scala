@@ -8,7 +8,7 @@ import org.scalatest.FunSuite
  */
 abstract class TestGeneratorApp extends FunSuite {
 
-  val defaultFileName = getClass.getSimpleName.toLowerCase.dropRight(1)
+  val defaultFileName = getClass.getSimpleName.toLowerCase
   val ver = Version.getVersion
 
   def fileName: String = defaultFileName

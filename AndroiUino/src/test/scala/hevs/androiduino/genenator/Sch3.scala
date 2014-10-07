@@ -8,16 +8,14 @@ import hevs.androiduino.dsl.components.fundamentals.uint1
 import hevs.androiduino.dsl.components.logic.And
 import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
-object Sch3Code {
-
-  val and1 = And() // FIXME !! order !!
+class Sch3Code {
 
   // Inputs
   val cst1 = Constant(uint1(true))
   val btn1 = DigitalInput(4)
 
   // Logic
-
+  val and1 = And()
 
   // Output
   val led1 = DigitalOutput(7)
@@ -28,16 +26,17 @@ object Sch3Code {
   btn1.out --> and1.in2
 }
 
-object Sch3Test extends TestGeneratorApp {
+class Sch3Test extends TestGeneratorApp {
 
-  val source = Sch3Code // The the main code
+  // The the main code
+  new Sch3Code()
 
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
   val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
 
   // Print code and dot as result
-  println(code)
-  println("\n***\n")
-  println(dot)
+//  println(code)
+//  println("\n***\n")
+//  println(dot)
 }

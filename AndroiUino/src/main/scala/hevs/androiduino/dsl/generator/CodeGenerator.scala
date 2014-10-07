@@ -4,12 +4,20 @@ import java.io.File
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
+import hevs.androiduino.dsl.components.fundamentals.hw_implemented
 import hevs.androiduino.dsl.utils.OSUtils._
 import hevs.androiduino.dsl.utils.{OSUtils, Version}
 
+import scala.collection.mutable
 import scala.sys.process._
 
+/**
+ * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
+ * and then generate the code for each connected components in the right order.
+ */
 object CodeGenerator extends Logging {
+
+  private val cps = mutable.ListBuffer.empty[hw_implemented]
 
   def generateCodeFile(progName: String, fileName: String): String = {
     val code = generateCode(progName)
@@ -32,23 +40,36 @@ object CodeGenerator extends Logging {
 
   def generateCode(progName: String): String = {
 
-    printWarnings()
+    // Resolve the graph before generating the C code
+    val resolve = Resolver.resolve()
 
-    val result =
-      preamble(progName) +
-        ComponentManager.generateGlobalCode +
-        ComponentManager.generateFunctionsCode +
-        preInit() +
-        ComponentManager.generateInitCode +
-        postInit() +
-        beginMain() +
-        ComponentManager.generateBeginMainCode +
-        beginLoopMain() +
-        ComponentManager.generateLoopingCode +
-        endLoopMain() +
-        endMain(progName)
+    // Order the result by pass number (sort by key value)
+    val ordered = resolve.toSeq.sortBy(_._1)
 
-    result
+    // Save all components in the right order
+    cps.clear()
+    cps ++= ordered flatMap (x => x._2)
+
+
+    if (hasWarnings) {
+      info("Warnings found !")
+      printWarnings()
+    }
+
+    val result = new StringBuilder
+    result ++= preamble(progName)
+    result ++= generateGlobalCode()
+    result ++= generateFunctionsCode()
+    result ++= preInit()
+    result ++= generateInitCode()
+    result ++= postInit()
+    result ++= beginMain()
+    result ++= generateBeginMainCode()
+    result ++= beginLoopMain()
+    result ++= generateLoopingCode()
+    result ++= endLoopMain()
+    result ++= endMain(progName)
+    result.result()
   }
 
   /**
@@ -65,6 +86,10 @@ object CodeGenerator extends Logging {
    * @return list of warnings or `None` if no warnings.
    */
   private def checkWarnings(): Option[String] = {
+
+    // TODO check other warnings
+    // FIXME check if an input is not connected
+
     val out = new StringBuilder
     val c = ComponentManager.findUnconnectedComponents
     if (c.nonEmpty) {
@@ -86,6 +111,56 @@ object CodeGenerator extends Logging {
       " */\n\n"
   }
 
+  // FIXME: refactor to on generic function
+  private def generateGlobalCode() = {
+    val out = new StringBuilder
+    out ++= "//*// 1. generateGlobalCode\n"
+    for (c <- cps if c.getGlobalCode.isDefined) {
+      out ++= c.getGlobalCode.get + "\n"
+    }
+    out + "//*// --\n\n"
+  }
+
+  // FIXME: refactor to on generic function
+  private def generateFunctionsCode() = {
+    val out = new StringBuilder
+    out ++= "//*// 2. generateFunctionsCode\n"
+    for (c <- cps if c.getFunctionsDefinitions.isDefined) {
+      out ++= c.getFunctionsDefinitions.get + "\n"
+    }
+    out + "//*// --\n\n"
+  }
+
+  // FIXME: refactor to on generic function
+  private def generateInitCode() = {
+    val out = new StringBuilder
+    out ++= "//*// 3. generateInitCode\n"
+    for (c <- cps if c.getInitCode.isDefined) {
+      out ++= c.getInitCode.get + "\n"
+    }
+    out + "//*// --\n"
+  }
+
+  // FIXME: refactor to on generic function
+  private def generateBeginMainCode() = {
+    val out = new StringBuilder
+    out ++= "//*// 4. generateBeginMainCode\n"
+    for (c <- cps if c.getBeginOfMainAfterInit.isDefined) {
+      out ++= c.getBeginOfMainAfterInit.get + "\n"
+    }
+    out + "//*// --\n\n"
+  }
+
+  // FIXME: refactor to on generic function
+  private def generateLoopingCode() = {
+    val out = new StringBuilder
+    out ++= "//*// 5. generateLoopingCode\n"
+    for (c <- cps if c.getLoopableCode.isDefined) {
+      out ++= c.getLoopableCode.get + "\n"
+    }
+    out + "//*// --\n"
+  }
+
   def preInit() = "void init() {\n"
 
   def postInit() = "}\n\n"
@@ -99,14 +174,14 @@ object CodeGenerator extends Logging {
   def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
 
   /**
-   * A program without warning.
-   * @return true if no warnings found, false otherwise
-   */
-  def hasNoWarning = !hasWarnings
-  
-  /**
    * A program with warnings.
    * @return true if warnings found, false otherwise
    */
   def hasWarnings: Boolean = checkWarnings().isDefined
+
+  /**
+   * A program without warning.
+   * @return true if no warnings found, false otherwise
+   */
+  def hasNoWarning = !hasWarnings
 }

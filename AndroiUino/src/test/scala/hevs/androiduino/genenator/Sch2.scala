@@ -8,7 +8,7 @@ import hevs.androiduino.dsl.components.fundamentals.uint1
 import hevs.androiduino.dsl.components.logic.And
 import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
-object Sch2Code {
+class Sch2Code {
 
   // Inputs
   val cst1 = Constant(uint1(true))
@@ -26,16 +26,16 @@ object Sch2Code {
   cst2.out --> and1.in2
 }
 
-object Sch2Test extends TestGeneratorApp {
+class Sch2Test extends TestGeneratorApp {
 
-  val source = Sch2Code // The the main code
+  new Sch2Code() // The the main code
 
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
   val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
 
   // Print code and dot as result
-  println(code)
-  println("\n***\n")
-  println(dot)
+//  println(code)
+//  println("\n***\n")
+//  println(dot)
 }

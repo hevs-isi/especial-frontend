@@ -43,7 +43,9 @@ object Resolver extends Logging {
    * Resolve a graph of components. Unconnected components are ignored.
    * The resolver do nothing if there is less than two connected components. After a maximum of `MaxPasses` iterations,
    * the `Resolver` stops automatically. An empty `Map` is returned if there is nothing to resolve or if it fails.
-   * @return the Map of hardware to resolve - in the right order, with the pass number as index (from 0)
+   * The index of the returned Map is the pass number.
+   *
+   * @return ordered Map of hardware to resolve, with the pass number as index
    */
   private def resolveGraph(): Map[Int, Set[hw_implemented]] = {
 

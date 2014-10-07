@@ -3,35 +3,38 @@ package hevs.androiduino.genenator
 import hevs.androiduino.apps.TestGeneratorApp
 import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
-import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
+import hevs.androiduino.dsl.components.digital.DigitalOutput
 import hevs.androiduino.dsl.components.fundamentals.uint1
+import hevs.androiduino.dsl.components.logic.And
 import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
-class Sch1Code {
+class Sch4Code {
 
-  // Inputs
-  val btn1 = DigitalInput(4)
-  val cst1 = Constant(uint1(true))
-
-  // Outputs
+  val cst1 = Constant(uint1(false))
+  val and1 = And()
+  val and2 = And()
+  val and3 = And()
+  val cst2 = Constant(uint1(false))
   val led1 = DigitalOutput(7)
-  val led2 = DigitalOutput(8)
-  val led3 = DigitalOutput(9)
 
-  // Connecting stuff
-  btn1.out --> led1.in
-  btn1.out --> led2.in
-
-  cst1.out --> led3.in
+  cst1.out --> and1.in1
+  and1.out --> and2.in2
+  and2.out --> and3.in1
+  cst2.out --> and3.in2
+  and3.out --> led1.in
 }
 
-class Sch1Test extends TestGeneratorApp {
+class Sch4Test extends TestGeneratorApp {
 
-  new Sch1Code // The the main code
+  // The the main code
+  new Sch4Code()
+
+  CodeGenerator.printWarnings()
 
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
   val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
+
 
   // Print code and dot as result
 //  println(code)

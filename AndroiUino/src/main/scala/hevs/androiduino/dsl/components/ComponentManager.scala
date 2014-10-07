@@ -8,6 +8,10 @@ import scalax.collection.edge.Implicits._
 import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
 
+/**
+ * Object used to store all components declared in the code. These components are stored in a graph. This data
+ * structure is useful to find any types of components, connected or not, to fin its direct successors, etc.
+ */
 object ComponentManager extends Logging {
 
   // This contains a (mutable) graph representation of the components
@@ -119,112 +123,14 @@ object ComponentManager extends Logging {
     tos
   }
 
-  // TODO beautify this (factorize it)
-  def generateInitCode() = {
-    var result = ""
-
-    for (c ← cpGraph.nodes.toList) {
-      // In the graph we have nodes. Each node has a content which is a component
-      val comp = c.value.asInstanceOf[Component]
-      assert(comp.isInstanceOf[Component])
-      if (comp.isInstanceOf[hw_implemented]) {
-        val hw_c = comp.asInstanceOf[hw_implemented]
-
-        if (hw_c.getInitCode.isDefined)
-          result += hw_c.getInitCode.get + "\n"
-      }
-    }
-    result
-  }
-
-  def generateBeginMainCode() = {
-    var result = ""
-
-    for (c ← cpGraph.nodes.toList) {
-      val comp = c.value
-      assert(comp.isInstanceOf[Component])
-
-      if (comp.isInstanceOf[hw_implemented]) {
-        val hw_c = comp.asInstanceOf[hw_implemented]
-
-        if (hw_c.getBeginOfMainAfterInit.isDefined)
-          result += hw_c.getBeginOfMainAfterInit.get + "\n"
-      }
-    }
-    result
-  }
-
-  def generateGlobalCode() = {
-    val cp = findConnectedHardware // Connected nodes only
-
-    var result = "//*// generateGlobalCode\n"
-    for (c <- cp if c.getGlobalCode.isDefined) {
-      result += c.getGlobalCode.get + "\n"
-    }
-    result + "\n"
-  }
-
-  /**
-   * Return all connected nodes of the graph in a Seq of `hw_implemented`.
-   * All nodes with a degree of o are ignored.
-   * @return all connected nodes
-   */
-  private def findConnectedHardware: Set[hw_implemented] = {
-    // TODO encore utile ou pas ?
-    // TODO utiliser le resolver
-    val nc = cpGraph.nodes filter (c => c.degree > 0)
-    nc.map(x => x.value.asInstanceOf[hw_implemented]).toSet
-  }
-
   def numberOfConnectedHardware() = cpGraph.nodes count (c => c.degree > 0)
 
   def numberOfUnconnectedHardware() = cpGraph.nodes count (c => c.degree == 0)
 
-  def generateFunctionsCode() = {
-    // Works but not really clearer
-    //		val filteredInstances : List[hw_implemented] = comps.filter(_.isInstanceOf[hw_implemented]).map(_.asInstanceOf[hw_implemented])
-    //		val functionCode = filteredInstances.map(x => x.getFunctionsDefinitions()).foldLeft("")(_ + _)
-
-    var result = "//*// generateFunctionsCode\n"
-    for (c ← cpGraph.nodes.toList) {
-      val comp = c.value
-      assert(comp.isInstanceOf[Component])
-
-      if (comp.isInstanceOf[hw_implemented]) {
-        val hw_c = comp.asInstanceOf[hw_implemented]
-
-        if (hw_c.getFunctionsDefinitions.isDefined)
-          result += hw_c.getFunctionsDefinitions.get + "\n\n"
-      }
-    }
-
-    result
-  }
-
-  // TODO beautify all these methods with pattern matching
-  //TODO Move all generate code to others class
-  //TODO Differents generators with pattern matching on trait to now if it is harware or simulated ?
-
-  def generateLoopingCode() = {
-    var result = "//*// generateLoopingCode\n"
-    for (c ← cpGraph.nodes.toList) {
-      val comp = c.value
-      assert(comp.isInstanceOf[Component])
-
-      if (comp.isInstanceOf[hw_implemented]) {
-        val hw_c = comp.asInstanceOf[hw_implemented]
-
-        if (hw_c.getLoopableCode.isDefined)
-          result += hw_c.getLoopableCode.get + "\n"
-      }
-    }
-    result
-  }
-
   // This a basically a Tuple2, but they cannot be override
   // Also used by the DotGenerator
   class Wire(val from: OutputPort[_], val to: InputPort[_]) {
-    override def toString = "MyWire " + from + "~" + to
+    override def toString = "Wire: " + from + "~" + to
   }
 
   private object IdGenerator {
