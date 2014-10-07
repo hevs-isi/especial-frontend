@@ -127,7 +127,6 @@ class ResolverTest extends ResolverTestSpec {
     val c = new ResolverCode5()
     val hw = testResolver()
 
-    println("HW: " + hw.mkString(", "))
     hw should contain inOrderOnly(c.cst1, c.and1, c.and2, c.cst2, c.and3, c.led1)
 
     ComponentManager.unregisterComponents()

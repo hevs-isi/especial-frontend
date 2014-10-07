@@ -21,4 +21,13 @@ object f {
   var c: Option[String] = None //Some("test")
   c.getOrElse("") + "dd\n"
 
+
+  val s = Set(1,3,4,5,6,22)
+  var l = List(22)
+
+  // Tous les éléments de l doivent être dans s
+  val ok = l.foldLeft(true) {
+    (acc, id) => acc & s.contains(id)
+  }
+
 }

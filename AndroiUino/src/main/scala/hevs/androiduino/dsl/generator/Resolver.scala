@@ -103,17 +103,27 @@ object Resolver extends Logging {
         for (id <- genId) {
           // Find direct successors for all components of the previous phase
           val successors = ComponentManager.getNode(id).diSuccessors
-          for (n <- successors) {
-            val cp = n.value.asInstanceOf[Component]
-            val gen = isCodeGenerated(cp.getId)
-            if (!gen) {
-              info(s" > Generate code for: $cp")
-              codeGeneratedFor(cp.getId)
-              genCp += cp.asInstanceOf[hw_implemented]
+          for (s <- successors) {
+            val cp = s.value.asInstanceOf[Component]
+            val cpGen = isCodeGenerated(cp.getId)
+            if (!cpGen) {
+              // Check if the component inputs are ready or not
+              val predecessors = ComponentManager.getNode(cp.getId).diPredecessors
+              val pIds = predecessors.map(x => x.value.asInstanceOf[Component].getId)
+              val ready = isCodeGenerated(pIds)
+
+              if (!ready) {
+                info(s" > Not ready: $cp")
+              }
+              else {
+                info(s" > Generate code for: $cp")
+                codeGeneratedFor(cp.getId)
+                genCp += cp.asInstanceOf[hw_implemented]
+              }
             }
             else {
               // Code of this component already generated
-              info(s" > Done for: $cp")
+              info(s" > Already done for: $cp")
             }
           }
         }
@@ -137,4 +147,9 @@ object Resolver extends Logging {
 
   // Check if the code of the component has been already generated or not
   private def isCodeGenerated(cpId: Int): Boolean = generatedCpId contains cpId
+
+  // Check if the list of IDs has been already generated or not
+  private def isCodeGenerated(cpListId: Set[Int]) = cpListId.foldLeft(true) {
+    (acc, id) => acc & generatedCpId.contains(id)
+  }
 }
