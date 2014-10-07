@@ -17,10 +17,8 @@ object f {
   val b3 = uint8(254)
   println(b1, b2, b3)
   println(c1.out)
-
   var c: Option[String] = None //Some("test")
   c.getOrElse("") + "dd\n"
-
 
   val s = Set(1,3,4,5,6,22)
   var l = List(22)
@@ -29,5 +27,7 @@ object f {
   val ok = l.foldLeft(true) {
     (acc, id) => acc & s.contains(id)
   }
+  val map = scala.collection.mutable.HashMap.empty[Int, Set[Int]]
+  map += (1 -> Set(1,5))
 
 }

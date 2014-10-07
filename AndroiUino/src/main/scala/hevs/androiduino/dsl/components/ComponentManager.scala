@@ -87,18 +87,18 @@ object ComponentManager extends Logging {
    * Find all connected inputs nodes. An input node is a node without direct predecessor.
    * @return list of hardware without direct predecessor (considered as an input)
    */
-  def findConnectedInputHardware: Seq[hw_implemented] = {
+  def findConnectedInputHardware: Set[hw_implemented] = {
     val in = cpGraph.nodes.filter(c => c.diPredecessors.isEmpty && c.edges.size > 0)
-    in.map(x => x.value.asInstanceOf[hw_implemented]).toSeq
+    in.map(x => x.value.asInstanceOf[hw_implemented]).toSet
   }
 
   /**
    * Return all unconnected nodes of the graph in a Seq of `Component`.
    * @return all unconnected nodes
    */
-  def findUnconnectedComponents: Seq[Component] = {
+  def findUnconnectedComponents: Set[Component] = {
     val nc = cpGraph.nodes filter (c => c.degree == 0)
-    nc.map(x => x.value.asInstanceOf[Component]).toList
+    nc.map(x => x.value.asInstanceOf[Component]).toSet
   }
 
   // Return a list of `InputPort`s that are connected
@@ -167,10 +167,11 @@ object ComponentManager extends Logging {
    * All nodes with a degree of o are ignored.
    * @return all connected nodes
    */
-  private def findConnectedHardware: Seq[hw_implemented] = {
+  private def findConnectedHardware: Set[hw_implemented] = {
     // TODO encore utile ou pas ?
+    // TODO utiliser le resolver
     val nc = cpGraph.nodes filter (c => c.degree > 0)
-    nc.map(x => x.value.asInstanceOf[hw_implemented]).toList // FIXME to seq ?
+    nc.map(x => x.value.asInstanceOf[hw_implemented]).toSet
   }
 
   def numberOfConnectedHardware() = cpGraph.nodes count (c => c.degree > 0)

@@ -16,7 +16,6 @@ class ResolverCode1 {
 class ResolverCode2 {
   val cst1 = Constant(uint1(false))
   val btn1 = DigitalInput(4)
-  // NC
   val led1 = DigitalOutput(7)
   cst1.out --> led1.in
 }
@@ -68,6 +67,7 @@ class ResolverCode5 {
 class ResolverTest extends ResolverTestSpec {
 
   test("1 unconnected component") {
+    ComponentManager.unregisterComponents()
     val c = new ResolverCode1()
     val warns = CodeGenerator.printWarnings()
     val hw = testResolver()
@@ -78,57 +78,71 @@ class ResolverTest extends ResolverTestSpec {
     assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(r.getNumberOfPasses == 0) // Optimized, nothing to do
     assert(hw.isEmpty) // Nothing to resolve
-
-    ComponentManager.unregisterComponents()
   }
 
   test("1 wire with 1 unconnected component") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode2()
     val warns = CodeGenerator.printWarnings()
-    val hw = testResolver()
+    val res = testResolver()
 
     assert(warns)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 2)
     assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(r.getNumberOfPasses == 2)
-    assert(hw.size == 2)
-    hw should contain inOrderOnly(c.cst1, c.led1)
-
-    ComponentManager.unregisterComponents()
+    assert(res.size == 2)
+    assert(res(0) === Set(c.cst1))
+    assert(res(1) === Set(c.led1))
   }
 
   test("3 passes without warning") {
+    ComponentManager.unregisterComponents()
     val c = new ResolverCode3()
     val warns = CodeGenerator.printWarnings()
-    val hw = testResolver()
+    val res = testResolver()
 
     assert(!warns)
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
     assert(r.getNumberOfPasses == 3)
-    assert(hw.size == 4)
-    hw should contain inOrderOnly(c.cst1, c.btn1, c.and1, c.led1)
-
-    ComponentManager.unregisterComponents()
+    assert(res.size == 3)
+    assert(res(0) === Set(c.btn1, c.cst1))
+    assert(res(1) === Set(c.and1))
+    assert(res(2) === Set(c.led1))
   }
 
   test("3 passes without warning, different order") {
-    val c = new ResolverCode4()
-    val hw = testResolver()
-
-    hw should contain inOrderOnly(c.cst1, c.btn1, c.and1, c.led1)
-
     ComponentManager.unregisterComponents()
+    val c = new ResolverCode4()
+    val warns = CodeGenerator.printWarnings()
+    val res = testResolver()
+
+    assert(!warns)
+    assert(ComponentManager.numberOfUnconnectedHardware() == 0)
+    assert(ComponentManager.numberOfConnectedHardware() == 4)
+    assert(r.getNumberOfPasses == 3)
+    assert(res.size == 3)
+    assert(res(0) === Set(c.btn1, c.cst1))
+    assert(res(1) === Set(c.and1))
+    assert(res(2) === Set(c.led1))
   }
 
-  test("long resolver") {
-    val c = new ResolverCode5()
-    val hw = testResolver()
-
-    hw should contain inOrderOnly(c.cst1, c.and1, c.and2, c.cst2, c.and3, c.led1)
-
+  test("5 passes with wait") {
     ComponentManager.unregisterComponents()
+    val c = new ResolverCode5()
+    val warns = CodeGenerator.printWarnings()
+    val res = testResolver()
+
+    assert(!warns)
+    assert(ComponentManager.numberOfUnconnectedHardware() == 0)
+    assert(ComponentManager.numberOfConnectedHardware() == 6)
+    assert(r.getNumberOfPasses == 5)
+    assert(res.size == 5)
+    assert(res(0) === Set(c.cst2, c.cst1))
+    assert(res(1) === Set(c.and1))
+    assert(res(2) === Set(c.and2))
+    assert(res(3) === Set(c.and3))
+    assert(res(4) === Set(c.led1))
   }
 }

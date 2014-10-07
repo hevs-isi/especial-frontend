@@ -15,18 +15,18 @@ abstract class ResolverTestSpec extends FunSuite with Matchers {
    * Resolve the current graph and return only components IDs to test if the resolver works correctly.
    * @return components IDs in the right order to resolve
    */
-  def testResolverWithIDs(): Seq[Int] = toIDs(testResolver)
+  def testResolverWithIDs(): Set[Int] = toIDs(testResolver())
 
   /**
    * Resolve the current graph and return all components.
    * @return components IDs in the right order to resolve
    */
-  def testResolver(): Seq[hw_implemented] = r.resolve()
+  def testResolver(): Map[Int, Set[hw_implemented]] = r.resolve()
 
   /**
    * Return only components IDs.
-   * @param l list of components
+   * @param m result of resolving the graph
    * @return IDs of the components
    */
-  def toIDs(l: Seq[hw_implemented]) = l map (x => x.asInstanceOf[Component].getId)
+  def toIDs(m: Map[Int, Set[hw_implemented]]): Set[Int] = m.map(x => x._2.asInstanceOf[Component].getId).toSet
 }
