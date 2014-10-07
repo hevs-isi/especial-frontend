@@ -61,8 +61,7 @@ class ResolverCode5 {
 }
 
 /**
- * Test specification for the `Resolver` class. Contains also some tests  for the `ComponentManager`.
- * The order of the component should be respected. Each component are identified by a unique ID.
+ * Test specification for the `Resolver` class. Contains also some tests for the `ComponentManager`.
  */
 class ResolverTest extends ResolverTestSpec {
 
@@ -112,7 +111,7 @@ class ResolverTest extends ResolverTestSpec {
     assert(res(2) === Set(c.led1))
   }
 
-  test("3 passes without warning, different order") {
+  test("3 passes without warning in a different order") {
     ComponentManager.unregisterComponents()
     val c = new ResolverCode4()
     val warns = CodeGenerator.printWarnings()

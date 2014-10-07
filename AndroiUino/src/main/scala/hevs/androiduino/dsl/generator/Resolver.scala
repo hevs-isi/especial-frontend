@@ -6,8 +6,6 @@ import hevs.androiduino.dsl.components.fundamentals.{Component, hw_implemented}
 
 import scala.collection.mutable
 
-// FIXME: better: return a map with index = number of pass and components
-
 /**
  * The `Resolver` object can be used to resolve a graph of components to get the right order on which component's
  * code must be generated when.
@@ -45,7 +43,7 @@ object Resolver extends Logging {
    * Resolve a graph of components. Unconnected components are ignored.
    * The resolver do nothing if there is less than two connected components. After a maximum of `MaxPasses` iterations,
    * the `Resolver` stops automatically. An empty `Map` is returned if there is nothing to resolve or if it fails.
-   * @return the Map of hardware to resolve - in the right order, with the pass number as index
+   * @return the Map of hardware to resolve - in the right order, with the pass number as index (from 0)
    */
   private def resolveGraph(): Map[Int, Set[hw_implemented]] = {
 
@@ -75,8 +73,17 @@ object Resolver extends Logging {
     Map.empty // Infinite loop
   }
 
+  /**
+   * Return the number of passes necessary to resolve the graph. If it was not possible to resolve it,
+   * `MaxPasses` is returned.
+   * @return number of passes to resolve thr graph
+   */
   def getNumberOfPasses = nbrOfPasses
 
+  /**
+   * Compute one pass of resolving the graph.
+   * @return component to generate for this pass
+   */
   private def nextPass: Set[hw_implemented] = {
 
     startPass()
@@ -130,14 +137,17 @@ object Resolver extends Logging {
     }
   }
 
+  // Debug only. Print the nex phase number
   private def startPass() = {
     info("Pass [%03d]".format(nbrOfPasses + 1))
   }
 
+  // Count the number of phase
   private def endPass() = {
-    nbrOfPasses += 1 // Count the number of phase
+    nbrOfPasses += 1
   }
 
+  // Components code generated. Save it to do it once only.
   private def codeGeneratedFor(cpId: Int) = {
     generatedCpId += cpId // Add ID to the global list
     nextPassCpId += cpId // Code to generate on the next pass
