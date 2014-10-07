@@ -79,7 +79,9 @@ object ComponentManager extends Logging {
   def getNode(cpId: Int): cpGraph.NodeT = {
     cpGraph.nodes find (c => c.value.asInstanceOf[Component].getId == cpId) match {
       case Some(c) => c
-      case None => throw ComponentNotFound(cpId) // Fatal exception: must be in the graph
+      case None =>
+        // Fatal exception: must be in the graph
+        throw new ComponentNotFound(s"Component id $cpId not found !")
     }
   }
 

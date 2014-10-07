@@ -2,7 +2,7 @@ package hevs.androiduino.dsl.components.fundamentals
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.utils.WireConnection
+import hevs.androiduino.dsl.utils.{PortInputShortCircuit, PortTypeMismatch}
 
 import scala.reflect.runtime.universe._
 
@@ -19,20 +19,28 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   // Optional description
   protected val description: String = ""
-  def getDescription = description
-
   private val id = owner.newUniquePortId
   protected var connected = false
+
+  def getDescription = description
 
   def getOwnerId = getOwner.getId
 
   def getOwner = owner
 
-  def connect() = connected = true
-
-  def isNotConnected = !isConnected
+  def connect() = this match {
+    case _: OutputPort[_] => connected = true
+    case _: InputPort[_] =>
+      // Cannot connect an input twice
+      if (isConnected)
+        throw new PortInputShortCircuit("Short circuit: the input is already connected !")
+      else
+        connected = true
+  }
 
   def isConnected = connected
+
+  def isNotConnected = !isConnected
 
   def disconnect() = connected = false
 
@@ -46,12 +54,21 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   override def hashCode = id.##
 
-  // Helper method to check if two `Port` contains the same type of data.
-  def isSameTypeAs[A <: CType : TypeTag](that: Port[A]): Boolean = {
+  /**
+   * Helper method to check if two `Port` are of the same type. If not, an `PortTypeMismatch` exception is thrown.
+   * @param that the port to connect with
+   * @tparam A The type of the port
+   * @return true if the types are the same, or an exception is thrown
+   */
+  def checkType[A <: CType : TypeTag](that: Port[A]): Boolean = {
     // TODO check and remove debug print
     // println("this is of type: " + typeOf[T])
     // println("that is of type: " + typeOf[A])
-    typeOf[T] == typeOf[A]
+    val tpA = typeOf[A]
+    val tpB = typeOf[T]
+    if (tpA != tpB)
+      throw new PortTypeMismatch(s"Cannot connected $tpA to $tpB !")
+    true
   }
 
   override def toString = s"Port[$id] of $getOwner"
@@ -71,10 +88,10 @@ abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T]
     w = None
   }*/
 
-  override def connect() = {
+  /*override def connect() = {
     assert(isNotConnected, "Input already connected !")
     connected = true
-  }
+  }*/
 
   // C code to set the value of an input port
   def setInputValue(s: String): String
@@ -93,13 +110,8 @@ abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T
    * @return
    */
   def -->(that: InputPort[T]) = {
-
-    // Check the type of the connection
-    val sameType = isSameTypeAs(that)
-    sameType match {
-      case false => throw new WireConnection("Connection types error !")
-      case _ =>
-    }
+    // Check the type of the connection. An error is thrown if the connection is not valid.
+    checkType(that)
 
     that.connect()
     this.connect()
