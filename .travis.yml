@@ -7,3 +7,4 @@ scala:
    - 2.11.2
 
 before_script: cd AndroiUino
+
