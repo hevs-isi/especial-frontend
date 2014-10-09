@@ -8,7 +8,7 @@ scala:
 
 before_install:
  # Install graphviz
- - "sudo apt-get install graphviz 2>&1 | tail -n 2"
+ - "sudo apt-get install graphviz"
 
 before_script: cd AndroiUino
 
