@@ -50,12 +50,11 @@ object CodeGenerator extends Logging {
     cps.clear()
     cps ++= ordered flatMap (x => x._2)
 
-
-    if (hasWarnings) {
-      info("Warnings found !")
+    // Print warnings if any
+    if (hasWarnings)
       printWarnings()
-    }
 
+    // Generate the code
     val result = new StringBuilder
     result ++= preamble(progName)
     result ++= generateGlobalCode()
@@ -81,34 +80,18 @@ object CodeGenerator extends Logging {
     case _ =>
   }
 
-  /**
-   * Run some checks to detect warnings.
-   * @return list of warnings or `None` if no warnings.
-   */
-  private def checkWarnings(): Option[String] = {
-
-    // TODO check other warnings
-    // FIXME check if an input is not connected
-
-    val out = new StringBuilder
-    val c = ComponentManager.findUnconnectedComponents
-    if (c.nonEmpty) {
-      out ++= s"WARN: ${c.size} unconnected component(s) found:"
-      out ++= "\t- " + c.mkString("\n\t- ")
-      Some(out.toString())
-    }
-    else
-      None // No warnings
-  }
-
   def preamble(progName: String) = {
     val ver = Version.getVersion
-    "/*" + "\n" +
-      " " + "*".*(60) + "\n" +
-      s" Version $ver\n" +
-      s" Code of '$progName.c' generated automatically.\n" +
-      " " + "*".*(60) + "\n" +
-      " */\n\n"
+    val out = new StringBuilder
+
+    out ++= "/*" + "\n"
+    out ++= " " + "*".*(60) + "\n"
+    out ++= s" Version $ver\n"
+    out ++= s" Code of '$progName.c' generated automatically.\n"
+    out ++= " " + "*".*(60) + "\n"
+    out ++= " */\n\n"
+    out ++= "#include \"target.h\"\n\n"
+    out.result()
   }
 
   // FIXME: refactor to on generic function
@@ -174,14 +157,42 @@ object CodeGenerator extends Logging {
   def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
 
   /**
+   * A program without warning.
+   * @return true if no warnings found, false otherwise
+   */
+  def hasNoWarning = !hasWarnings
+
+  /**
    * A program with warnings.
    * @return true if warnings found, false otherwise
    */
   def hasWarnings: Boolean = checkWarnings().isDefined
 
   /**
-   * A program without warning.
-   * @return true if no warnings found, false otherwise
+   * Run some checks to detect warnings.
+   * @return list of warnings or `None` if no warning found.
    */
-  def hasNoWarning = !hasWarnings
+  private def checkWarnings(): Option[String] = {
+
+    val out = new StringBuilder
+
+    // Unconnected components
+    val c = ComponentManager.findUnconnectedComponents
+    if (c.nonEmpty) {
+      out ++= s"${c.size} components are declared but not connected at all:\n"
+      out ++= "\t- " + c.mkString("\n\t- ")
+    }
+
+    // Unconnected ports
+    val p = ComponentManager.findUnconnectedPorts
+    if (p.nonEmpty) {
+      out ++= s"${p.size} components have some unconnected ports:\n"
+      out ++= "\t- " + p.mkString("\n\t- ")
+    }
+
+    if (out.isEmpty)
+      None // No warnings
+    else
+      Some("WARNINGS:\n" + out.toString())
+  }
 }

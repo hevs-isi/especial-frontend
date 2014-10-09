@@ -29,12 +29,9 @@ class Sch4Test extends TestGeneratorApp {
   // The the main code
   new Sch4Code()
 
-  CodeGenerator.printWarnings()
-
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
   val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
-
 
   // Print code and dot as result
 //  println(code)

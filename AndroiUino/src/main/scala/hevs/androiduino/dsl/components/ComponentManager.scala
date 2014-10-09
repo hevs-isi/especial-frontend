@@ -90,7 +90,8 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Find all connected inputs nodes. An input node is a node without direct predecessor.
+   * Find all connected inputs nodes. An input node is a node without direct predecessor. The node must be connected
+   * with another node at least, or it will be ignored (node degree > 0).
    * @return list of hardware without direct predecessor (considered as an input)
    */
   def findConnectedInputHardware: Set[hw_implemented] = {
@@ -99,7 +100,23 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Return all unconnected nodes of the graph in a Seq of `Component`.
+   * Return all unconnected nodes of the graph in a Seq of `Component`. To be connected,
+   * all ports of the component must be connected. The degree of the node should correspond to the number of inputs
+   * plus the number of outputs.
+   * @return unconnected nodes
+   */
+  def findUnconnectedPorts: Set[Component] = {
+    val nc = cpGraph.nodes filter {
+      c =>
+        val cp = c.value.asInstanceOf[Component]
+        c.degree != cp.getIOCount // All ports must be connected
+    }
+    // Return only once the same component
+    nc.map(x => x.value.asInstanceOf[Component]).toSet
+  }
+
+  /**
+   * Return all unconnected nodes of the graph (node degree = 0) in a Seq of `Component`.
    * @return all unconnected nodes
    */
   def findUnconnectedComponents: Set[Component] = {

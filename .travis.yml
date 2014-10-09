@@ -6,5 +6,9 @@ jdk:
 scala:
    - 2.11.2
 
+before_install:
+ # Install graphviz
+ - "sudo apt-get install graphviz 2>&1 | tail -n 2"
+
 before_script: cd AndroiUino
 

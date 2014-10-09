@@ -29,6 +29,13 @@ abstract class Component {
   // The default implementation of a Seq is a List.
   def getInputs: Option[Seq[InputPort[_]]]
 
+  // Count the number of inputs and outputs of the component. Useful to known if the component is connected or not.
+  def getIOCount: Int = {
+    val in = getInputs.getOrElse(Nil)
+    val out = getOutputs.getOrElse(Nil)
+    in.size + out.size
+  }
+
   def getDescription = description
 
   def getFullDescriptor = {

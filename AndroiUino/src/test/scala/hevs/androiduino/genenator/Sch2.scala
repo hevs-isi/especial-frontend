@@ -28,14 +28,15 @@ class Sch2Code {
 
 class Sch2Test extends TestGeneratorApp {
 
-  new Sch2Code() // The the main code
+  // The the main code
+  new Sch2Code()
 
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
   val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
 
   // Print code and dot as result
-//  println(code)
-//  println("\n***\n")
-//  println(dot)
+  //  println(code)
+  //  println("\n***\n")
+  //  println(dot)
 }
