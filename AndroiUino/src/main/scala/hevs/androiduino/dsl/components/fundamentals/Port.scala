@@ -6,6 +6,8 @@ import hevs.androiduino.dsl.utils.{PortInputShortCircuit, PortTypeMismatch}
 
 import scala.reflect.runtime.universe._
 
+// TODO: documentation + cleanup
+
 // This class represents an input of a component which can be updated
 // from a mixed-in trait
 
@@ -20,7 +22,8 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   // Optional description
   protected val description: String = ""
   private val id = owner.newUniquePortId
-  protected var connected = false
+  private var connected = false
+  private var connections = 0
 
   def getDescription = description
 
@@ -29,18 +32,23 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   def getOwner = owner
 
   def connect() = this match {
-    case _: OutputPort[_] => connected = true
+    case _: OutputPort[_] =>
+      // Connected with at least one other input
+      connections += 1
+      connected = true
     case _: InputPort[_] =>
-      // Cannot connect an input twice
-      if (isConnected)
+      // Cannot connect an input with more than one output
+      if (connections > 0)
         throw new PortInputShortCircuit("Short circuit: the input is already connected !")
-      else
+      else {
         connected = true
+        connections = 1
+      }
   }
 
-  def isConnected = connected
-
   def isNotConnected = !isConnected
+
+  def isConnected = connected
 
   def disconnect() = connected = false
 
@@ -61,9 +69,6 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
    * @return true if the types are the same, or an exception is thrown
    */
   def checkType[A <: CType : TypeTag](that: Port[A]): Boolean = {
-    // TODO check and remove debug print
-    // println("this is of type: " + typeOf[T])
-    // println("that is of type: " + typeOf[A])
     val tpA = typeOf[A]
     val tpB = typeOf[T]
     if (tpA != tpB)
@@ -76,23 +81,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {
 
-  // FIXME useful or not ? Le wire a 2 ports ou les port ont le wire ?
-  //var w: Option[Wire] = None
-
-  /*def setInputWire(in: Wire) = {
-    assert(!isConnected, "The input is already connected !")
-    w = Some(in)
-  }
-
-  def clearInputWire() = {
-    w = None
-  }*/
-
-  /*override def connect() = {
-    assert(isNotConnected, "Input already connected !")
-    connected = true
-  }*/
-
+  // TODO: documentation
   // C code to set the value of an input port
   def setInputValue(s: String): String
 
@@ -101,12 +90,9 @@ abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T]
 
 abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
-  // FIXME list of wires here ?
-  // var wires: List[Wire] = List.empty
-
   /**
    * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
-   * @param that
+   * @param that the input to connect with this output
    * @return
    */
   def -->(that: InputPort[T]) = {
@@ -116,30 +102,12 @@ abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T
     that.connect()
     this.connect()
 
-    // Add the directed edge in the graph
-    ComponentManager.addWire(this, that)
+    ComponentManager.addWire(this, that) // Add the directed edge in the graph
   }
 
-  /*def updateConnected() = {
-    for (wire <- wires) {
-      wire.to.updateValue(wire.from.getValue)
-    }
-  }*/
-
-  // Abstract function
+  // TODO: documentation
   def getValue: String
 
   override def toString = "Output" + super.toString
 
-  /*override def toString = isConnected match {
-    case true => {
-      // FIXME not beautiful
-      var result = ""
-      for (wire <- wires) {
-        result += "going to [ID" + wire.to.getOwnerId + "]"
-      }
-      result
-    }
-    case false => "Output NC"
-  }*/
 }

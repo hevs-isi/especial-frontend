@@ -18,6 +18,19 @@ import scala.sys.process._
 object CodeGenerator extends Logging {
 
   private val cps = mutable.ListBuffer.empty[hw_implemented]
+  private var warnings: Option[String] = None
+
+  /**
+   * A program without warning.
+   * @return true if no warnings found, false otherwise
+   */
+  def hasNoWarning = !hasWarnings
+
+  /**
+   * A program with warnings.
+   * @return true if warnings found, false otherwise
+   */
+  def hasWarnings: Boolean = warnings.isDefined
 
   def generateCodeFile(progName: String, fileName: String): String = {
     val code = generateCode(progName)
@@ -40,19 +53,20 @@ object CodeGenerator extends Logging {
 
   def generateCode(progName: String): String = {
 
+    // Clear the object state
+    warnings = None
+    cps.clear()
+
     // Resolve the graph before generating the C code
     val resolve = Resolver.resolve()
 
     // Order the result by pass number (sort by key value)
     val ordered = resolve.toSeq.sortBy(_._1)
-
-    // Save all components in the right order
-    cps.clear()
     cps ++= ordered flatMap (x => x._2)
 
-    // Print warnings if any
-    if (hasWarnings)
-      printWarnings()
+    // Check warnings and print if any
+    checkWarnings()
+    printWarnings()
 
     // Generate the code
     val result = new StringBuilder
@@ -72,9 +86,9 @@ object CodeGenerator extends Logging {
   }
 
   /**
-   * Check and display warnings.
+   * Display warnings (if any). Warnings are automatically check when the code is generated.
    */
-  def printWarnings() = checkWarnings() match {
+  def printWarnings() = warnings match {
     case Some(w) =>
       info(w)
     case _ =>
@@ -157,42 +171,31 @@ object CodeGenerator extends Logging {
   def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
 
   /**
-   * A program without warning.
-   * @return true if no warnings found, false otherwise
-   */
-  def hasNoWarning = !hasWarnings
-
-  /**
-   * A program with warnings.
-   * @return true if warnings found, false otherwise
-   */
-  def hasWarnings: Boolean = checkWarnings().isDefined
-
-  /**
    * Run some checks to detect warnings.
-   * @return list of warnings or `None` if no warning found.
    */
-  private def checkWarnings(): Option[String] = {
+  def checkWarnings(): Boolean = {
 
     val out = new StringBuilder
 
     // Unconnected components
     val c = ComponentManager.findUnconnectedComponents
     if (c.nonEmpty) {
-      out ++= s"${c.size} components are declared but not connected at all:\n"
-      out ++= "\t- " + c.mkString("\n\t- ")
+      out ++= s"WARN: ${c.size} component(s) declared but not connected at all:\n"
+      out ++= "\t- " + c.mkString("\n\t- ") + "\n\n"
     }
 
     // Unconnected ports
     val p = ComponentManager.findUnconnectedPorts
     if (p.nonEmpty) {
-      out ++= s"${p.size} components have some unconnected ports:\n"
-      out ++= "\t- " + p.mkString("\n\t- ")
+      out ++= s"WARN: ${p.size} unconnected port(s) found:\n"
+      out ++= "\t- " + p.mkString("\n\t- ") + "\n"
     }
 
     if (out.isEmpty)
-      None // No warnings
+      warnings = None // No warning
     else
-      Some("WARNINGS:\n" + out.toString())
+      warnings = Some("WARNINGS:\n\n" + out.toString())
+
+    warnings.isDefined
   }
 }

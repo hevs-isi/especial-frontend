@@ -70,7 +70,7 @@ class ResolverTest extends ResolverTestSpec {
     val c = new ResolverCode1()
     val hw = testResolver()
 
-    assert(CodeGenerator.hasWarnings)
+    assert(CodeGenerator.checkWarnings())
     //assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 0)
@@ -83,7 +83,7 @@ class ResolverTest extends ResolverTestSpec {
     val c = new ResolverCode2()
     val res = testResolver()
 
-    assert(CodeGenerator.hasWarnings)
+    assert(CodeGenerator.checkWarnings())
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 2)
     //assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
@@ -98,7 +98,7 @@ class ResolverTest extends ResolverTestSpec {
     val c = new ResolverCode3()
     val res = testResolver()
 
-    assert(CodeGenerator.hasNoWarning)
+    assert(!CodeGenerator.checkWarnings())
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
     assert(r.getNumberOfPasses == 3)
@@ -113,7 +113,7 @@ class ResolverTest extends ResolverTestSpec {
     val c = new ResolverCode4()
     val res = testResolver()
 
-    assert(CodeGenerator.hasNoWarning)
+    assert(!CodeGenerator.checkWarnings())
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
     assert(r.getNumberOfPasses == 3)
@@ -128,7 +128,7 @@ class ResolverTest extends ResolverTestSpec {
     val c = new ResolverCode5()
     val res = testResolver()
 
-    assert(CodeGenerator.hasWarnings) // Some input are not connected
+    assert(CodeGenerator.checkWarnings()) // Some input are not connected
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 6)
     assert(r.getNumberOfPasses == 5)

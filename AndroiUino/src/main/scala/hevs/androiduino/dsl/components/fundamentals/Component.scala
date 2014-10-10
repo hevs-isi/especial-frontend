@@ -29,11 +29,20 @@ abstract class Component {
   // The default implementation of a Seq is a List.
   def getInputs: Option[Seq[InputPort[_]]]
 
-  // Count the number of inputs and outputs of the component. Useful to known if the component is connected or not.
-  def getIOCount: Int = {
-    val in = getInputs.getOrElse(Nil)
-    val out = getOutputs.getOrElse(Nil)
-    in.size + out.size
+  /**
+   * Check if at least one port of this component is not connected.
+   * @return true if one or more ports are not connected
+   */
+  def isConnected: Boolean = getUnconnectedPorts.isEmpty
+
+  /**
+   * Get the list of all unconnected ports of this component.
+   * @return all unconnected ports (input or output)
+   */
+  def getUnconnectedPorts: Seq[Port[_]] = {
+    val ins = getInputs.getOrElse(Nil)
+    val outs = getOutputs.getOrElse(Nil)
+    (ins ++ outs).filter(c => c.isNotConnected)
   }
 
   def getDescription = description

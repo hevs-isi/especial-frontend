@@ -1,9 +1,10 @@
 package hevs.androiduino.dsl.components
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, hw_implemented}
+import hevs.androiduino.dsl.components.fundamentals._
 import hevs.androiduino.dsl.utils.ComponentNotFound
 
+import scala.collection.mutable
 import scalax.collection.edge.Implicits._
 import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
@@ -100,19 +101,16 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Return all unconnected nodes of the graph in a Seq of `Component`. To be connected,
-   * all ports of the component must be connected. The degree of the node should correspond to the number of inputs
-   * plus the number of outputs.
-   * @return unconnected nodes
+   * Return unconnected ports of all components of the graph.
+   * @return all unconnected ports of all components
    */
-  def findUnconnectedPorts: Set[Component] = {
-    val nc = cpGraph.nodes filter {
-      c =>
-        val cp = c.value.asInstanceOf[Component]
-        c.degree != cp.getIOCount // All ports must be connected
+  def findUnconnectedPorts: Seq[Port[_]] = {
+    val ncPorts = mutable.ListBuffer.empty[Port[_]]
+    for (n <- cpGraph.nodes) {
+      val cp = n.value.asInstanceOf[Component]
+      ncPorts ++= cp.getUnconnectedPorts
     }
-    // Return only once the same component
-    nc.map(x => x.value.asInstanceOf[Component]).toSet
+    ncPorts.toSeq
   }
 
   /**

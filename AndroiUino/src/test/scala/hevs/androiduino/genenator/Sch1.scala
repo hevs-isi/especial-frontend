@@ -13,6 +13,8 @@ class Sch1Code {
   val btn1 = DigitalInput(4)
   val cst1 = Constant(uint1(true))
 
+  val btn2 = DigitalOutput(42)
+
   // Outputs
   val led1 = DigitalOutput(7)
   val led2 = DigitalOutput(8)
