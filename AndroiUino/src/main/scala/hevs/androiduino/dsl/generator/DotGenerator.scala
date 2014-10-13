@@ -4,7 +4,7 @@ import java.io.File
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager.Wire
-import hevs.androiduino.dsl.components.fundamentals.Component
+import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
 import hevs.androiduino.dsl.utils.OSUtils
 import hevs.androiduino.dsl.utils.OSUtils.Linux
 
@@ -44,8 +44,9 @@ object DotGenerator extends Logging {
 
 /**
  * Display all components of a graph to a DOT diagram.
- * The components are the nodes, and they are connected together with ports. The label on the edge describe to
- * connection from the OutputPort to the InputPort of two components.
+ * Components are the nodes, connected together with ports. The label on the edge describe the type
+ * of the connection - from an OutputPort to an InputPort of two components. Unconnected ports are display as "NC".
+ * Unconnected components (nodes) are in orange.
  * @param graphName the name of the DOT graph to generate
  */
 class DotGenerator(val graphName: String) {
@@ -53,7 +54,7 @@ class DotGenerator(val graphName: String) {
   private val name = "\"" + graphName + "\""
 
   // Align nodes from the left to the right. Use orthogonal splines and add the title of the graph as a label.
-  private val dotParams = Seq(DotAttr("rankdir", "LR"), DotAttr("splines", "line"), DotAttr("label", name))
+  private val dotParams = Seq(DotAttr("label", name), DotAttr("rankdir", "TB"))
 
   private val dotRoot = DotRootGraph(directed = true, id = Some("DotGraph"), kvList = dotParams)
 
@@ -64,7 +65,7 @@ class DotGenerator(val graphName: String) {
    */
   def generateDot(g: Graph[Component, LDiEdge]): String = {
     // Return the dot diagram as text
-    g.toDot(dotRoot, edgeTransformer, cNodeTransformer = Option(cNodeTransformer))
+    g.toDot(dotRoot, edgeTransformer, iNodeTransformer = Option(nodeTrans), cNodeTransformer = Option(nodeTrans))
   }
 
   /**
@@ -72,11 +73,58 @@ class DotGenerator(val graphName: String) {
    * @param innerNode graph nodes
    * @return the same transformation for all connected nodes of the graph
    */
-  private def cNodeTransformer(innerNode: Graph[Component, LDiEdge]#NodeT):
+  private def nodeTrans(innerNode: Graph[Component, LDiEdge]#NodeT):
   Option[(DotGraph, DotNodeStmt)] = {
-    val node = innerNode.value.asInstanceOf[Component]
+    val n = innerNode.value.asInstanceOf[Component]
 
-    Some(dotRoot, DotNodeStmt(nodeName(node), Seq(DotAttr("shape", "component"))))
+    // The label is something like: {<in1>in1|<in2>in2}|Cmp[01]|{<out1>out1|<out2>out2}
+    val in = makeLabelList(n.getInputs.getOrElse(Nil))
+    val out = makeLabelList(n.getOutputs.getOrElse(Nil))
+    val label = s"{$in}|${nodeName(n)}|{$out}"
+
+    val color = if (n.isConnected) "black" else "orange"
+
+    Some(dotRoot, DotNodeStmt(nodeId(n), Seq(DotAttr("label", label), DotAttr("shape", "Mrecord"), DotAttr("color",
+      color))))
+  }
+
+  /**
+   * Format the name of a Component to display it in a node.
+   * @param c Component to display in a node
+   * @return the node value
+   */
+  private def nodeName(c: Component): String = {
+    // Display the component id and description on two lines
+    val title = s"Cmp[${c.getId}]"
+    val desc = c.getDescription
+    val connected = if (c.isConnected) "" else " (NC)"
+    s"$title$connected\\n$desc"
+  }
+
+  /**
+   * Return the component ID as String.
+   * @param c the Component
+   * @return the ID as String
+   */
+  private def nodeId(c: Component): String = c.getId.toString
+
+  /**
+   * Format a list of input or output of a component. Check if it is connected or not and display it.
+   * @param l list of input or output of the component
+   * @return list formatted for dot record structure
+   */
+  private def makeLabelList(l: Seq[Port[_]]) = {
+    // Return the ID of the port with a label
+    l.map(
+      x => {
+        val id = x.getId
+        val nc = if (x.isNotConnected) " (NC)" else ""
+        x match {
+          case _: InputPort[_] => s"<$id>In[$id]$nc"
+          case _: OutputPort[_] => s"<$id>Out[$id]$nc"
+        }
+      }
+    ).mkString("|")
   }
 
   /**
@@ -89,33 +137,23 @@ class DotGenerator(val graphName: String) {
     val edge = innerEdge.edge
     val label = edge.label.asInstanceOf[Wire]
 
-    val nodeFrom = nodeName(edge.from.value.asInstanceOf[Component])
-    val nodeTo = nodeName(edge.to.value.asInstanceOf[Component])
+    val nodeFrom = edge.from.value.asInstanceOf[Component].getId
+    val nodeTo = edge.to.value.asInstanceOf[Component].getId
     Some(dotRoot,
-      DotEdgeStmt(nodeFrom, nodeTo,
+      DotEdgeStmt(nodeFrom + ":" + label.from.getId, nodeTo + ":" + label.to.getId,
         List(DotAttr("label", labelName(label)))))
   }
 
   /**
-   * Format the name of a Component to display it in a node.
-   * @param c Component to display in a node
-   * @return the node value
-   */
-  private def nodeName(c: Component): String = {
-    // Display the component id and description on two lines
-    val title = s"Cmp[${c.getId}]"
-    val desc = c.getDescription
-    title + "\\n" + desc
-  }
-
-  /**
-   * Format a Wire to display it as a edge node.
+   * Display the type of the connection on thw wire.
    * @param w the wire to display as a edge label
-   * @return the label value
+   * @return the type of the connection as a label value
    */
   private def labelName(w: Wire): String = {
-    val portFrom = w.from // OutputPort
-    val portTo = w.to // InputPort
-    s"${portFrom.getDescription}-->${portTo.getDescription}"
+    // Something like "hevs.androiduino.dsl.components.fundamentals.uint1"
+    val t = w.from.getType
+
+    // Return the child class (ex: uint1) as String
+    t.baseClasses.head.asClass.name.toString
   }
 }

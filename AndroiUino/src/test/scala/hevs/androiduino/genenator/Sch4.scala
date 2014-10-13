@@ -10,6 +10,8 @@ import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
 class Sch4Code {
 
+  val cst0 = Constant(uint1(false))
+
   val cst1 = Constant(uint1(false))
   val and1 = And()
   val and2 = And()

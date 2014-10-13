@@ -22,14 +22,13 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   // Optional description
   protected val description: String = ""
   private val id = owner.newUniquePortId
+  private val tpe: Type = typeOf[T]
   private var connected = false
   private var connections = 0
 
   def getDescription = description
 
   def getOwnerId = getOwner.getId
-
-  def getOwner = owner
 
   def connect() = this match {
     case _: OutputPort[_] =>
@@ -64,8 +63,8 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   /**
    * Helper method to check if two `Port` are of the same type. If not, an `PortTypeMismatch` exception is thrown.
+   * @tparam A the type of the port
    * @param that the port to connect with
-   * @tparam A The type of the port
    * @return true if the types are the same, or an exception is thrown
    */
   def checkType[A <: CType : TypeTag](that: Port[A]): Boolean = {
@@ -76,7 +75,15 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
     true
   }
 
+  /**
+   * Return the type of the Port.
+   * @return
+   */
+  def getType = tpe
+
   override def toString = s"Port[$id] of $getOwner"
+
+  def getOwner = owner
 }
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {
