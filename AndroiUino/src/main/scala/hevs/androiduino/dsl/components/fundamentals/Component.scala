@@ -2,7 +2,13 @@ package hevs.androiduino.dsl.components.fundamentals
 
 import hevs.androiduino.dsl.components.ComponentManager
 
-// TODO: un composant est sotcké dans un graph, doit avoir `override def equals` et `override def hashCode`
+/**
+ * Base class for all components (blocks) used in a program. These components, with there connections,
+ * are stored only once in the graph. Methods `equals` and `hashCode` are used for that (class equality). Each
+ * component has a unique `ìd` and each port of it has also a unique ID (`newUniquePortId` function) inside the
+ * component. When a component is created, it is automatically added to the graph,
+ * which is managed by the `ComponentManager`.
+ */
 abstract class Component {
 
   private val id = ComponentManager.createComponentId() // Id of component (must be unique)
@@ -16,7 +22,9 @@ abstract class Component {
 
   def getId = id
 
-  // Component description (optional)
+  /**
+   * Optional description of the component.
+   */
   protected val description: String = ""
 
   ComponentManager.registerComponent(this)
@@ -53,14 +61,14 @@ abstract class Component {
       "\n\tOutputs: " + getOutputs.getOrElse("None")
   }
 
-  // For the graph
+  // Used by the graph library
   override def equals(other: Any) = other match {
     // A component ID must be unique
     case that: Component => that.id == this.id
     case _ => false
   }
 
-  // For the graph
+  // Used by the graph library
   override def hashCode = id.##
 
   override def toString = s"Cmp[$id] '$getDescription'"
@@ -76,7 +84,6 @@ trait hw_implemented {
 
   // Code inserted to init the component (executed once)
   def getInitCode: Option[String] = None
-
 
   def getBeginOfMainAfterInit: Option[String] = None
 

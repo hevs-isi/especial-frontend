@@ -13,14 +13,14 @@ import scala.collection.mutable
  */
 object Resolver extends Logging {
 
+  // Define the maximum number of passes. After that, the resolver will stop.
+  private val MaxPasses = 64  // Should be enough for now
+
   // IDs of components that are generated. Order not valid !
   private val generatedCpId = mutable.Set.empty[Int]
 
   // Component code already generated or not
   private val nextPassCpId = mutable.Set.empty[Int]
-
-  // Define the maximum number of passes. After that, the resolver will stop.
-  private val MaxPasses = 20
 
   // Count the number of passes to generate the code
   private var nbrOfPasses = 0

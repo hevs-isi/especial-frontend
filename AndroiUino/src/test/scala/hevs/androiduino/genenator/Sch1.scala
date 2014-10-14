@@ -29,6 +29,8 @@ class Sch1Code {
 
 class Sch1Test extends TestGeneratorApp {
 
+  ComponentManager.reset()
+
   // The the main code
   new Sch1Code
 

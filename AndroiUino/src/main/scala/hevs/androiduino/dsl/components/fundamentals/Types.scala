@@ -1,5 +1,7 @@
 package hevs.androiduino.dsl.components.fundamentals
 
+import hevs.androiduino.dsl.utils.Logger
+
 /**
  * Abstract type that can be used in the native C code.
  *
@@ -13,32 +15,32 @@ sealed abstract class CType(val v: Any) {
 
   //TODO Bake with spire ? https://github.com/non/spire
 
-  import hevs.androiduino.dsl.utils.Logger._
+  val l = new Logger
 
   /**
    * @return a `scala.Long` value
    */
-  def asLong: Long = fatal("Conversion not available.")
+  def asLong: Long = l.fatal("Conversion not available.")
 
   /**
    * @return a `scala.String` value
    */
-  def asString: String = fatal("Conversion not available.")
+  def asString: String = l.fatal("Conversion not available.")
 
   /**
    * @return a `scala.Boolean` value
    */
-  def asBool: Boolean = fatal("Conversion not available.")
+  def asBool: Boolean = l.fatal("Conversion not available.")
 
   /**
    * @return a `scala.Float` value
    */
-  def asFloat: Float = fatal("Conversion not available.")
+  def asFloat: Float = l.fatal("Conversion not available.")
 
   /**
    * @return a `scala.Double` value
    */
-  def asDouble: Double = fatal("Conversion not available.")
+  def asDouble: Double = l.fatal("Conversion not available.")
 
   /**
    * @return the C type as a `scala.String`

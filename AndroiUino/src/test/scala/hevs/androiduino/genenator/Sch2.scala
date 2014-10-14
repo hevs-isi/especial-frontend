@@ -30,6 +30,8 @@ class Sch2Code {
 
 class Sch2Test extends TestGeneratorApp {
 
+  ComponentManager.reset()
+
   // The the main code
   new Sch2Code()
 

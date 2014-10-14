@@ -27,15 +27,16 @@ class PortCode2 extends PortCode {
 class PortTests extends FunSuite with Matchers {
 
   test("Input to output") {
+    ComponentManager.reset()
     new PortCode1()
-    ComponentManager.unregisterComponents()
   }
 
   test("Input short circuit") {
+    ComponentManager.reset()
+
     intercept[PortInputShortCircuit] {
       new PortCode2()
     }
     info("Short circuit detected")
-    ComponentManager.unregisterComponents()
   }
 }

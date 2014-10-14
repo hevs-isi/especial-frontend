@@ -68,8 +68,8 @@ class ResolverCode5 {
 class ResolverTest extends ResolverTestSpec {
 
   test("1 unconnected component") {
-    ComponentManager.unregisterComponents()
-    val c = new ResolverCode1()
+    ComponentManager.reset()
+    new ResolverCode1()
     val hw = testResolver()
 
     assert(CodeGenerator.checkWarnings())
@@ -81,7 +81,7 @@ class ResolverTest extends ResolverTestSpec {
   }
 
   test("1 wire with 1 unconnected component") {
-    ComponentManager.unregisterComponents()
+    ComponentManager.reset()
     val c = new ResolverCode2()
     val res = testResolver()
 
@@ -96,7 +96,7 @@ class ResolverTest extends ResolverTestSpec {
   }
 
   test("3 passes without warning") {
-    ComponentManager.unregisterComponents()
+    ComponentManager.reset()
     val c = new ResolverCode3()
     val res = testResolver()
 
@@ -111,7 +111,7 @@ class ResolverTest extends ResolverTestSpec {
   }
 
   test("3 passes without warning in a different order") {
-    ComponentManager.unregisterComponents()
+    ComponentManager.reset()
     val c = new ResolverCode4()
     val res = testResolver()
 
@@ -126,7 +126,7 @@ class ResolverTest extends ResolverTestSpec {
   }
 
   test("5 passes with wait") {
-    ComponentManager.unregisterComponents()
+    ComponentManager.reset()
     val c = new ResolverCode5()
     val res = testResolver()
 

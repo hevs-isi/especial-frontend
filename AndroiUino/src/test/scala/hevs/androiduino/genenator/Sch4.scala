@@ -15,7 +15,7 @@ class Sch4Code {
   val cst1 = Constant(uint1(false))
   val and1 = And()
   val and2 = And()
-  val and3 = And()
+  val and3 = And(4)
   val cst2 = Constant(uint1(false))
   val led1 = DigitalOutput(7)
 
@@ -28,8 +28,12 @@ class Sch4Code {
 
 class Sch4Test extends TestGeneratorApp {
 
+  ComponentManager.reset()
+
   // The the main code
   new Sch4Code()
+
+  println(Resolver.resolve())
 
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)

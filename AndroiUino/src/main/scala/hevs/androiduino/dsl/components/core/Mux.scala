@@ -4,7 +4,7 @@ import hevs.androiduino.dsl.components.fundamentals.{CType, Component, InputPort
 
 import scala.reflect.runtime.universe._
 
-// FIXME remove outputType and use template (how ?)
+// FIXME Deprecated
 
 @Deprecated
 case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_implemented {
@@ -21,26 +21,19 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
     }
   }
   val in1 = new InputPort[T](this) {
-
     override val description = "input 1"
-
     override def setInputValue(s: String): String = {
-      // TODO: Here is the code for setting the first input
       s"input1 = $s"
     }
   }
   val in2 = new InputPort[T](this) {
-
-
+    override val description = "input 2"
     override def setInputValue(s: String): String = {
-      // TODO: Here is the code for setting the second input
       s"input2 = $s"
     }
   }
   val sel = new InputPort[T](this) {
-
     override val description = "input selector"
-
     override def setInputValue(s: String): String = {
       // Here is the code to set the selector value
       s"sel = $s"
@@ -68,9 +61,9 @@ case class Mux2[T <: CType : TypeTag](outputType: T) extends Component with hw_i
     Some(result)
   }
 
+  // TODO: example for updatable ?
   /*(this) with Updatable {
     override def updateValue(s: String): String = {
-      // TODO: Here is the code for setting the LED !
       s"led$pin = $s"
     }
   }*/

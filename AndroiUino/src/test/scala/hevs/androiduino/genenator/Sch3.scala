@@ -28,6 +28,8 @@ class Sch3Code {
 
 class Sch3Test extends TestGeneratorApp {
 
+  ComponentManager.reset()
+
   // The the main code
   new Sch3Code()
 

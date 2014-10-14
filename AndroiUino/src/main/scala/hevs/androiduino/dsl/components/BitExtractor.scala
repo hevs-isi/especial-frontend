@@ -4,6 +4,7 @@ import hevs.androiduino.dsl.components.fundamentals.{CType, Component, InputPort
 
 import scala.reflect.runtime.universe._
 
+// FIXME Deprecated
 @Deprecated
 case class BitExtractor[T <: CType : TypeTag]() extends Component with hw_implemented {
 
@@ -14,8 +15,7 @@ case class BitExtractor[T <: CType : TypeTag]() extends Component with hw_implem
     override val description = "All bits input"
 
     override def setInputValue(s: String): String = {
-      // TODO: Here is the code for setting the first input
-      s"input1 = $s" // TODO: tbd
+      s"input1 = $s"
     }
   }
 
@@ -25,7 +25,7 @@ case class BitExtractor[T <: CType : TypeTag]() extends Component with hw_implem
 
     override def getValue: String = {
       //"Here is the code for getting the output of the extractor
-      s"// extracted bit code" // TODO
+      s"// extracted bit code"
     }
   }
 

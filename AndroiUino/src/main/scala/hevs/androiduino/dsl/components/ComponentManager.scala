@@ -33,7 +33,7 @@ object ComponentManager extends Logging {
   /**
    * Remove all components from the graph and clear all previous IDs.
    */
-  def unregisterComponents() = {
+  def reset() = {
     cpGraph.clear()
     IdGenerator.reset() // Restart id generation from 0
   }
