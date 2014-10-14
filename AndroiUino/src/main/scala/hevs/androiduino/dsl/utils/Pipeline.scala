@@ -1,65 +1,52 @@
 package hevs.androiduino.dsl.utils
 
-
-// http://stackoverflow.com/a/9606174/938081
-// http://www.jayway.com/2011/10/04/scala-type-variances-part-two/
-
+/**
+ * Base pipeline class used to chain different operations together.
+ *
+ * A pipeline block `run` a function from an input type `I` that return an output type `O`. Pipelines can be
+ * chains together (similar to the `andThen` method of Scala). A logger is used to report any info or error. If an
+ * error is reported, the pipeline just stop.
+ *
+ * @see http://stackoverflow.com/a/9606174/938081
+ * @see https://gist.github.com/richdougherty/730e03fc865870c46724
+ * @see https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Pipeline.scala
+ *
+ * @tparam I input type of the run method
+ * @tparam O output type of the run method
+ */
 abstract class Pipeline[-I, +O] {
 
+  /**
+   * Name of the pipeline block (required).
+   */
   val name: String
 
-  // Return a function with input type I and result type O
-  def produce: I => O
+  /**
+   * Execute the pipeline block.
+   * @param log the logger used to report if any error occur
+   * @param input the input value of the pipeline
+   * @return the result of the pipeline
+   */
+  def run(log: Logger)(input: I): O
 
-  def stats: String
+  /**
+   * Used to chain pipelines. Create a new Pipeline from these two. Compute the first pipeline and then the second
+   * (like the `andThen` Scala function).
+   * @param next pipeline to execute after the first one
+   * @tparam F output of the second pipeline
+   * @return the result of the two chained pipeline
+   */
+  def ->[F](next: Pipeline[O, F]): Pipeline[I, F] = new Pipeline[I, F] {
 
-  def ->[X](seg: Pipeline[_ >: O, X]): Pipeline[I, X] = {
-    val func = this.produce
-    val outerName = this.name
-    new Pipeline[I, X] {
-      val name = outerName + "." + seg.name
+    // Name of the chain of pipelines
+    override val name = Pipeline.this.name + " -> " + next.name
 
-      def produce = func andThen seg.produce
-
-      def stats = seg.stats
+    def run(log: Logger)(v: I): F = {
+      val first: O = Pipeline.this.run(log)(v) // Run the first one
+      log.terminateIfErrors()
+      next.run(log)(first) // Run second with the result of the first one
     }
   }
-}
 
-abstract class Source[+T] extends Pipeline[Unit, T] {
-}
-
-class RandomInteger extends Source[Int] {
-  override val name = "randInt"
-
-  def produce: Unit => Int = (x: Unit) => scala.math.round(scala.math.random.asInstanceOf[Float] * 10)
-
-  def stats = "stateless"
-}
-
-class TimesTen extends Pipeline[Int, Int] {
-  override val name = "times"
-
-  private var count = 0
-
-  def produce: Int => Int = (x: Int) => {
-    count += 1
-    x * 10
-  }
-
-  def stats = "called for " + count + " times"
-}
-
-
-object Main {
-  def main(args: Array[String]) {
-
-    val p = new RandomInteger() -> new TimesTen()
-
-    for (i <- 0 to 10)
-      println(p.produce())
-
-    println(p.name)  // "randInt.times10"
-    println(p.stats) // called for 11 times
-  }
+  override def toString = name
 }
