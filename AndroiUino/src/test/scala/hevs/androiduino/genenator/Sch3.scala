@@ -22,8 +22,8 @@ class Sch3Code {
 
   // Connecting stuff
   and1.out --> led1.in
-  cst1.out --> and1.in1
-  btn1.out --> and1.in2
+  cst1.out --> and1(1)
+  btn1.out --> and1(2)
 }
 
 class Sch3Test extends TestGeneratorApp {

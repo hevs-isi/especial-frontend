@@ -15,15 +15,17 @@ class Sch2Code {
   val cst2 = Constant(uint1(true))
 
   // Logic
-  val and1 = And() // TODO: connect here ?
+  val and1 = And(3)
 
   // Output
   val led1 = DigitalOutput(7)
 
   // Connecting stuff
   and1.out --> led1.in
-  cst1.out --> and1.in1
-  cst2.out --> and1.in2
+  cst1.out --> and1(2)
+  cst1.out --> and1(3)
+
+  // cst2.out --> and1(3) // Test with 14 // 1
 }
 
 class Sch2Test extends TestGeneratorApp {

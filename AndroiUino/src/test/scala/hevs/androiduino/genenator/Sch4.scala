@@ -19,10 +19,10 @@ class Sch4Code {
   val cst2 = Constant(uint1(false))
   val led1 = DigitalOutput(7)
 
-  cst1.out --> and1.in1
-  and1.out --> and2.in2
-  and2.out --> and3.in1
-  cst2.out --> and3.in2
+  cst1.out --> and1(1)
+  and1.out --> and2(2)
+  and2.out --> and3(1)
+  cst2.out --> and3(2)
   and3.out --> led1.in
 }
 
