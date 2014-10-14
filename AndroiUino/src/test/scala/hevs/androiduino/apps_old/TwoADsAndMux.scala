@@ -1,8 +1,8 @@
-package hevs.androiduino.apps
+package hevs.androiduino.apps_old
 
 import java.io.PrintWriter
 
-import hevs.androiduino.apps.Constant2Led._
+import hevs.androiduino.apps_old.Constant2Led._
 import hevs.androiduino.dsl.components.digital.{DigitalOutput, DigitalInput}
 import hevs.androiduino.dsl.generator.CodeGenerator
 

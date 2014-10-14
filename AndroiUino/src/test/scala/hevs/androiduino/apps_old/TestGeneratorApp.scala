@@ -1,4 +1,4 @@
-package hevs.androiduino.apps
+package hevs.androiduino.apps_old
 
 import hevs.androiduino.dsl.utils.Version
 import org.scalatest.FunSuite

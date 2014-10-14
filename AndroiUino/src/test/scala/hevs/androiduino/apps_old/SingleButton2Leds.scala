@@ -1,4 +1,4 @@
-package hevs.androiduino.apps
+package hevs.androiduino.apps_old
 
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.generator.CodeGenerator

@@ -12,6 +12,8 @@ class ResolverCode1 {
   val btn1 = DigitalInput(4)
 }
 
+// TODO: centraliser toutes ces applications et les utiliser pour tous les test, pas faire des cas particulier...
+
 // 1 pass, 1 unconnected
 class ResolverCode2 {
   val cst1 = Constant(uint1(false))

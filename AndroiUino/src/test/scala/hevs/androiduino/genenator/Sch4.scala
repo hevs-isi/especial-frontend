@@ -1,12 +1,12 @@
 package hevs.androiduino.genenator
 
-import hevs.androiduino.apps.TestGeneratorApp
+import hevs.androiduino.apps_old.TestGeneratorApp
 import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.DigitalOutput
 import hevs.androiduino.dsl.components.fundamentals.uint1
 import hevs.androiduino.dsl.components.logic.And
-import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
+import hevs.androiduino.dsl.generator.{Resolver, CodeGenerator, DotGenerator}
 
 class Sch4Code {
 
