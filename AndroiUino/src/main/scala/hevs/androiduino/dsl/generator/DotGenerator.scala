@@ -56,7 +56,7 @@ class DotGenerator(val graphName: String) {
   // Align nodes from the left to the right. Use orthogonal splines and add the title of the graph as a label.
   private val dotParams = Seq(DotAttr("label", name), DotAttr("rankdir", "TB"))
 
-  private val dotRoot = DotRootGraph(directed = true, id = Some("DotGraph"), kvList = dotParams)
+  private val root = DotRootGraph(directed = true, id = Some("DotGraph"), kvList = dotParams)
 
   /**
    * Generate the DOT diagram of a graph.
@@ -65,7 +65,12 @@ class DotGenerator(val graphName: String) {
    */
   def generateDot(g: Graph[Component, LDiEdge]): String = {
     // Return the dot diagram as text
-    g.toDot(dotRoot, edgeTransformer, iNodeTransformer = Option(nodeTrans), cNodeTransformer = Option(nodeTrans))
+    g.toDot(root, edgeTransformer,
+      hEdgeTransformer = Option(edgeTransformer),
+      iNodeTransformer = Option(nodeTrans),
+      cNodeTransformer = Option(nodeTrans))
+
+    // g.toDot(root, edgeTransformer, iNodeTransformer = Option(nodeTrans), cNodeTransformer = Option(nodeTrans))
   }
 
   /**
@@ -83,9 +88,8 @@ class DotGenerator(val graphName: String) {
     val label = s"{$in}|${nodeName(n)}|{$out}"
 
     val color = if (n.isConnected) "black" else "orange"
-
-    Some(dotRoot, DotNodeStmt(nodeId(n), Seq(DotAttr("label", label), DotAttr("shape", "Mrecord"), DotAttr("color",
-      color))))
+    val attrs = Seq(DotAttr("label", label), DotAttr("shape", "Mrecord"), DotAttr("color", color))
+    Some(root, DotNodeStmt(nodeId(n), attrs))
   }
 
   /**
@@ -128,20 +132,18 @@ class DotGenerator(val graphName: String) {
   }
 
   /**
-   * Transform all edges of the graph.
+   * Transform all edges of the graph. Display the wire from an InputPort to an OutputPort of two components.
    * @param innerEdge graph edges
    * @return the same transformation for all edges of the graph
    */
-  private def edgeTransformer(innerEdge: Graph[Component, LDiEdge]#EdgeT):
-  Option[(DotGraph, DotEdgeStmt)] = {
+  private def edgeTransformer(innerEdge: Graph[Component, LDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
     val edge = innerEdge.edge
     val label = edge.label.asInstanceOf[Wire]
 
     val nodeFrom = edge.from.value.asInstanceOf[Component].getId
     val nodeTo = edge.to.value.asInstanceOf[Component].getId
-    Some(dotRoot,
-      DotEdgeStmt(nodeFrom + ":" + label.from.getId, nodeTo + ":" + label.to.getId,
-        List(DotAttr("label", labelName(label)))))
+    val attrs = Seq(DotAttr("label", labelName(label)))
+    Some(root, DotEdgeStmt(nodeFrom + ":" + label.from.getId, nodeTo + ":" + label.to.getId, attrs))
   }
 
   /**

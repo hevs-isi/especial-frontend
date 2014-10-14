@@ -51,18 +51,16 @@ object ComponentManager extends Logging {
     // Get components "from" and "to". These components must be in the graph, or an exception is thrown.
     val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
-    val w = new Wire(from, to)
+    val w = new Wire(from, to) // Add a wire between the two ports
 
     assert(from.isConnected, "From port not connected !")
     assert(to.isConnected, "To port not connected !")
 
-    // Add the connection (wire) between these to ports
-    val outer = (cpFrom ~+> cpTo)(w) // Component to component with input (right) as label
+    // Add the connection (wire) between these to ports.
+    // The edge is directed with a key label. The label must be a key because an output can be connected to multiple
+    // inputs. It must be possible to add multiple wire from an to the same nodes, with different labels.
+    val outer = (cpFrom ~+#> cpTo)(w)
     cpGraph += outer
-
-    // ~>   directed
-    // ~+>  directed with label
-    // ~+#> directed with key label
   }
 
   /**
@@ -145,6 +143,14 @@ object ComponentManager extends Logging {
   // This a basically a Tuple2, but they cannot be override
   // Also used by the DotGenerator
   class Wire(val from: OutputPort[_], val to: InputPort[_]) {
+
+    override def equals(other: Any) = other match {
+      case that: Wire => that.from == from && that.to == to
+      case _ => false
+    }
+
+    override def hashCode = 41 * from.hashCode() + to.hashCode()
+
     override def toString = "Wire: " + from + "~" + to
   }
 

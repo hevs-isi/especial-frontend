@@ -11,10 +11,6 @@ import scala.reflect.runtime.universe._
 // This class represents an input of a component which can be updated
 // from a mixed-in trait
 
-// TODO passer le type du port en template ?
-// TODO faire une classe abstraite port ou *trait* ?
-// TODO enlever le var, faire ConnectedPort, UnconnectedPort ?
-
 // Description of a port
 // Input ot output port of a component. Transport only one type of data.
 abstract class Port[T <: CType : TypeTag](owner: Component) {
@@ -29,6 +25,8 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   def getDescription = description
 
   def getOwnerId = getOwner.getId
+
+  def getOwner = owner
 
   def connect() = this match {
     case _: OutputPort[_] =>
@@ -82,8 +80,6 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   def getType = tpe
 
   override def toString = s"Port[$id] of $getOwner"
-
-  def getOwner = owner
 }
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {
