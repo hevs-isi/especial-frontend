@@ -35,7 +35,7 @@ class Sch3Test extends TestGeneratorApp {
 
   // Generate the C code and the DOT graph
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
-  val dot = DotGenerator.generateDotFile(ComponentManager.cpGraph, fileName, fileName)
+  val dot = DotGenerator.generateDotFile(fileName, fileName)
 
   // Print code and dot as result
 //  println(code)
