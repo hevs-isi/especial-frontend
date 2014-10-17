@@ -21,8 +21,8 @@ object DotGenerator {
     """
       |	// Diagram settings
       |	graph [rankdir=LR labelloc=b, fontname=Arial, fontsize=14];
-      |	node [ fontname=serif, fontsize=11];
-      |	edge [ fontname=Courier, color=dimgrey fontsize=10 ];
+      |	node [ fontname=serif, fontsize=11, shape=Mrecord];
+      |	edge [ fontname=Courier, color=dimgrey fontsize=12 ];
       |
       |	// Exported nodes from the components graph
     """.stripMargin
@@ -109,9 +109,9 @@ class DotGenerator(val graphName: String) {
     val out = makeLabelList(n.getOutputs.getOrElse(Nil))
     val label = s"{{$in}|${nodeName(n)}|{$out}}" // Double '{' are necessary with rankdir=LR !
 
-    val color = if (n.isConnected) "black" else "orange"
-    val attrs = Seq(DotAttr("label", label), DotAttr("shape", "Mrecord"), DotAttr("color", color))
-    Some(root, DotNodeStmt(nodeId(n), attrs))
+    // Change the color for unconnected nodes
+    val color = if (!n.isConnected) Seq(DotAttr("color", "orange")) else Nil
+    Some(root, DotNodeStmt(nodeId(n), Seq(DotAttr("label", label)) ++ color))
   }
 
   /**
