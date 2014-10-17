@@ -16,6 +16,9 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
 
   type T = uint1  // Inputs are outputs are boolean values
 
+  /**
+   * List of inputs. Use the `in` method to access to it safely.
+   */
   private val inputs = mutable.ListBuffer.empty[InputPort[uint1]]
   private val tpe = uint1().getType
   private val outputVarName = s"outComp$getId"
@@ -39,14 +42,15 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
   def getInputs = Some(inputs)
 
   /**
-   * Select and connect and input. Index start from 1.
-   * @param index input number, start from 1
-   * @return the corresponding input to connect
+   * Select and input of the component. Input index start at 1. Check if the index is valid or not.
+   * @throws IndexOutOfBoundsException if the input does not exist
+   * @param index input number, start at 1
+   * @return the corresponding input to connect if index is valid
    */
-  def apply(index: Int) = {
+  def in(index: Int) = {
     val nbr = index - 1
     if (nbr < 0 || nbr >= inputs.size)
-      throw new IllegalArgumentException(s"Input $index does not exit. Goes from 1 to ${inputs.size} !")
+      throw new IndexOutOfBoundsException(s"Input $index does not exit. Goes from 1 to ${inputs.size} !")
     inputs(index - 1)
   }
 

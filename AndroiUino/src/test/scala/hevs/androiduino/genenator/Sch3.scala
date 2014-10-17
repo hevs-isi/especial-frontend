@@ -5,7 +5,7 @@ import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.components.logic.And
+import hevs.androiduino.dsl.components.logic.And2
 import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
 class Sch3Code {
@@ -15,15 +15,15 @@ class Sch3Code {
   val btn1 = DigitalInput(4)
 
   // Logic
-  val and1 = And()
+  val and1 = And2()
 
   // Output
   val led1 = DigitalOutput(7)
 
   // Connecting stuff
   and1.out --> led1.in
-  cst1.out --> and1(1)
-  btn1.out --> and1(2)
+  cst1.out --> and1.in1
+  btn1.out --> and1.in2
 }
 
 class Sch3Test extends TestGeneratorApp {

@@ -5,22 +5,22 @@ import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.DigitalOutput
 import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.components.logic.And
+import hevs.androiduino.dsl.components.logic.{And4, And2}
 import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
 class Sch4Code {
 
   val cst1 = Constant(uint1(false))
   val cst2 = Constant(uint1(false))
-  val and1 = And()
-  val and2 = And()
-  val and3 = And(4)
+  val and1 = And2()
+  val and2 = And2()
+  val and3 = And4()
   val led1 = DigitalOutput(7)
 
-  cst2.out --> and3(2)
-  cst1.out --> and1(1)
-  and1.out --> and2(2)
-  and2.out --> and3(4)
+  cst2.out --> and3.in2
+  cst1.out --> and1.in1
+  and1.out --> and2.in2
+  and2.out --> and3.in4
   and3.out --> led1.in
 }
 

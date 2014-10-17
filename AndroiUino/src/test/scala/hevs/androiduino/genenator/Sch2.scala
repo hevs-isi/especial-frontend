@@ -5,7 +5,7 @@ import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.DigitalOutput
 import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.components.logic.And
+import hevs.androiduino.dsl.components.logic.And2
 import hevs.androiduino.dsl.generator.{CodeGenerator, DotGenerator}
 
 class Sch2Code {
@@ -15,15 +15,15 @@ class Sch2Code {
   val cst2 = Constant(uint1(true))
 
   // Logic
-  val and1 = And(3)
+  val and1 = And2()
 
   // Output
   val led1 = DigitalOutput(7)
 
   // Connecting stuff
   and1.out --> led1.in
-  cst1.out --> and1(2)
-  cst1.out --> and1(3)
+  cst1.out --> and1.in1
+  cst1.out --> and1.in2
 
   // cst2.out --> and1(3) // Test with 14 // 1
 }

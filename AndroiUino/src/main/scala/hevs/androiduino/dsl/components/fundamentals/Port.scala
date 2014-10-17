@@ -79,7 +79,15 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
    */
   def getType = tpe
 
-  override def toString = s"Port[$id] of $getOwner"
+  import scala.reflect.runtime.universe._
+  val typeMirror = runtimeMirror(this.getClass.getClassLoader)
+  val instanceMirror = typeMirror.reflect(this)
+
+  override def toString = {
+   // instanceMirror.symbol.fullName
+    //
+    s"Port[$id] of $getOwner"
+  }
 }
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {

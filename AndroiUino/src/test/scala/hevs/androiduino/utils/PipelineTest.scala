@@ -33,7 +33,7 @@ class PipelineTest extends FunSuite with Matchers {
   val pB = new PipeB
   val pC = new PipeC
 
-  test("run individually") {
+  test("run each block individually") {
     val resA = pA.run(logger)(10)
     val resB = pB.run(logger)(10)
     val resC = pC.run(logger)(10)
@@ -62,7 +62,7 @@ class PipelineTest extends FunSuite with Matchers {
     resD shouldBe "40.0"
   }
 
-  test("chain same") {
+  test("chain the same block") {
     val d = pA -> pA -> pA
     val resD = d.run(logger)(70)
 

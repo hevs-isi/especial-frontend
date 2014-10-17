@@ -4,7 +4,7 @@ import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.core.Constant
 import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.components.logic.And
+import hevs.androiduino.dsl.components.logic.And2
 import hevs.androiduino.dsl.generator.CodeGenerator
 
 class ResolverCode1 {
@@ -27,10 +27,10 @@ class ResolverCode3 {
   val cst1 = Constant(uint1(false))
   val btn1 = DigitalInput(4)
   val led1 = DigitalOutput(7)
-  val and1 = And()
+  val and1 = And2()
 
-  cst1.out --> and1(1)
-  btn1.out --> and1(2)
+  cst1.out --> and1.in1
+  btn1.out --> and1.in2
   and1.out --> led1.in
 }
 
@@ -39,26 +39,26 @@ class ResolverCode4 {
   // Same as ResolverCode3 in a different order
   val led1 = DigitalOutput(7)
   val cst1 = Constant(uint1(false))
-  val and1 = And()
+  val and1 = And2()
   val btn1 = DigitalInput(4)
 
   and1.out --> led1.in
-  btn1.out --> and1(2)
-  cst1.out --> and1(1)
+  btn1.out --> and1.in2
+  cst1.out --> and1.in1
 }
 
 class ResolverCode5 {
   val cst1 = Constant(uint1(false))
-  val and1 = And()
-  val and2 = And()
-  val and3 = And()
+  val and1 = And2()
+  val and2 = And2()
+  val and3 = And2()
   val cst2 = Constant(uint1(false))
   val led1 = DigitalOutput(7)
 
-  cst1.out --> and1(1)
-  and1.out --> and2(2)
-  and2.out --> and3(1)
-  cst2.out --> and3(2)
+  cst1.out --> and1.in1
+  and1.out --> and2.in2
+  and2.out --> and3.in1
+  cst2.out --> and3.in2
   and3.out --> led1.in
 }
 
