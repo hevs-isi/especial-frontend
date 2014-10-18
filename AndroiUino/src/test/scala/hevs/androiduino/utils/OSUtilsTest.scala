@@ -21,16 +21,13 @@ class OSUtilsTest extends FunSuite with Logging {
     val valid = OSUtils.runWithBooleanResult(cmd)
     if (valid._1) {
       info("dot is installed.")
-      OSUtils.runWithResult(cmd)
+      info(valid._2)
     }
-    else {
-      intercept[IOException] {
-        info("dot is not installed !")
-      }
-    }
+    else
+      info("dot is not installed !")
 
     // Run a none valid command
     val res3 = OSUtils.runWithBooleanResult("d" + cmd)
-    assert(!res3._1, "Should be a none valid command !")
+    assert(!res3._1, "Should not be a valid command !")
   }
 }
