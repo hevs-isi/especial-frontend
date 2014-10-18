@@ -2,11 +2,12 @@ package hevs.androiduino.dsl.generator
 
 import java.io.{File, IOException}
 
+import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.ComponentManager.Wire
 import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
 import hevs.androiduino.dsl.utils.OSUtils.Linux
-import hevs.androiduino.dsl.utils.{OSUtils, Version}
+import hevs.androiduino.dsl.utils.{OsNotSupported, OSUtils, Version}
 
 import scala.language.existentials
 import scala.sys.process._
@@ -14,7 +15,7 @@ import scalax.collection.Graph
 import scalax.collection.edge.LDiEdge
 import scalax.collection.io.dot._
 
-object DotGenerator {
+object DotGenerator extends Logging {
 
   /* General tot diagrams settings */
   private val dotSettings =
@@ -60,12 +61,19 @@ object DotGenerator {
   }
 
   private def convertDotToPdf(fileName: String) = {
+    // FIXME: use a pipeline for this
+
     // Convert the dot file to PDF with the same file name
     val path = s"output/dot/$fileName"
-    OSUtils.getOsType match {
-      case _: Linux => s"dot $path.dot -Tpdf -o $path.pdf".!!
-      case _ => new IOException("OS not supported. Cannot run `dot`.")
+    try {
+      // Check the if dot is installed and print the installed version
+      info("Running " + "dot -V".!!)
     }
+    catch {
+      case e: Exception => throw new IOException("Unable to run dot. Must be installed and in the PATH.", e)
+    }
+
+    s"dot $path.dot -Tpdf -o $path.pdf".!  // Export to pdf
   }
 }
 

@@ -1,12 +1,12 @@
 package hevs.androiduino.dsl.generator
 
-import java.io.File
+import java.io.{IOException, File}
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.fundamentals.hw_implemented
 import hevs.androiduino.dsl.utils.OSUtils._
-import hevs.androiduino.dsl.utils.{OSUtils, Version}
+import hevs.androiduino.dsl.utils.{OsNotSupported, OSUtils, Version}
 
 import scala.collection.mutable
 import scala.sys.process._
@@ -40,12 +40,17 @@ object CodeGenerator extends Logging {
     val file: RichFile = new File(path)
     file.write(code)
 
+    // FIXME: use a pipeline for this
+
     // Call the AStyle conversion program
-    info("Running Astyle.")
     OSUtils.getOsType match {
-      case _: Windows => s"./lib/AStyle.exe --style=kr -Y $path".!!
-      case _: Linux => s"./lib/astyle --style=kr -Y $path".!!
-      case _ => error("OS not supported. Cannot run `astyle`.")
+      case _: Windows =>
+        info("Running " + "./third_party/astyle/astyle.exe -V".!!)
+        s"./third_party/astyle/astyle.exe --style=kr -Y $path".!
+      case _: Linux =>
+        info("Running " + s"./third_party/astyle/astyle -V".!!)
+        s"./third_party/astyle/astyle --style=kr -Y $path".!
+      case _ => throw new OsNotSupported("Cannot run astyle.")
     }
 
     code // Return the non-formatted code
