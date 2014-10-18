@@ -1,15 +1,14 @@
 package hevs.androiduino.dsl.generator
 
-import java.io.{IOException, File}
+import java.io.File
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.fundamentals.hw_implemented
-import hevs.androiduino.dsl.utils.OSUtils._
-import hevs.androiduino.dsl.utils.{OsNotSupported, OSUtils, Version}
+import hevs.androiduino.dsl.utils.OSUtils.{Linux, Windows}
+import hevs.androiduino.dsl.utils.{OSUtils, OsNotSupported, Version}
 
 import scala.collection.mutable
-import scala.sys.process._
 
 /**
  * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
@@ -33,6 +32,8 @@ object CodeGenerator extends Logging {
   def hasWarnings: Boolean = warnings.isDefined
 
   def generateCodeFile(progName: String, fileName: String): String = {
+    // FIXME: use a pipeline for this
+
     val code = generateCode(progName)
     // Create the file in the folder "output/dot/"
     val path = s"output/code/$fileName.c"
@@ -40,18 +41,23 @@ object CodeGenerator extends Logging {
     val file: RichFile = new File(path)
     file.write(code)
 
-    // FIXME: use a pipeline for this
-
     // Call the AStyle conversion program
+    var run = "./third_party/astyle/%s"
     OSUtils.getOsType match {
-      case _: Windows =>
-        info("Running " + "./third_party/astyle/astyle.exe -V".!!)
-        s"./third_party/astyle/astyle.exe --style=kr -Y $path".!
-      case _: Linux =>
-        info("Running " + s"./third_party/astyle/astyle -V".!!)
-        s"./third_party/astyle/astyle --style=kr -Y $path".!
+      case Windows =>
+        run = run.format("astyle.exe")
+      case Linux =>
+        run = run.format("astyle")
       case _ => throw new OsNotSupported("Cannot run astyle.")
     }
+
+    val valid = OSUtils.runWithBooleanResult(run + " -V")
+    if(valid._1){
+      info(s"Running '${valid._2}'.")
+      OSUtils.runWithResult(run + s" --style=kr -Y $path")
+    }
+    else
+      error("Unable to run AStyle !")
 
     code // Return the non-formatted code
   }

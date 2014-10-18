@@ -23,3 +23,9 @@ class ComponentNotFound(msg: String) extends RuntimeException(msg)
  * @param msg exception details
  */
 class OsNotSupported(msg: String) extends RuntimeException(msg)
+
+/**
+ * The program terminates because one or more errors have occurred.
+ * @param msg exception details
+ */
+class LoggerError(msg: String) extends RuntimeException(msg)

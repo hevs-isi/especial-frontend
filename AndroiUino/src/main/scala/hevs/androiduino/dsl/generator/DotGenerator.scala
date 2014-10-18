@@ -1,23 +1,21 @@
 package hevs.androiduino.dsl.generator
 
-import java.io.{File, IOException}
+import java.io.File
 
 import grizzled.slf4j.Logging
 import hevs.androiduino.dsl.components.ComponentManager
 import hevs.androiduino.dsl.components.ComponentManager.Wire
 import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
-import hevs.androiduino.dsl.utils.OSUtils.Linux
-import hevs.androiduino.dsl.utils.{OsNotSupported, OSUtils, Version}
+import hevs.androiduino.dsl.utils.{OSUtils, Version}
 
 import scala.language.existentials
-import scala.sys.process._
 import scalax.collection.Graph
 import scalax.collection.edge.LDiEdge
 import scalax.collection.io.dot._
 
 object DotGenerator extends Logging {
 
-  /* General tot diagrams settings */
+  /* General dot diagrams settings */
   private val dotSettings =
     """
       |	// Diagram settings
@@ -65,15 +63,15 @@ object DotGenerator extends Logging {
 
     // Convert the dot file to PDF with the same file name
     val path = s"output/dot/$fileName"
-    try {
-      // Check the if dot is installed and print the installed version
-      info("Running " + "dot -V".!!)
-    }
-    catch {
-      case e: Exception => throw new IOException("Unable to run dot. Must be installed and in the PATH.", e)
-    }
 
-    s"dot $path.dot -Tpdf -o $path.pdf".!  // Export to pdf
+    // Check the if dot is installed and print the installed version
+    val valid = OSUtils.runWithBooleanResult("dot -V")
+    if (valid._1) {
+      info(s"Running '${valid._2}'.")
+      OSUtils.runWithResult(s"dot $path.dot -Tpdf -o $path.pdf")
+    }
+    else
+      error("Unable to run dot. Must be installed and in the PATH !")
   }
 }
 

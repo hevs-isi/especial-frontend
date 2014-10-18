@@ -3,39 +3,33 @@ package hevs.androiduino.utils
 import java.io.IOException
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.utils.{Logger, OSUtils}
+import hevs.androiduino.dsl.utils.{LoggerError, Logger, OSUtils}
 import org.scalatest.FunSuite
 
-class LoggerTest extends FunSuite with Logging {
-  test("print error and terminates") {
-    println("Simple print.") // Without logger
-
-    // Not displayed using the default logger configuration
-    debug("Debug information.")
-    trace("Trace information.")
-
-    // Output to the console
-    info("Some information.")
-    warn("Warning.")
-    error("Something terrible.")
-
-    println()
-    info(s"Running on '${OSUtils.getOsName}'.")
-    info(s"Is Linux: ${OSUtils.isLinux}.")
-    info(s"Is Windows: ${OSUtils.isWindows}.")
-    info(s"Is Other: ${OSUtils.isOther}.")
+class LoggerTest extends FunSuite {
+  test("print various messages") {
 
     val l = new Logger
-    l.warn("Warning")
+
+    // Not displayed using the default logger configuration
+    l.debug("Debug information.")
+    l.trace("Trace information.")
+
+    // Output to the console
+    l.info("An information.")
+    l.warn("A warning.")
     assert(!l.hasErrors)
-    l.error("Error")
+
+    l.error("A terrible error.")
     assert(l.hasErrors)
 
-    // sys.exit() thrown a SecurityException
-    intercept[IOException] {
+    l.warn("Warning")
+    l.error("Error")
+
+    intercept[LoggerError] {
       l.terminateIfErrors()
     }
-
-    l.info("Never executed :(")
+    assert(!l.hasErrors)
+    l.info("Error detected.")
   }
 }
