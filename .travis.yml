@@ -1,15 +1,9 @@
 language: scala
 
-sudo: true
-
 jdk:
   - openjdk7
 
 scala:
   - 2.11.2
 
-before_install:
-  - sudo apt-get install graphviz
-
 before_script: cd AndroiUino
-
