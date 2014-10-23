@@ -5,5 +5,5 @@ __See the [AndroiUino](https://github.com/metc/ScalaTest/tree/master/AndroiUino)
 Some other Scala test projects available here...
 
 --
-For now, the Travis CI build errored because the `sudo` mode is not available for Education account (see http://stackoverflow.com/a/26304928/938081). 
-Tests for the [AndroiUino](https://github.com/metc/ScalaTest/tree/master/AndroiUino) are available [here](https://github.com/metc/ScalaTest/tree/master/AndroiUino/src/test/scala/hevs/androiduino).
+For now, the `sudo` mode is not available for Education accounts on Travis CI (see http://stackoverflow.com/a/26304928/938081). Dot diagrams cannot be generated. Tests are skipped if `graphviz` is not installed. 
+All [AndroiUino](https://github.com/metc/ScalaTest/tree/master/AndroiUino) tests are available [here](https://github.com/metc/ScalaTest/tree/master/AndroiUino/src/test/scala/hevs/androiduino).
