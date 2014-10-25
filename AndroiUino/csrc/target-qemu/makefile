@@ -8,14 +8,14 @@ RM := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
--include system/src/stm32f1-stdperiph/subdir.mk
--include system/src/newlib/subdir.mk
--include system/src/freertos/subdir.mk
--include system/src/diag/subdir.mk
--include system/src/cortexm/subdir.mk
--include system/src/CMSIS/subdir.mk
--include system/include/freertos/portable/MemMang/subdir.mk
--include system/include/freertos/portable/GCC/ARM_CM3/subdir.mk
+-include stm32f10x_lib/src/stm32f1/subdir.mk
+-include stm32f10x_lib/src/newlib/subdir.mk
+-include stm32f10x_lib/src/hal/subdir.mk
+-include stm32f10x_lib/src/freertos/subdir.mk
+-include stm32f10x_lib/src/diag/subdir.mk
+-include stm32f10x_lib/src/cortexm/subdir.mk
+-include stm32f10x_lib/src/cmsis/subdir.mk
+-include stm32f10x_lib/include/freertos/subdir.mk
 -include src/subdir.mk
 -include subdir.mk
 -include objects.mk
@@ -51,38 +51,38 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 SECONDARY_FLASH += \
-blink-simple.hex \
+csrc.hex \
 
 SECONDARY_SIZE += \
-blink-simple.siz \
+csrc.siz \
 
 
 # All Target
-all: blink-simple.elf secondary-outputs
+all: csrc.elf secondary-outputs
 
 # Tool invocations
-blink-simple.elf: $(OBJS) $(USER_OBJS)
+csrc.elf: $(OBJS) $(USER_OBJS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: Cross ARM C++ Linker'
-	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall -Wextra  -g3 -T mem_qemu.ld -T libs.ld -T sections.ld -nostartfiles -Xlinker --gc-sections -L"../ldscripts" -Wl,-Map,"blink-simple.map" --specs=nano.specs -o "blink-simple.elf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-g++ -mcpu=cortex-m3 -mthumb -O0 -fmessage-length=0 -fsigned-char -ffunction-sections -fdata-sections -Wall -Wextra  -g3 -T "/home/chm/git/stm32/stm32f10x_lib/ldscripts/stm32f103_qemu.ld" -T "/home/chm/git/stm32/stm32f10x_lib/ldscripts/sections.ld" -nostartfiles -Xlinker --gc-sections -Wl,-Map,"csrc.map" --specs=nano.specs -o "csrc.elf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-blink-simple.hex: blink-simple.elf
+csrc.hex: csrc.elf
 	@echo 'Invoking: Cross ARM GNU Create Flash Image'
-	arm-none-eabi-objcopy -O ihex "blink-simple.elf"  "blink-simple.hex"
+	arm-none-eabi-objcopy -O ihex "csrc.elf"  "csrc.hex"
 	@echo 'Finished building: $@'
 	@echo ' '
 
-blink-simple.siz: blink-simple.elf
+csrc.siz: csrc.elf
 	@echo 'Invoking: Cross ARM GNU Print Size'
-	arm-none-eabi-size --format=berkeley "blink-simple.elf"
+	arm-none-eabi-size --format=berkeley "csrc.elf"
 	@echo 'Finished building: $@'
 	@echo ' '
 
 # Other Targets
 clean:
-	-$(RM) $(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS) blink-simple.elf
+	-$(RM) $(CC_DEPS)$(C++_DEPS)$(OBJS)$(C_UPPER_DEPS)$(CXX_DEPS)$(SECONDARY_FLASH)$(SECONDARY_SIZE)$(ASM_DEPS)$(S_UPPER_DEPS)$(C_DEPS)$(CPP_DEPS) csrc.elf
 	-@echo ' '
 
 secondary-outputs: $(SECONDARY_FLASH) $(SECONDARY_SIZE)

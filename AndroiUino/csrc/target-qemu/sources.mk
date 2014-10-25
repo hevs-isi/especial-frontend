@@ -27,13 +27,13 @@ CPP_DEPS :=
 
 # Every subdirectory with source files must be described here
 SUBDIRS := \
-system/src/stm32f1-stdperiph \
-system/src/newlib \
-system/src/freertos \
-system/src/diag \
-system/src/cortexm \
-system/src/CMSIS \
-system/include/freertos/portable/MemMang \
-system/include/freertos/portable/GCC/ARM_CM3 \
+stm32f10x_lib/src/stm32f1 \
+stm32f10x_lib/src/newlib \
+stm32f10x_lib/src/hal \
+stm32f10x_lib/src/freertos \
+stm32f10x_lib/src/diag \
+stm32f10x_lib/src/cortexm \
+stm32f10x_lib/src/cmsis \
+stm32f10x_lib/include/freertos \
 src \
 
