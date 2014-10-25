@@ -3,7 +3,7 @@ package hevs.androiduino.utils
 import java.io.IOException
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.utils.{LoggerError, OSUtils}
+import hevs.androiduino.dsl.utils.OSUtils
 import org.scalatest.FunSuite
 
 class OSUtilsTest extends FunSuite with Logging {
@@ -18,16 +18,22 @@ class OSUtilsTest extends FunSuite with Logging {
   test("Exec commands") {
     val cmd = "dot -V"
     // Run a command to check if dot is installed
-    val valid = OSUtils.runWithBooleanResult(cmd)
-    if (valid._1) {
+    val valid = OSUtils.runWithCodeResult(cmd)
+    if (valid._1 == 0) {
       info("dot is installed.")
-      info(valid._2)
+      info(OSUtils.runWithResult(cmd)) //same as valid._2
     }
     else
       info("dot is not installed !")
 
     // Run a none valid command
-    val res3 = OSUtils.runWithBooleanResult("d" + cmd)
-    assert(!res3._1, "Should not be a valid command !")
+    val res3 = OSUtils.runWithCodeResult("d" + cmd)
+    assert(res3._1 != 0, "Should not be a valid command !")
+    info("Invalid command:")
+    info(res3)
+
+    intercept[IOException] {
+      OSUtils.runWithResult("e" + cmd)
+    }
   }
 }

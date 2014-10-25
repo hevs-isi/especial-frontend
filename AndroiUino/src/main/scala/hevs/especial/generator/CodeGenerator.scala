@@ -51,8 +51,8 @@ object CodeGenerator extends Logging {
       case _ => throw new OsNotSupported("Cannot run astyle.")
     }
 
-    val valid = OSUtils.runWithBooleanResult(run + " -V")
-    if(valid._1){
+    val valid = OSUtils.runWithCodeResult(run + " -V")
+    if(valid._1 == 0){
       info(s"Running '${valid._2}'.")
       OSUtils.runWithResult(run + s" --style=kr -Y $path")
     }

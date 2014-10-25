@@ -30,4 +30,13 @@ object f {
   val map = scala.collection.mutable.HashMap.empty[Int, Set[Int]]
   map += (1 -> Set(1,5))
 
+  class MyClass {
+    /*override def toString = {
+      //"miaou"
+      //???
+    }*/
+  }
+  val instanceName = new MyClass()
+  println(instanceName) // Should print "instanceName"
+
 }
