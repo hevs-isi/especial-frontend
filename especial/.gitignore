@@ -1,0 +1,16 @@
+target/
+
+# Ignore generate files
+output/code/*
+output/dot/*
+
+# Eclipse
+.settings
+.worksheet
+.cache
+.classpath
+.project
+bin
+
+# Idea
+.idea
