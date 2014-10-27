@@ -1,6 +1,5 @@
 package hevs.especial.utils
 
-import hevs.especial.utils.{Pipeline, Logger}
 import org.scalatest.{FunSuite, Matchers}
 
 /**

@@ -3,7 +3,6 @@ package hevs.especial.utils
 import java.io.IOException
 
 import grizzled.slf4j.Logging
-import hevs.especial.utils.OSUtils
 import org.scalatest.FunSuite
 
 class OSUtilsTest extends FunSuite with Logging {

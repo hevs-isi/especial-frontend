@@ -1,6 +1,5 @@
 package hevs.especial.utils
 
-import hevs.especial.utils.{LoggerError, Logger}
 import org.scalatest.FunSuite
 
 class LoggerTest extends FunSuite {
