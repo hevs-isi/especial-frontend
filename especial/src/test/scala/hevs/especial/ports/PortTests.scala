@@ -1,10 +1,10 @@
-package hevs.androiduino.ports
+package hevs.especial.ports
 
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.core.Constant
-import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
-import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.utils.PortInputShortCircuit
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.core.Constant
+import hevs.especial.dsl.components.digital.{DigitalOutput, DigitalInput}
+import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.utils.PortInputShortCircuit
 import org.scalatest.{FunSuite, Matchers}
 
 abstract class PortCode {

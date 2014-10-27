@@ -1,10 +1,14 @@
-package hevs.androiduino.apps_old
+package hevs.especial.apps_old
 
-import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
-import hevs.androiduino.dsl.generator.CodeGenerator
+import hevs.especial.genenator.STM32TestSuite
 
-object SingleButton2Leds extends TestGeneratorApp {
-  val b1 = DigitalInput(3)
+//FIXME: use this test
+@Deprecated
+object SingleButton2Leds extends STM32TestSuite {
+
+  def getDslCode = ""
+
+ /* val b1 = DigitalInput(3)
   val l1 = DigitalOutput(4)
   val l2 = DigitalOutput(2)
 
@@ -20,5 +24,5 @@ object SingleButton2Leds extends TestGeneratorApp {
 
   // Generate code
   val code = CodeGenerator.generateCodeFile(fileName, fileName)
-  println(code)
+  println(code)*/
 }

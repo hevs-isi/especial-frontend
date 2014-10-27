@@ -1,6 +1,6 @@
-package hevs.androiduino.utils
+package hevs.especial.utils
 
-import hevs.androiduino.dsl.utils.{Logger, Pipeline}
+import hevs.especial.utils.{Pipeline, Logger}
 import org.scalatest.{FunSuite, Matchers}
 
 /**

@@ -1,9 +1,6 @@
-package hevs.androiduino.utils
+package hevs.especial.utils
 
-import java.io.IOException
-
-import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.utils.{LoggerError, Logger, OSUtils}
+import hevs.especial.utils.{LoggerError, Logger}
 import org.scalatest.FunSuite
 
 class LoggerTest extends FunSuite {

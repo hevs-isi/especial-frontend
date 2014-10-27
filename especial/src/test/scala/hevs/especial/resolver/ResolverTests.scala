@@ -1,11 +1,11 @@
-package hevs.androiduino.resolver
+package hevs.especial.resolver
 
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.core.Constant
-import hevs.androiduino.dsl.components.digital.{DigitalInput, DigitalOutput}
-import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.components.logic.And2
-import hevs.androiduino.dsl.generator.CodeGenerator
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.core.Constant
+import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
+import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.dsl.components.logic.And2
+import hevs.especial.generator.CodeGenerator
 
 class ResolverCode1 {
   // Nothing to do, no inputs

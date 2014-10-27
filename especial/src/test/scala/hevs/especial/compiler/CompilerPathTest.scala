@@ -1,14 +1,14 @@
-package hevs.androiduino.compiler
+package hevs.especial.compiler
 
 import java.io.File
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.core.Constant
-import hevs.androiduino.dsl.components.digital.DigitalOutput
-import hevs.androiduino.dsl.components.fundamentals.uint1
-import hevs.androiduino.dsl.generator.{RichFile, CodeGenerator}
-import hevs.androiduino.dsl.utils.OSUtils
+import hevs.especial.dsl.components.core.Constant
+import hevs.especial.dsl.components.digital.DigitalOutput
+import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.generator.CodeGenerator
 import hevs.especial.simulation.MonitorServer
+import hevs.especial.utils.{OSUtils, RichFile}
 
 /**
  * Path example from a program to the QEMU simulation.

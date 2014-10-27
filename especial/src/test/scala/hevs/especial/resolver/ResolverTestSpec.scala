@@ -1,7 +1,7 @@
-package hevs.androiduino.resolver
+package hevs.especial.resolver
 
-import hevs.androiduino.dsl.components.fundamentals.{Component, hw_implemented}
-import hevs.androiduino.dsl.generator.Resolver
+import hevs.especial.dsl.components.fundamentals.hw_implemented
+import hevs.especial.generator.Resolver
 import org.scalatest.{FunSuite, Matchers}
 
 /**
