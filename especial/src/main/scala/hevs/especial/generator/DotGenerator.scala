@@ -1,21 +1,71 @@
-package hevs.androiduino.dsl.generator
+package hevs.especial.generator
 
 import java.io.File
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.ComponentManager.Wire
-import hevs.androiduino.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
-import hevs.androiduino.dsl.utils.{OSUtils, Version}
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.ComponentManager.Wire
+import hevs.especial.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
+import hevs.especial.utils._
 
 import scala.language.existentials
 import scalax.collection.Graph
 import scalax.collection.edge.LDiEdge
 import scalax.collection.io.dot._
 
+/**
+ * Depending on the Settings, export the DOT and the PDF file.
+ * The DOT diagram and the PDF are exported to the "output/<input>/dot" folder.
+ */
+class DotPipe extends Pipeline[String, Unit] {
+
+  override val name = "DotExport"
+
+  /**
+   * The input String is the name of the program.
+   */
+  def run(log: Logger)(input: String): Unit = {
+    if (!Settings.PIPELINE_RUN_DOT) {
+      log.info("DOT generator is disabled.")
+      return
+    }
+
+    // Check the if dot is installed and print the installed version
+    val valid = OSUtils.runWithCodeResult("dot -V")
+    if (valid._1 == 0)
+      log.info(s"Running '${valid._2}'.")
+    else {
+      log.error("Unable to run DOT. Must be installed and in the PATH !")
+      return
+    }
+
+    // Generate the DOT file
+    val res = DotGenerator.generateDotFile(input)
+    if (!res)
+      log.error("Unable to generate the DOT file !")
+    else
+      log.info("DOT file generated.")
+
+    // Generate the PDF file if necessary
+    if (Settings.PIPELINE_EXPORT_PDF) {
+      val res = DotGenerator.convertDotToPdf(input)
+      if (!res)
+        log.error("Unable to generate the PDF file !")
+      else
+        log.info("PDF file generated.")
+    }
+  }
+}
+
+/**
+ * Helper object to generate the DOT file, format it correctly and final convert it to a PDF file.
+ */
 object DotGenerator extends Logging {
 
-  /* General dot diagrams settings */
+  /** DOT output path */
+  private final val OUTPUT_PATH = "output/%s/dot/"
+
+  /** General dot diagrams settings */
   private final val dotSettings =
     """
       |	// Diagram settings
@@ -31,16 +81,22 @@ object DotGenerator extends Logging {
       |// Visualisation of the '%s' program.""".stripMargin
 
   /**
-   * Generate the dot file, save it and also export the pdf version.
-   * @param graphName the title to display on the graph
-   * @param fileName the name of the dot and pdf file
+   * Generate the dot file and save it.
+   * @param progName the name of the program
+   * @return true if file generated correctly
    */
-  def generateDotFile(graphName: String, fileName: String) = {
-    val path = s"output/dot/$fileName.dot"
-    val dot = generateDot(graphName)
-    val f: RichFile = new File(path) // Create the DOT file in the folder "output/dot/"
-    f.write(dot)
-    convertDotToPdf(fileName) // Export the DOT image
+  def generateDotFile(progName: String): Boolean = {
+    val dot = generateDot(progName)
+
+    // Create the folder if it not exist
+    val folder: RichFile = new File(String.format(OUTPUT_PATH, progName))
+    if (!folder.createEmptyFolder())
+      return false // Error: unable to create the folder
+
+    // Generate the DOT file to the created folder
+    val path = String.format(OUTPUT_PATH, progName) + progName + ".dot"
+    val f: RichFile = new File(path)
+    f.write(dot) // Write succeed or not
   }
 
   /**
@@ -58,20 +114,16 @@ object DotGenerator extends Logging {
     header + "\n" + dotLines.mkString
   }
 
-  private def convertDotToPdf(fileName: String) = {
-    // FIXME: use a pipeline for this
-
+  def convertDotToPdf(progName: String): Boolean = {
     // Convert the dot file to PDF with the same file name
-    val path = s"output/dot/$fileName"
-
-    // Check the if dot is installed and print the installed version
-    val valid = OSUtils.runWithCodeResult("dot -V")
-    if (valid._1 == 0) {
-      info(s"Running '${valid._2}'.")
-      OSUtils.runWithResult(s"dot $path.dot -Tpdf -o $path.pdf")
-    }
+    val path = String.format(OUTPUT_PATH, progName)
+    val dotFile = path + progName + ".dot"
+    val pdfFile = path + progName + ".pdf"
+    val res = OSUtils.runWithCodeResult(s"dot $dotFile -Tpdf -o $pdfFile")
+    if (res._1 == 0)
+      true
     else
-      error("Unable to run dot. Must be installed and in the PATH !")
+      false
   }
 }
 
@@ -179,7 +231,7 @@ class DotGenerator(val graphName: String) {
    * @return the type of the connection as a label value
    */
   private def labelName(w: Wire): String = {
-    // Something like "hevs.androiduino.dsl.components.fundamentals.uint1"
+    // Something like "hevs.especial.dsl.components.fundamentals.uint1"
     val t = w.from.getType
 
     // Return the child class (ex: uint1) as String

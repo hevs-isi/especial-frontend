@@ -1,4 +1,4 @@
-package hevs.androiduino.dsl.utils
+package hevs.especial.utils
 
 /**
  * Base pipeline class used to chain different operations together.
@@ -7,6 +7,7 @@ package hevs.androiduino.dsl.utils
  * chains together (similar to the `andThen` method of Scala). A logger is used to report any info or error. If an
  * error is reported, the pipeline just stop.
  *
+ * Code adapted from:
  * @see http://stackoverflow.com/a/9606174/938081
  * @see https://gist.github.com/richdougherty/730e03fc865870c46724
  * @see https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Pipeline.scala
