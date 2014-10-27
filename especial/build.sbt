@@ -28,17 +28,12 @@ parallelExecution in ThisBuild := false
 scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 
 
+
 // Custom clean task
-clean ~= { x => println("Remove output code and dot files...")}
+clean ~= { x => println("Remove output files...")}
 
-// Clean generated C files from the output folder
+// Delete all generated files in the output directory
 cleanFiles <++= baseDirectory { base => {
   // Add files to the path
-  (base / "output/code/" * "*.c").get ++ (base / "output/code/" * "*.c.orig").get
-}}
-
-// Clean generated DOT files from the output folder
-cleanFiles <++= baseDirectory { base => {
-  // Add files to the path
-  (base / "output/dot/" * "*.dot").get ++ (base / "output/dot/" * "*.pdf").get
+  (base / "output/" * "*").get
 }}
