@@ -3,28 +3,27 @@ package hevs.especial.genenator
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.dsl.components.logic.And2
 
-class Sch1Code extends STM32TestSuite {
+class Sch3Code extends STM32TestSuite {
 
   def getDslCode = {
     // Inputs
-    val btn1 = DigitalInput(4)
     val cst1 = Constant(uint1(v = true))
+    val btn1 = DigitalInput(4)
 
-    val led4 = DigitalOutput(42) // NC
+    // Logic
+    val and1 = And2()
 
-    // Outputs
+    // Output
     val led1 = DigitalOutput(7)
-    val led2 = DigitalOutput(8)
-    val led3 = DigitalOutput(9)
 
     // Connecting stuff
-    btn1.out --> led1.in
-    btn1.out --> led2.in
-
-    cst1.out --> led3.in
+    and1.out --> led1.in
+    cst1.out --> and1.in1
+    btn1.out --> and1.in2
   }
 
   runDotGeneratorTest()
-  runCodeCheckerTest(hasWarnings = true)
+  runCodeCheckerTest(hasWarnings = false)
 }

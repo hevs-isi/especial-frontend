@@ -19,23 +19,14 @@ import scalax.collection.io.dot._
  */
 class DotPipe extends Pipeline[String, Unit] {
 
-  override val name = "DotExport"
-
   /**
-   * The input String is the name of the program.
+   * Create the DOT and the PDF file that correspond to a DSL program.
+   * @param input the name of the program
+   * @return nothing (not used)
    */
   def run(log: Logger)(input: String): Unit = {
     if (!Settings.PIPELINE_RUN_DOT) {
-      log.info("DOT generator is disabled.")
-      return
-    }
-
-    // Check the if dot is installed and print the installed version
-    val valid = OSUtils.runWithCodeResult("dot -V")
-    if (valid._1 == 0)
-      log.info(s"Running '${valid._2}'.")
-    else {
-      log.error("Unable to run DOT. Must be installed and in the PATH !")
+      log.info(s"$name is disabled.")
       return
     }
 
@@ -48,6 +39,15 @@ class DotPipe extends Pipeline[String, Unit] {
 
     // Generate the PDF file if necessary
     if (Settings.PIPELINE_EXPORT_PDF) {
+      // Check the if dot is installed and print the installed version
+      val valid = OSUtils.runWithCodeResult("dot -V")
+      if (valid._1 == 0)
+        log.info(s"Running '${valid._2}'.")
+      else {
+        log.error("Unable to run DOT. Must be installed and in the PATH !")
+        return
+      }
+
       val res = DotGenerator.convertDotToPdf(input)
       if (!res)
         log.error("Unable to generate the PDF file !")
@@ -137,7 +137,7 @@ object DotGenerator extends Logging {
 class DotGenerator(val graphName: String) {
 
   // Basic diagram settings and title
-  private final val name = "\"Visualisation of the '" + graphName + "' program.\""
+  private final val name = "\"\\n\\nVisualisation of the '" + graphName + "' program.\""
   private final val root = DotRootGraph(directed = true, id = Some("G"), kvList = Seq(DotAttr("label", name)))
 
   /**

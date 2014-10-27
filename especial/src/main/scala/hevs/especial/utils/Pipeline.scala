@@ -18,9 +18,9 @@ package hevs.especial.utils
 abstract class Pipeline[-I, +O] {
 
   /**
-   * Name of the pipeline block (required).
+   * Name of the pipeline block. By default, it is the name of the class.
    */
-  val name: String
+  val name: String = this.getClass.getSimpleName
 
   /**
    * Execute the pipeline block.

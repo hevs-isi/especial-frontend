@@ -25,7 +25,8 @@ class LoggerTest extends FunSuite {
     intercept[LoggerError] {
       l.terminateIfErrors()
     }
-    assert(!l.hasErrors)
+
+    assert(l.hasErrors)
     l.info("Error detected.")
   }
 }

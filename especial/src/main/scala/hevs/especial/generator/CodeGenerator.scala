@@ -3,7 +3,6 @@ package hevs.especial.generator
 import java.io.File
 
 import grizzled.slf4j.Logging
-import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.fundamentals.hw_implemented
 import hevs.especial.utils.OSUtils.{Linux, Windows}
 import hevs.especial.utils.{OSUtils, OsNotSupported, RichFile, Version}
@@ -17,19 +16,6 @@ import scala.collection.mutable
 object CodeGenerator extends Logging {
 
   private val cps = mutable.ListBuffer.empty[hw_implemented]
-  private var warnings: Option[String] = None
-
-  /**
-   * A program without warning.
-   * @return true if no warnings found, false otherwise
-   */
-  def hasNoWarning = !hasWarnings
-
-  /**
-   * A program with warnings.
-   * @return true if warnings found, false otherwise
-   */
-  def hasWarnings: Boolean = warnings.isDefined
 
   def generateCodeFile(progName: String, fileName: String): String = {
     // FIXME: use a pipeline for this
@@ -65,7 +51,6 @@ object CodeGenerator extends Logging {
   def generateCode(progName: String): String = {
 
     // Clear the object state
-    warnings = None
     cps.clear()
 
     // Resolve the graph before generating the C code
@@ -74,10 +59,6 @@ object CodeGenerator extends Logging {
     // Order the result by pass number (sort by key value)
     val ordered = resolve.toSeq.sortBy(_._1)
     cps ++= ordered flatMap (x => x._2)
-
-    // Check warnings and print if any
-    checkWarnings()
-    printWarnings()
 
     // Generate the code
     val result = new StringBuilder
@@ -94,15 +75,6 @@ object CodeGenerator extends Logging {
     result ++= endLoopMain()
     result ++= endMain(progName)
     result.result()
-  }
-
-  /**
-   * Display warnings (if any). Warnings are automatically check when the code is generated.
-   */
-  def printWarnings() = warnings match {
-    case Some(w) =>
-      info(w)
-    case _ =>
   }
 
   def preamble(progName: String) = {
@@ -180,33 +152,4 @@ object CodeGenerator extends Logging {
   def endLoopMain() = "}\n"
 
   def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
-
-  /**
-   * Run some checks to detect warnings.
-   */
-  def checkWarnings(): Boolean = {
-
-    val out = new StringBuilder
-
-    // Unconnected components
-    val c = ComponentManager.findUnconnectedComponents
-    if (c.nonEmpty) {
-      out ++= s"WARN: ${c.size} component(s) declared but not connected at all:\n"
-      out ++= "\t- " + c.mkString("\n\t- ") + "\n\n"
-    }
-
-    // Unconnected ports
-    val p = ComponentManager.findUnconnectedPorts
-    if (p.nonEmpty) {
-      out ++= s"WARN: ${p.size} unconnected port(s) found:\n"
-      out ++= "\t- " + p.mkString("\n\t- ") + "\n"
-    }
-
-    if (out.isEmpty)
-      warnings = None // No warning
-    else
-      warnings = Some("WARNINGS:\n\n" + out.toString())
-
-    warnings.isDefined
-  }
 }

@@ -18,6 +18,16 @@ class Logger {
   var hasErrors = false
 
   /**
+   * Warnings have occurred or not.
+   */
+  var hasWarnings = false
+
+  def reset() = {
+    hasErrors = false
+    hasWarnings = false
+  }
+
+  /**
    * Trace a message.
    * @param msg message to print
    */
@@ -39,7 +49,10 @@ class Logger {
    * Print a warning message.
    * @param msg message to print
    */
-  def warn(msg: => Any): Unit = logger.warn(msg)
+  def warn(msg: => Any): Unit = {
+    hasWarnings = true // Report a warning
+    logger.warn(msg)
+  }
 
   /**
    * Print an error.
@@ -63,9 +76,7 @@ class Logger {
    * Errors have occurred. Throw a `LoggerError` exception to terminate the program and clean previous errors.
    */
   def terminateIfErrors() = {
-    if (hasErrors) {
-      hasErrors = false
+    if (hasErrors)
       throw new LoggerError("Program stopped because of errors !")
-    }
   }
 }

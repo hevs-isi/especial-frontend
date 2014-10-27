@@ -6,12 +6,19 @@ package hevs.especial.utils
  */
 object Settings {
 
+  /* DOT */
+
   /** Generate the DOT diagram or PDF file corresponding to the program. */
   final var PIPELINE_RUN_DOT: Boolean = true
-  final val PIPELINE_EXPORT_PDF: Boolean = true // DOT must be enabled
+
+  final val PIPELINE_EXPORT_PDF: Boolean = true // PIPELINE_RUN_DOT must be enabled and DOT installed
+
+  /* WARNINGS */
 
   /** Print warnings before generating the code from the DSL program. */
-  final val PIPELINE_PRINT_WARNINGS: Boolean = true
+  final val PIPELINE_RUN_CODE_CHECKER: Boolean = true
+
+  /* ASTYLE */
 
   /** Format the generated C code using AStyle. */
   final val PIPELINE_RUN_ASTYLE: Boolean = true
@@ -21,5 +28,4 @@ object Settings {
 
   /** Port used by the Scala TCP Monitor Server to communicate with the QEMU client. */
   final val MONITOR_TCP_CMD_PORT = 14001
-
 }

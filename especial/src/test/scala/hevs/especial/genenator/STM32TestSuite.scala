@@ -2,8 +2,8 @@ package hevs.especial.genenator
 
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.digital.DigitalOutput
-import hevs.especial.generator.DotPipe
-import hevs.especial.utils.Logger
+import hevs.especial.generator.{CodeChecker, DotPipe}
+import hevs.especial.utils.{Logger, Settings}
 import org.scalatest.FunSuite
 
 /**
@@ -21,8 +21,10 @@ abstract class STM32TestSuite extends FunSuite {
 
   /** Logger used to report errors with the pipeline. */
   private val log = new Logger
+  log.reset() // Reset before all tests
 
   private val dot = new DotPipe().run(log) _
+  private val checker = new CodeChecker().run(log) _
 
   /** The name of the test is its class name. */
   private val progName = this.getClass.getSimpleName
@@ -46,16 +48,44 @@ abstract class STM32TestSuite extends FunSuite {
   /**
    * Run the DOT pipeline block and check if any errors occurs.
    */
-  def runDotTest(): Unit = {
+  def runDotGeneratorTest(): Unit = {
+    if (!Settings.PIPELINE_RUN_DOT)
+      return // Test disabled
+
     // Reset and run the DSL program
     ComponentManager.reset()
-    log.info(s"Test '$progName' started.")
+    test("Dot generator") {
+      log.info(s"Dot generator test for '$progName' started.")
 
-    test("Run DOT") {
       getDslCode
       dot(progName)
 
       checkErrors()
+    }
+  }
+
+  /**
+   * Run the code checker pipeline block
+   * @param hasWarnings true if the DSL program has warnings
+   */
+  def runCodeCheckerTest(hasWarnings: Boolean = false): Unit = {
+    if (!Settings.PIPELINE_RUN_CODE_CHECKER)
+      return // Test disabled
+
+    test("Code checker") {
+      log.info(s"Code checker test for '$progName' started.")
+
+      val warns = checker("")
+      assert(log.hasWarnings == hasWarnings)
+
+      // Not excepted result
+      if (warns != hasWarnings) {
+        if (hasWarnings)
+          fail("Warnings found !")
+        else
+          fail("No warning found !")
+
+      }
     }
   }
 }
