@@ -1,8 +1,8 @@
-package hevs.androiduino.dsl.components
+package hevs.especial.dsl.components
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.fundamentals._
-import hevs.androiduino.dsl.utils.ComponentNotFound
+import hevs.especial.dsl.components.fundamentals._
+import hevs.especial.utils.ComponentNotFound
 
 import scala.collection.mutable
 import scalax.collection.edge.Implicits._

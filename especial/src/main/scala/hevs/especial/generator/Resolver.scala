@@ -1,8 +1,8 @@
-package hevs.androiduino.dsl.generator
+package hevs.especial.generator
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.fundamentals.{Component, hw_implemented}
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.fundamentals.{Component, hw_implemented}
 
 import scala.collection.mutable
 
@@ -14,7 +14,7 @@ import scala.collection.mutable
 object Resolver extends Logging {
 
   // Define the maximum number of passes. After that, the resolver will stop.
-  private val MaxPasses = 64  // Should be enough for now
+  private val MaxPasses = 64 // Should be enough for now
 
   // IDs of components that are generated. Order not valid !
   private val generatedCpId = mutable.Set.empty[Int]

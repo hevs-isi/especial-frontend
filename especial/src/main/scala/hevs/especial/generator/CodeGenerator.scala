@@ -1,12 +1,12 @@
-package hevs.androiduino.dsl.generator
+package hevs.especial.generator
 
 import java.io.File
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.fundamentals.hw_implemented
-import hevs.androiduino.dsl.utils.OSUtils.{Linux, Windows}
-import hevs.androiduino.dsl.utils.{OSUtils, OsNotSupported, Version}
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.fundamentals.hw_implemented
+import hevs.especial.utils.OSUtils.{Linux, Windows}
+import hevs.especial.utils.{OSUtils, OsNotSupported, RichFile, Version}
 
 import scala.collection.mutable
 
@@ -52,7 +52,7 @@ object CodeGenerator extends Logging {
     }
 
     val valid = OSUtils.runWithCodeResult(run + " -V")
-    if(valid._1 == 0){
+    if (valid._1 == 0) {
       info(s"Running '${valid._2}'.")
       OSUtils.runWithResult(run + s" --style=kr -Y $path")
     }

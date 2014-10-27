@@ -1,6 +1,6 @@
-package hevs.androiduino.dsl.components.fundamentals
+package hevs.especial.dsl.components.fundamentals
 
-import hevs.androiduino.dsl.components.ComponentManager
+import hevs.especial.dsl.components.ComponentManager
 
 /**
  * Base class for all components (blocks) used in a program. These components, with there connections,

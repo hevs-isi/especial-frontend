@@ -1,6 +1,6 @@
-package hevs.androiduino.dsl.components.digital
+package hevs.especial.dsl.components.digital
 
-import hevs.androiduino.dsl.components.fundamentals.{Component, uint1}
+import hevs.especial.dsl.components.fundamentals.{uint1, Component}
 
 /**
  * A digital input or output is defined by a unique pin number.

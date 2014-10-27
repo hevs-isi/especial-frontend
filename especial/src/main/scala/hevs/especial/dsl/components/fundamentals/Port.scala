@@ -1,8 +1,8 @@
-package hevs.androiduino.dsl.components.fundamentals
+package hevs.especial.dsl.components.fundamentals
 
 import grizzled.slf4j.Logging
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.utils.{PortInputShortCircuit, PortTypeMismatch}
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch}
 
 import scala.reflect.runtime.universe._
 

@@ -1,7 +1,7 @@
-package hevs.androiduino.dsl.components.digital
+package hevs.especial.dsl.components.digital
 
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.fundamentals.{OutputPort, hw_implemented, uint1}
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.fundamentals.{OutputPort, hw_implemented, uint1}
 
 import scala.collection.mutable.ListBuffer
 

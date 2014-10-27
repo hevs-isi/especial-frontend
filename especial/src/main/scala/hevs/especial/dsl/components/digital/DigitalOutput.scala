@@ -1,6 +1,6 @@
-package hevs.androiduino.dsl.components.digital
+package hevs.especial.dsl.components.digital
 
-import hevs.androiduino.dsl.components.fundamentals.{InputPort, hw_implemented}
+import hevs.especial.dsl.components.fundamentals.{InputPort, hw_implemented}
 
 case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with hw_implemented {
 

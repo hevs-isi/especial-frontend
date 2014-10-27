@@ -1,7 +1,8 @@
-package hevs.androiduino.dsl.components.core
+package hevs.especial.dsl.components.core
 
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.fundamentals._
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.fundamentals.{CType, Component, OutputPort, hw_implemented}
+
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 

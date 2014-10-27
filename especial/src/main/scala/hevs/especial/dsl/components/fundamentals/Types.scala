@@ -1,6 +1,6 @@
-package hevs.androiduino.dsl.components.fundamentals
+package hevs.especial.dsl.components.fundamentals
 
-import hevs.androiduino.dsl.utils.Logger
+import hevs.especial.utils.Logger
 
 /**
  * Abstract type that can be used in the native C code.

@@ -1,6 +1,6 @@
-import hevs.androiduino.dsl.components.core.Constant
-import hevs.androiduino.dsl.components.fundamentals._
-import hevs.androiduino.dsl.components.fundamentals.ImplicitTypes._
+import hevs.especial.dsl.components.core.Constant
+import hevs.especial.dsl.components.fundamentals.{uint1, uint8}
+
 object f {
   val a: Byte = 12
   val b: Int = 3

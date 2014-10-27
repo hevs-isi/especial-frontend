@@ -1,6 +1,6 @@
-package hevs.androiduino.dsl.components
+package hevs.especial.dsl.components
 
-import hevs.androiduino.dsl.components.fundamentals.{InputPort, OutputPort}
+import hevs.especial.dsl.components.fundamentals.{InputPort, OutputPort}
 
 trait In1 {
   def in: InputPort[_]

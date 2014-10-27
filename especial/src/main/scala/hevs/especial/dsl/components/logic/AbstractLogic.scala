@@ -1,7 +1,7 @@
-package hevs.androiduino.dsl.components.logic
+package hevs.especial.dsl.components.logic
 
-import hevs.androiduino.dsl.components.ComponentManager
-import hevs.androiduino.dsl.components.fundamentals._
+import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.fundamentals._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
@@ -14,17 +14,7 @@ import scala.collection.mutable.ListBuffer
  */
 abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component with hw_implemented {
 
-  type T = uint1  // Inputs are outputs are boolean values
-
-  /**
-   * List of inputs. Use the `in` method to access to it safely.
-   */
-  private val inputs = mutable.ListBuffer.empty[InputPort[uint1]]
-  private val tpe = uint1().getType
-  private val outputVarName = s"outComp$getId"
-
-  // Create input(s) of the component
-  createInputs()
+  type T = uint1 // Inputs are outputs are boolean values
 
   // One single boolean output
   val out = new OutputPort[T](this) {
@@ -36,6 +26,15 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
       inputs.mkString(s" $operator ") // Example: in1Comp2 & in2Comp2 & ...
     }
   }
+  /**
+   * List of inputs. Use the `in` method to access to it safely.
+   */
+  private val inputs = mutable.ListBuffer.empty[InputPort[uint1]]
+  private val tpe = uint1().getType
+
+  // Create input(s) of the component
+  createInputs()
+  private val outputVarName = s"outComp$getId"
 
   def getOutputs = Some(Seq(out))
 
@@ -53,23 +52,6 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
       throw new IndexOutOfBoundsException(s"Input $index does not exit. Goes from 1 to ${inputs.size} !")
     inputs(index - 1)
   }
-
-  private def inputVarName(index: Int) = s"in${index}Comp$getId" // Example: in1Comp2
-
-  private def createInputs() = {
-    for (i <- 1 to nbrInput) {
-      val inVar = inputVarName(i)
-      val in = new InputPort[T](this) {
-        override val description = s"input $i"
-
-        // Use global variable
-        override def setInputValue(s: String): String = s"$inVar = $s"
-      }
-      inputs += in
-    }
-  }
-
-  /* Code generation */
 
   override def getGlobalCode = out.isConnected match {
     // Input variables declarations of the gate
@@ -95,4 +77,21 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
       Some(result.mkString("\n"))
     case _ => None
   }
+
+  /* Code generation */
+
+  private def createInputs() = {
+    for (i <- 1 to nbrInput) {
+      val inVar = inputVarName(i)
+      val in = new InputPort[T](this) {
+        override val description = s"input $i"
+
+        // Use global variable
+        override def setInputValue(s: String): String = s"$inVar = $s"
+      }
+      inputs += in
+    }
+  }
+
+  private def inputVarName(index: Int) = s"in${index}Comp$getId" // Example: in1Comp2
 }
