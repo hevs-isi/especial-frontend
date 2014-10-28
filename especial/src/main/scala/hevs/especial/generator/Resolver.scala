@@ -4,7 +4,7 @@ import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.fundamentals.{Component, hw_implemented}
 import hevs.especial.generator.Resolver.O
-import hevs.especial.utils.{Context, Logger, Pipeline}
+import hevs.especial.utils.{Settings, Context, Logger, Pipeline}
 
 import scala.collection.mutable
 
@@ -19,9 +19,6 @@ object Resolver {
  * Unconnected components are ignored.
  */
 class Resolver extends Pipeline[Any, O] with Logging {
-
-  // Define the maximum number of passes. After that, the resolver will stop.
-  private val MaxPasses = 64 // Should be enough for now
 
   // IDs of components that are generated. Order not valid !
   private val generatedCpId = mutable.Set.empty[Int]
@@ -73,7 +70,7 @@ class Resolver extends Pipeline[Any, O] with Logging {
     trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
     do {
       map += (nbrOfPasses -> nextPass) // Resolve each pass for the current component graph
-    } while (generatedCpId.size != connectedNbr && nbrOfPasses < MaxPasses)
+    } while (generatedCpId.size != connectedNbr && nbrOfPasses < Settings.RESOLVER_MAX_PASSES)
 
     if (generatedCpId.size == connectedNbr) {
       trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +

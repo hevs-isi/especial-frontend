@@ -8,9 +8,6 @@ import hevs.especial.utils._
  */
 class CodeFormatter extends Pipeline[String, String] {
 
-  /** Path to the AStyle binary file */
-  private val ASTYLE_PATH = "./third_party/astyle/%s"
-
   /**
    * Format the generated C code using AStyle and write the file to the output directory.
    *
@@ -26,8 +23,8 @@ class CodeFormatter extends Pipeline[String, String] {
 
     // Call the AStyle conversion program
     val path = OSUtils.getOsType match {
-      case Windows => ASTYLE_PATH.format("astyle.exe")
-      case Linux => ASTYLE_PATH.format("astyle")
+      case Windows => Settings.ASTYLE_PATH.format("astyle.exe")
+      case Linux => Settings.ASTYLE_PATH.format("astyle")
       case _ =>
         ctx.log.error("OS not supported. Cannot run AStyle !")
         return input // Return the path of the none formatted file

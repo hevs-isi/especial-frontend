@@ -46,6 +46,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
   /**
    * Generate the C code.
+   * 
    * @param progName the name of the C program
    * @param resolve the resolver output
    * @return the C code as a String (not formatted)

@@ -91,9 +91,10 @@ abstract class STM32TestSuite extends FunSuite {
       val resolve = new Resolver()
       val gen = new CodeGenerator()
       val formatter = new CodeFormatter()
+      val compiler = new CodeCompiler()
 
       // The pipeline
-      val pipe = resolve -> gen -> formatter
+      val pipe = resolve -> gen -> formatter -> compiler
 
       val res = pipe.run(ctx)("")
     }
