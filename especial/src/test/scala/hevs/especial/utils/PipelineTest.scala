@@ -7,24 +7,21 @@ import org.scalatest.{FunSuite, Matchers}
  */
 class PipelineTest extends FunSuite with Matchers {
 
-  val logger = new Logger
+  /** Pipeline context */
+  val ctx = new Context(this.getClass.getSimpleName)
 
   class PipeA extends Pipeline[Int, Int] {
-    override val name = "PipeA"
-
-    override def run(log: Logger)(i: Int) = i + 10
+    override def run(ctx: Context)(i: Int) = i + 10
   }
 
   class PipeB extends Pipeline[Int, Float] {
-    override val name = "PipeB"
-
-    override def run(log: Logger)(i: Int) = i / 2.0f
+    override def run(ctx: Context)(i: Int) = i / 2.0f
   }
 
   class PipeC extends Pipeline[Float, String] {
-    override val name = "PipeC"
+    override val name = "MyPipeC"
 
-    override def run(log: Logger)(f: Float) = String.valueOf(f)
+    override def run(ctx: Context)(f: Float) = String.valueOf(f)
   }
 
   // Pipeline under tests
@@ -33,9 +30,9 @@ class PipelineTest extends FunSuite with Matchers {
   val pC = new PipeC
 
   test("run each block individually") {
-    val resA = pA.run(logger)(10)
-    val resB = pB.run(logger)(10)
-    val resC = pC.run(logger)(10)
+    val resA = pA.run(ctx)(10)
+    val resB = pB.run(ctx)(10)
+    val resC = pC.run(ctx)(10)
 
     resA shouldBe an[java.lang.Integer]
     resA shouldBe 20
@@ -47,24 +44,27 @@ class PipelineTest extends FunSuite with Matchers {
 
   test("chain 2 blocks") {
     val d = pA -> pB
-    val resD = d.run(logger)(50)
+    ctx.log.info(s"Run '$d'.")
 
+    val resD = d.run(ctx)(50)
     resD shouldBe a[java.lang.Float]
     resD shouldBe 30
   }
 
   test("chain 3 blocks") {
     val d = pA -> pB -> pC
-    val resD = d.run(logger)(70)
+    ctx.log.info(s"Run '$d'.")
 
+    val resD = d.run(ctx)(70)
     resD shouldBe a[java.lang.String]
     resD shouldBe "40.0"
   }
 
   test("chain the same block") {
     val d = pA -> pA -> pA
-    val resD = d.run(logger)(70)
+    ctx.log.info(s"Run '$d'.")
 
+    val resD = d.run(ctx)(70)
     resD shouldBe an[java.lang.Integer]
     resD shouldBe 100
   }

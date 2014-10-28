@@ -3,18 +3,22 @@ package hevs.especial.generator
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.fundamentals.{Component, hw_implemented}
-import hevs.especial.utils.{Logger, Pipeline}
+import hevs.especial.generator.Resolver.O
+import hevs.especial.utils.{Context, Logger, Pipeline}
 
 import scala.collection.mutable
+
+object Resolver {
+  // Output type of the resolver. Used by the Code generator.
+  type O = Map[Int, Set[hw_implemented]]
+}
 
 /**
  * The `Resolver` object can be used to resolve a graph of components to get the right order on which component's
  * code must be generated when.
  * Unconnected components are ignored.
  */
-class Resolver extends Pipeline[Any, Map[Int, Set[hw_implemented]]] with Logging {
-
-  type O = Map[Int, Set[hw_implemented]]
+class Resolver extends Pipeline[Any, O] with Logging {
 
   // Define the maximum number of passes. After that, the resolver will stop.
   private val MaxPasses = 64 // Should be enough for now
@@ -30,10 +34,12 @@ class Resolver extends Pipeline[Any, Map[Int, Set[hw_implemented]]] with Logging
 
   /**
    * Resolve the current graph.
+   *
+   * @param ctx the context of the program with the logger
    * @param input nothing (not used)
    * @return the resolver graph
    */
-  def run(log: Logger)(input: Any): O = resolve(log)
+  def run(ctx: Context)(input: Any): O = resolve(ctx.log)
 
   /**
    * Resolve a graph of components. Unconnected components are ignored.

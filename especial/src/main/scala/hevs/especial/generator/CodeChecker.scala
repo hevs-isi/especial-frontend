@@ -1,7 +1,7 @@
 package hevs.especial.generator
 
 import hevs.especial.dsl.components.ComponentManager
-import hevs.especial.utils.{Logger, Pipeline, Settings}
+import hevs.especial.utils.{Context, Pipeline, Settings}
 
 /**
  * Helper object to check if a code has warnings or not.
@@ -29,21 +29,23 @@ class CodeChecker extends Pipeline[Any, Boolean] {
 
   /**
    * Analyse the `ComponentManager` and print some warnings if any.
+   *
+   * @param ctx the context of the program with the logger
    * @param input nothing (not used)
    * @return true if warnings found, false otherwise
    */
-  def run(log: Logger)(input: Any): Boolean = {
+  def run(ctx: Context)(input: Any): Boolean = {
     if (!Settings.PIPELINE_RUN_CODE_CHECKER) {
-      log.info(s"$name is disabled.")
+      ctx.log.info(s"$name is disabled.")
       return false
     }
 
     val warns = checkWarnings()
     if (warns.isDefined)
       // Print warnings
-      log.warn("WARNINGS:\n\n" + warns.get)
+      ctx.log.warn("WARNINGS:\n\n" + warns.get)
     else
-      log.info("No warning found.")
+      ctx.log.info("No warning found.")
 
     warns.isDefined // Warning found or not
   }

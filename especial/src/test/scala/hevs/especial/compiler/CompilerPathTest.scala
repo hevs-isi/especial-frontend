@@ -6,9 +6,9 @@ import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.digital.DigitalOutput
 import hevs.especial.dsl.components.fundamentals.uint1
-import hevs.especial.generator.CodeGenerator
+import hevs.especial.generator.{Resolver, CodeGenerator}
 import hevs.especial.simulation.MonitorServer
-import hevs.especial.utils.{OSUtils, RichFile}
+import hevs.especial.utils.{Context, OSUtils, RichFile}
 
 /**
  * Path example from a program to the QEMU simulation.
@@ -23,8 +23,12 @@ object CompilerPathTest extends App with Logging {
   }
 
   val code = new Code
-  val c = CodeGenerator.generateCode("code")
-  val f: RichFile = new File("csrc/src/main.c")
+
+  val ctx = new Context("Code")
+  val resolve = new Resolver().run(ctx)("")
+  val c = new CodeGenerator().run(ctx)(resolve)
+
+  //val f: RichFile = new File("csrc/src/main.c")
 
   // Must be in "/usr/bin/"
   // arm-none-eabi-size

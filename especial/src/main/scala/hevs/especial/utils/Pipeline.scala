@@ -24,11 +24,11 @@ abstract class Pipeline[-I, +O] {
 
   /**
    * Execute the pipeline block.
-   * @param log the logger used to report if any error occur
+   * @param ctx the context of the program with the logger
    * @param input the input value of the pipeline
    * @return the result of the pipeline
    */
-  def run(log: Logger)(input: I): O
+  def run(ctx: Context)(input: I): O
 
   /**
    * Used to chain pipelines. Create a new Pipeline from these two. Compute the first pipeline and then the second
@@ -42,10 +42,10 @@ abstract class Pipeline[-I, +O] {
     // Name of the chain of pipelines
     override val name = Pipeline.this.name + " -> " + next.name
 
-    def run(log: Logger)(v: I): F = {
-      val first: O = Pipeline.this.run(log)(v) // Run the first one
-      log.terminateIfErrors()
-      next.run(log)(first) // Run second with the result of the first one
+    def run(ctx: Context)(v: I): F = {
+      val first: O = Pipeline.this.run(ctx)(v) // Run the first one
+      ctx.log.terminateIfErrors()
+      next.run(ctx)(first) // Run second with the result of the first one
     }
   }
 

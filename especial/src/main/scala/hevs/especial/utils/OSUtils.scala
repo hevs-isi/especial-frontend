@@ -66,7 +66,7 @@ object OSUtils {
    * Run a command and return the exit code and the result. If the command cannot be executed,
    * the error code will be `-1` (no exception is thrown).
    * @param cmd the command to run
-   * @return the result and the exit code of the command. `0` if success.
+   * @return the result and the exit code of the command. `0` for a success, negative if error.
    */
   def runWithCodeResult(cmd: String): (Int, String) = {
     val out = mutable.ListBuffer.empty[String]

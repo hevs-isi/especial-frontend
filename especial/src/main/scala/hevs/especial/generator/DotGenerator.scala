@@ -21,46 +21,49 @@ class DotPipe extends Pipeline[String, Unit] {
 
   /**
    * Create the DOT and the PDF file that correspond to a DSL program.
+   * Files written directly in the output folder (pipeline output not used).
+   *
+   * @param ctx the context of the program with the logger
    * @param input the name of the program
    * @return nothing (not used)
    */
-  def run(log: Logger)(input: String): Unit = {
+  def run(ctx: Context)(input: String): Unit = {
     if (!Settings.PIPELINE_RUN_DOT) {
-      log.info(s"$name is disabled.")
+      ctx.log.info(s"$name is disabled.")
       return
     }
 
     // Generate the DOT file
     val res = DotGenerator.generateDotFile(input)
     if (!res)
-      log.error("Unable to generate the DOT file !")
+      ctx.log.error("Unable to generate the DOT file !")
     else
-      log.info("DOT file generated.")
+      ctx.log.info("DOT file generated.")
 
     // Generate the PDF file if necessary
     if (Settings.PIPELINE_EXPORT_PDF) {
       // Check the if dot is installed and print the installed version
       val valid = OSUtils.runWithCodeResult("dot -V")
       if (valid._1 == 0)
-        log.info(s"Running '${valid._2}'.")
+        ctx.log.info(s"Running '${valid._2}'.")
       else {
-        log.error("Unable to run DOT. Must be installed and in the PATH !")
+        ctx.log.error("Unable to run DOT. Must be installed and in the PATH !")
         return
       }
 
       val res = DotGenerator.convertDotToPdf(input)
       if (!res)
-        log.error("Unable to generate the PDF file !")
+        ctx.log.error("Unable to generate the PDF file !")
       else
-        log.info("PDF file generated.")
+        ctx.log.info("PDF file generated.")
     }
   }
 }
 
 /**
- * Helper object to generate the DOT file, format it correctly and final convert it to a PDF file.
+ * Helper object to generate the DOT file, format it correctly and finally convert it to a PDF file.
  */
-object DotGenerator extends Logging {
+object DotGenerator {
 
   /** DOT output path */
   private final val OUTPUT_PATH = "output/%s/dot/"
@@ -120,10 +123,7 @@ object DotGenerator extends Logging {
     val dotFile = path + progName + ".dot"
     val pdfFile = path + progName + ".pdf"
     val res = OSUtils.runWithCodeResult(s"dot $dotFile -Tpdf -o $pdfFile")
-    if (res._1 == 0)
-      true
-    else
-      false
+    res._1 == 0 // Exit '0' is OK
   }
 }
 
