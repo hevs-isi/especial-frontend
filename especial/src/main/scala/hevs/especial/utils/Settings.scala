@@ -20,8 +20,12 @@ object Settings {
 
   /* ASTYLE */
 
-  /** Format the generated C code using AStyle. */
-  final val PIPELINE_RUN_ASTYLE: Boolean = true
+  /**
+   * Format the generated C code using AStyle.
+   * The original file is automatically renamed with a ".orig" extension.
+   */
+  final val PIPELINE_RUN_FORMATTER: Boolean = true
+
 
   /** Path to the root folder of QEMU for STM32. Relative to the Scala project path. */
   final val PATH_QEMU_STM32 = "../../stm32/qemu_stm32"
