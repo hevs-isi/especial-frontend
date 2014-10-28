@@ -2,9 +2,7 @@ package hevs.especial.generator
 
 import java.io.File
 
-import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.fundamentals.hw_implemented
-import hevs.especial.utils.OSUtils.{Linux, Windows}
 import hevs.especial.utils._
 
 import scala.collection.mutable
@@ -13,50 +11,47 @@ import scala.collection.mutable
  * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
  * and then generate the code for each connected components in the right order.
  */
-object CodeGenerator extends Logging {
+class CodeGenerator extends Pipeline[Resolver.O, String] {
 
+  /** Output path of the generated code. */
+  private final val OUTPUT_PATH = "output/%s/"
+
+  /** List of components to generate (from the resolver). */
   private val cps = mutable.ListBuffer.empty[hw_implemented]
 
-  def generateCodeFile(progName: String, fileName: String): String = {
-    // FIXME: use a pipeline for this
+  /**
+   * Generate the C code from the DSL program using the order given by the resolver. If the resolver failed,
+   * the code generator is not called.
+   * The code generator write the file to the output directory. The output of the pipeline is the path of the generated
+   * file.
+   *
+   * @param ctx the context of the program with the logger
+   * @param input the result of the resolver
+   * @return the path of the C generated file
+   */
+  def run(ctx: Context)(input: Resolver.O): String = {
+    // Generate the C file (the folder should exist and created by the resolver before)
+    val path = String.format(OUTPUT_PATH, ctx.progName) + ctx.progName + ".c"
+    val f: RichFile = new File(path)
 
-    val code = generateCode(progName)
-    // Create the file in the folder "output/dot/"
-    val path = s"output/code/$fileName.c"
-    info(s"Code generated to '$path'.")
-    val file: RichFile = new File(path)
-    file.write(code)
-
-    // Call the AStyle conversion program
-    var run = "./third_party/astyle/%s"
-    OSUtils.getOsType match {
-      case Windows =>
-        run = run.format("astyle.exe")
-      case Linux =>
-        run = run.format("astyle")
-      case _ => throw new OsNotSupported("Cannot run astyle.")
-    }
-
-    val valid = OSUtils.runWithCodeResult(run + " -V")
-    if (valid._1 == 0) {
-      info(s"Running '${valid._2}'.")
-      OSUtils.runWithResult(run + s" --style=kr -Y $path")
-    }
+    val code = generateCode(ctx.progName, input)
+    val res = f.write(code) // Write succeed or not
+    if (res)
+      ctx.log.info(s"Code generated to '$path'.")
     else
-      error("Unable to run AStyle !")
+      ctx.log.info(s"Unable to generate the C code.")
 
-    code // Return the non-formatted code
+    path // The file path as output
   }
 
-  def generateCode(progName: String): String = {
-
-    // Clear the object state
-    cps.clear()
-
-    // Resolve the graph before generating the C code
-    val resolve = new Resolver().run(new Logger)("")
-
-    // Order the result by pass number (sort by key value)
+  /**
+   * Generate the C code.
+   * @param progName the name of the C program
+   * @param resolve the resolver output
+   * @return the C code as a String (not formatted)
+   */
+  private def generateCode(progName: String, resolve: Resolver.O): String = {
+    // Order the result of the resolver by pass number (sort by key value)
     val ordered = resolve.toSeq.sortBy(_._1)
     cps ++= ordered flatMap (x => x._2)
 
@@ -77,7 +72,7 @@ object CodeGenerator extends Logging {
     result.result()
   }
 
-  def preamble(progName: String) = {
+  private def preamble(progName: String) = {
     val ver = Version.getVersion
     val out = new StringBuilder
 
@@ -141,15 +136,15 @@ object CodeGenerator extends Logging {
     out + "//*// --\n"
   }
 
-  def preInit() = "void init() {\n"
+  private def preInit() = "void init() {\n"
 
-  def postInit() = "}\n\n"
+  private def postInit() = "}\n\n"
 
-  def beginMain() = "int main() {\n"
+  private def beginMain() = "int main() {\n"
 
-  def beginLoopMain() = "while(1){\n"
+  private def beginLoopMain() = "while(1){\n"
 
-  def endLoopMain() = "}\n"
+  private def endLoopMain() = "}\n"
 
-  def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
+  private def endMain(fileName: String) = s"}\n// END of '$fileName.c'"
 }
