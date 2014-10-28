@@ -36,7 +36,7 @@ class CodeChecker extends Pipeline[Any, Boolean] {
    */
   def run(ctx: Context)(input: Any): Boolean = {
     if (!Settings.PIPELINE_RUN_CODE_CHECKER) {
-      ctx.log.info(s"$name is disabled.")
+      ctx.log.info(s"$currentName is disabled.")
       return false
     }
 

@@ -19,8 +19,6 @@ class PipelineTest extends FunSuite with Matchers {
   }
 
   class PipeC extends Pipeline[Float, String] {
-    override val name = "MyPipeC"
-
     override def run(ctx: Context)(f: Float) = String.valueOf(f)
   }
 

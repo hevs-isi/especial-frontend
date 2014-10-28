@@ -45,9 +45,10 @@ class RichFile(file: File) {
       if (!file.mkdirs())
         return false
     }
-    else
-    // Delete all files in this existing directory
+    else {
+      // Delete all files in this existing directory
       deleteFilesRecursively()
+    }
     true
   }
 

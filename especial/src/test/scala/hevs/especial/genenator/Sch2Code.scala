@@ -28,4 +28,6 @@ class Sch2Code extends STM32TestSuite {
 
   runDotGeneratorTest()
   runCodeCheckerTest(hasWarnings = true)
+
+  runCodeGenTest()
 }

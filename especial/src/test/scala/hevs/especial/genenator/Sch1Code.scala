@@ -28,6 +28,5 @@ class Sch1Code extends STM32TestSuite {
   runDotGeneratorTest()
   runCodeCheckerTest(hasWarnings = true)
 
-
   runCodeGenTest()
 }

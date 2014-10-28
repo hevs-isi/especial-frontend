@@ -18,12 +18,21 @@ package hevs.especial.utils
 abstract class Pipeline[-I, +O] {
 
   /**
-   * Name of the pipeline block. By default, it is the name of the class.
+   * Name of the pipeline block.
+   * Block names added when blocks are connected together.
    */
-  val name: String = this.getClass.getSimpleName
+  protected val name: Seq[String] = Seq(this.getClass.getSimpleName)
+
+  /**
+   * Get the name of the current pipeline block and not all the chain.
+   * @return the name of the current block
+   */
+  def currentName = name.last
 
   /**
    * Execute the pipeline block.
+   * An exception is thrown when blocks are chained if an error occurs.
+   *
    * @param ctx the context of the program with the logger
    * @param input the input value of the pipeline
    * @return the result of the pipeline
@@ -32,22 +41,29 @@ abstract class Pipeline[-I, +O] {
 
   /**
    * Used to chain pipelines. Create a new Pipeline from these two. Compute the first pipeline and then the second
-   * (like the `andThen` Scala function).
+   * (like the `andThen` Scala function). Immediately stop the program if an error is reported to the logger.
+   *
    * @param next pipeline to execute after the first one
    * @tparam F output of the second pipeline
    * @return the result of the two chained pipeline
    */
   def ->[F](next: Pipeline[O, F]): Pipeline[I, F] = new Pipeline[I, F] {
 
-    // Name of the chain of pipelines
-    override val name = Pipeline.this.name + " -> " + next.name
+    // Chains names of blocks
+    override val name = Pipeline.this.name ++ next.name
 
     def run(ctx: Context)(v: I): F = {
       val first: O = Pipeline.this.run(ctx)(v) // Run the first one
-      ctx.log.terminateIfErrors()
-      next.run(ctx)(first) // Run second with the result of the first one
+      ctx.log.terminateIfErrors(Pipeline.this)
+      val second = next.run(ctx)(first) // Run second with the result of the first one
+      ctx.log.terminateIfErrors(this)
+      second
     }
   }
 
-  override def toString = name
+  /**
+   * Print the name of the current blocks or of several blocks if chained.
+   * @return the name the pipeline chain
+   */
+  override def toString = name.mkString(" -> ")
 }

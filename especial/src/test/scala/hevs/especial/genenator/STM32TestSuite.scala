@@ -2,8 +2,8 @@ package hevs.especial.genenator
 
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.digital.DigitalOutput
-import hevs.especial.generator.{CodeGenerator, Resolver, CodeChecker, DotPipe}
-import hevs.especial.utils.{Context, Logger, Settings}
+import hevs.especial.generator._
+import hevs.especial.utils.{Context, Settings}
 import org.scalatest.FunSuite
 
 /**
@@ -90,10 +90,12 @@ abstract class STM32TestSuite extends FunSuite {
     test("Resolver and code gen") {
       val resolve = new Resolver()
       val gen = new CodeGenerator()
-      val pipe = resolve -> gen // Pipeline
+      val formatter = new CodeFormatter()
+
+      // The pipeline
+      val pipe = resolve -> gen -> formatter
 
       val res = pipe.run(ctx)("")
-      println(res)
     }
   }
 }

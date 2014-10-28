@@ -26,4 +26,6 @@ class Sch3Code extends STM32TestSuite {
 
   runDotGeneratorTest()
   runCodeCheckerTest(hasWarnings = false)
+
+  runCodeGenTest()
 }

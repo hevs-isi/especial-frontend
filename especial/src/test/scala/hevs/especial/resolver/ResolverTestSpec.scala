@@ -23,7 +23,7 @@ abstract class ResolverTestSpec extends FunSuite with Matchers {
     r = new Resolver
     val res = r.run(ctx)("")
 
-    ctx.log.terminateIfErrors()
+    ctx.log.terminateIfErrors(r)
     ctx.log.info("Result:\n" + res.mkString("\n"))
     res
   }

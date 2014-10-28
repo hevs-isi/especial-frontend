@@ -2,7 +2,6 @@ package hevs.especial.generator
 
 import java.io.File
 
-import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.ComponentManager.Wire
 import hevs.especial.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
@@ -28,8 +27,12 @@ class DotPipe extends Pipeline[String, Unit] {
    * @return nothing (not used)
    */
   def run(ctx: Context)(input: String): Unit = {
+    // First block of the pipeline. Force to clean the output folder.
+    val folder: RichFile = new File("output/")
+    folder.createEmptyFolder()
+
     if (!Settings.PIPELINE_RUN_DOT) {
-      ctx.log.info(s"$name is disabled.")
+      ctx.log.info(s"$currentName is disabled.")
       return
     }
 
@@ -47,15 +50,15 @@ class DotPipe extends Pipeline[String, Unit] {
       if (valid._1 == 0)
         ctx.log.info(s"Running '${valid._2}'.")
       else {
-        ctx.log.error("Unable to run DOT. Must be installed and in the PATH !")
+        ctx.log.error(s"Unable to run DOT. Must be installed and in the PATH !\n> ${valid._2}")
         return
       }
 
       val res = DotGenerator.convertDotToPdf(input)
-      if (!res)
-        ctx.log.error("Unable to generate the PDF file !")
-      else
+      if (res._1 == 0)
         ctx.log.info("PDF file generated.")
+      else
+        ctx.log.error(s"Unable to generate the PDF file !\n> ${res._2}")
     }
   }
 }
@@ -117,13 +120,12 @@ object DotGenerator {
     header + "\n" + dotLines.mkString
   }
 
-  def convertDotToPdf(progName: String): Boolean = {
+  def convertDotToPdf(progName: String): (Int, String) = {
     // Convert the dot file to PDF with the same file name
     val path = String.format(OUTPUT_PATH, progName)
     val dotFile = path + progName + ".dot"
     val pdfFile = path + progName + ".pdf"
-    val res = OSUtils.runWithCodeResult(s"dot $dotFile -Tpdf -o $pdfFile")
-    res._1 == 0 // Exit '0' is OK
+    OSUtils.runWithCodeResult(s"dot $dotFile -Tpdf -o $pdfFile")
   }
 }
 

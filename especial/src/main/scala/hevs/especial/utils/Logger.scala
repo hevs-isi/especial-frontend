@@ -45,17 +45,8 @@ class Logger {
    * @param msg message to print
    */
   def warn(msg: => Any): Unit = {
-    hasWarnings = true // Report a warning
     logger.warn(msg)
-  }
-
-  /**
-   * Print an error.
-   * @param msg message to print
-   */
-  def error(msg: => Any): Unit = {
-    hasErrors = true // Report an error
-    logger.error(msg)
+    hasWarnings = true // Report a warning
   }
 
   /**
@@ -68,10 +59,29 @@ class Logger {
   }
 
   /**
-   * Errors have occurred. Throw a `LoggerError` exception to terminate the program and clean previous errors.
+   * Print an error.
+   * @param msg message to print
    */
-  def terminateIfErrors() = {
+  def error(msg: => Any): Unit = {
+    logger.error(msg)
+    hasErrors = true // Report an error
+  }
+
+  /**
+   * @see terminateIfErrors
+   */
+  def terminateIfErrors(): Unit = terminateIfErrors(null)
+
+  /**
+   * Errors have occurred. Throw a `LoggerError` exception to terminate the program and clean previous errors.
+   * @param p the pipeline currently executed or null if not used
+   */
+  def terminateIfErrors(p: Pipeline[_, _]): Unit = {
     if (hasErrors)
-      throw new LoggerError("Program stopped because of errors !")
+      if (p != null)
+        // Print a verbose error with the name of the last pipeline block executed.
+        throw new LoggerError(s"Program stopped because of errors in the '${p.currentName}' block !\nPipeline: $p")
+      else
+        throw new LoggerError(s"Program stopped because of errors !")
   }
 }
