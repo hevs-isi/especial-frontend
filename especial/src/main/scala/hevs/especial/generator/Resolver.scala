@@ -3,6 +3,7 @@ package hevs.especial.generator
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.fundamentals.{Component, hw_implemented}
+import hevs.especial.utils.{Logger, Pipeline}
 
 import scala.collection.mutable
 
@@ -11,7 +12,9 @@ import scala.collection.mutable
  * code must be generated when.
  * Unconnected components are ignored.
  */
-object Resolver extends Logging {
+class Resolver extends Pipeline[Any, Map[Int, Set[hw_implemented]]] with Logging {
+
+  type O = Map[Int, Set[hw_implemented]]
 
   // Define the maximum number of passes. After that, the resolver will stop.
   private val MaxPasses = 64 // Should be enough for now
@@ -25,42 +28,43 @@ object Resolver extends Logging {
   // Count the number of passes to generate the code
   private var nbrOfPasses = 0
 
-  def resolve(): Map[Int, Set[hw_implemented]] = {
-    reset() // First reset the state of the resolver
-    resolveGraph()
-  }
-
   /**
-   * Reset the state of the current `Resolver` object.
+   * Resolve the current graph.
+   * @param input nothing (not used)
+   * @return the resolver graph
    */
-  private def reset(): Unit = {
-    generatedCpId.clear()
-    nextPassCpId.clear()
-    nbrOfPasses = 0
-  }
+  def run(log: Logger)(input: Any): O = resolve(log)
 
   /**
    * Resolve a graph of components. Unconnected components are ignored.
    * The resolver do nothing if there is less than two connected components. After a maximum of `MaxPasses` iterations,
-   * the `Resolver` stops automatically. An empty `Map` is returned if there is nothing to resolve or if it fails.
-   * The index of the returned Map is the pass number.
+   * the `Resolver` stops automatically. An empty `Map` is returned if the resolver failed. The index of the returned
+   * Map is the pass number.
    *
+   * @param log the reporter logger
    * @return ordered Map of hardware to resolve, with the pass number as index
    */
-  private def resolveGraph(): Map[Int, Set[hw_implemented]] = {
+  private def resolve(log: Logger): O = {
 
     val connectedNbr = ComponentManager.numberOfConnectedHardware()
     val unconnectedNbr = ComponentManager.numberOfUnconnectedHardware()
+    val map = mutable.Map.empty[Int, Set[hw_implemented]]
 
     // At least two components must be connected together, or nothing to resolve...
-    if (connectedNbr < 2) {
-      trace(s"Nothing to resolve: $connectedNbr components ($unconnectedNbr unconnected)")
-      return Map.empty // Nothing to resolve
+    if (connectedNbr == 1) {
+      // Nothing to resolve. Just return the component id
+      log.warn(s"Nothing to resolve: $connectedNbr components ($unconnectedNbr unconnected)")
+      map += (0 -> Set(ComponentManager.findConnectedInputHardware.head))
+      return map.toMap
+    }
+    else if (connectedNbr == 0) {
+      // Warning. No connected component found ?
+      log.warn(s"No connected components found ($unconnectedNbr unconnected)")
+      return Map.empty
     }
 
+    // Normal case
     trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
-
-    val map = mutable.Map.empty[Int, Set[hw_implemented]]
     do {
       map += (nbrOfPasses -> nextPass) // Resolve each pass for the current component graph
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < MaxPasses)
@@ -71,8 +75,9 @@ object Resolver extends Logging {
       return map.toMap // Return all components in the right order (immutable Map)
     }
 
-    error(s"Resolver stopped after $getNumberOfPasses passes")
-    Map.empty // Infinite loop
+    // Error: infinite loop. Report an error.
+    log.error(s"Error resolving the graph. Stopped after $getNumberOfPasses passes.")
+    Map.empty
   }
 
   /**

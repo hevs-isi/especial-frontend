@@ -5,7 +5,7 @@ import java.io.File
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.fundamentals.hw_implemented
 import hevs.especial.utils.OSUtils.{Linux, Windows}
-import hevs.especial.utils.{OSUtils, OsNotSupported, RichFile, Version}
+import hevs.especial.utils._
 
 import scala.collection.mutable
 
@@ -54,7 +54,7 @@ object CodeGenerator extends Logging {
     cps.clear()
 
     // Resolve the graph before generating the C code
-    val resolve = Resolver.resolve()
+    val resolve = new Resolver().run(new Logger)("")
 
     // Order the result by pass number (sort by key value)
     val ordered = resolve.toSeq.sortBy(_._1)

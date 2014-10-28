@@ -67,17 +67,24 @@ class ResolverCode5 {
  */
 class ResolverTest extends ResolverTestSpec {
 
+  test("No components") {
+    ComponentManager.reset()
+    val res = testResolver()
+
+    assert(res.isEmpty) // No connected components
+    assert(r.getNumberOfPasses == 0)
+  }
+
   test("1 unconnected component") {
     ComponentManager.reset()
     new ResolverCode1()
-    val hw = testResolver()
+    val res = testResolver()
 
     assert(CodeChecker.hasWarnings)
-    //assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 0)
-    assert(r.getNumberOfPasses == 0) // Optimized, nothing to do
-    assert(hw.isEmpty) // Nothing to resolve
+    assert(r.getNumberOfPasses == 0) // Optimized. No connected components
+    assert(res.isEmpty) // Nothing to resolve
   }
 
   test("1 wire with 1 unconnected component") {
@@ -88,7 +95,6 @@ class ResolverTest extends ResolverTestSpec {
     assert(CodeChecker.hasWarnings)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 2)
-    //assert(ComponentManager.findUnconnectedComponents.head == c.btn1)
     assert(r.getNumberOfPasses == 2)
     assert(res.size == 2)
     assert(res(0) === Set(c.cst1))

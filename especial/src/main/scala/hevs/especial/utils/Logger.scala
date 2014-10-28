@@ -13,19 +13,14 @@ class Logger {
   private val logger = Log(classOf[Logger])
 
   /**
-   * Errors have occurred or not.
-   */
-  var hasErrors = false
-
-  /**
    * Warnings have occurred or not.
    */
   var hasWarnings = false
 
-  def reset() = {
-    hasErrors = false
-    hasWarnings = false
-  }
+  /**
+   * Errors have occurred or not.
+   */
+  var hasErrors = false
 
   /**
    * Trace a message.
