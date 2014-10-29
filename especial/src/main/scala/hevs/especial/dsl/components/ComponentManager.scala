@@ -15,10 +15,13 @@ import scalax.collection.mutable.Graph
  */
 object ComponentManager extends Logging {
 
-  // This contains a (mutable) graph representation of the components
-  // that can be skimmed later on
+  /** Mutable graph representation of all the components of the program. */
   val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
 
+  /**
+   * Create a unique component id to store in the graph.
+   * @return a unique component id
+   */
   def createComponentId() = IdGenerator.newUniqueId
 
   /**
@@ -89,16 +92,6 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Find all connected inputs nodes. An input node is a node without direct predecessor. The node must be connected
-   * with another node at least, or it will be ignored (node degree > 0).
-   * @return list of hardware without direct predecessor (considered as an input)
-   */
-  def findConnectedInputHardware: Set[hw_implemented] = {
-    val in = cpGraph.nodes.filter(c => c.diPredecessors.isEmpty && c.edges.size > 0)
-    in.map(x => x.value.asInstanceOf[hw_implemented]).toSet
-  }
-
-  /**
    * Return unconnected ports of all components of the graph.
    * @return all unconnected ports of all components
    */
@@ -112,12 +105,47 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Return all unconnected nodes of the graph (node degree = 0) in a Seq of `Component`.
-   * @return all unconnected nodes
+   * Return all unconnected nodes of the graph.
+   * A component is considered as unconnected if it has at least one input or output and no connections to other
+   * components.
+   * A component without input and output is considered as connected.
+   *
+   * @see findConnectedInputHardware
+   * @return all unconnected nodes (with at least one input or output)
    */
   def findUnconnectedComponents: Set[Component] = {
-    val nc = cpGraph.nodes filter (c => c.degree == 0)
+    val nc = cpGraph.nodes filter { c =>
+      val cp = c.value.asInstanceOf[Component]
+      // If no I/O, not considered has unconnected
+      val io = cp.getInputs.getOrElse(Nil) ++ cp.getOutputs.getOrElse(Nil)
+      c.degree == 0 && io.length != 0
+    }
     nc.map(x => x.value.asInstanceOf[Component]).toSet
+  }
+
+  /**
+   * @see findUnconnectedComponents
+   */
+  def numberOfUnconnectedHardware() = findUnconnectedComponents.size
+
+  def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()
+
+  /**
+   * Find all connected inputs nodes. An input node is a node without direct predecessor. To be considered as
+   * connected, a node must have at least one input or output and connected with at least one other node.
+   * A component without input and output is considered as connected.
+   *
+   * @see findUnconnectedComponents
+   * @return list of connected inputs
+   */
+  def findConnectedInputHardware: Set[hw_implemented] = {
+    val in = cpGraph.nodes.filter { c =>
+      val cp = c.value.asInstanceOf[Component]
+      val io = cp.getInputs.getOrElse(Nil) ++ cp.getOutputs.getOrElse(Nil)
+
+      c.diPredecessors.isEmpty && c.edges.size > 0 || io.size == 0
+    }
+    in.map(x => x.value.asInstanceOf[hw_implemented]).toSet
   }
 
   // Return a list of `InputPort`s that are connected
@@ -136,10 +164,6 @@ object ComponentManager extends Logging {
     tos
   }
 
-  def numberOfConnectedHardware() = cpGraph.nodes count (c => c.degree > 0)
-
-  def numberOfUnconnectedHardware() = cpGraph.nodes count (c => c.degree == 0)
-
   // This a basically a Tuple2, but they cannot be override
   // Also used by the DotGenerator
   class Wire(val from: OutputPort[_], val to: InputPort[_]) {
@@ -154,6 +178,10 @@ object ComponentManager extends Logging {
     override def toString = "Wire: " + from + "~" + to
   }
 
+  /**
+   * Helper class used to generate a unique ID to all components stored in the graph.
+   * This is necessary to equals nodes in the graph.
+   */
   private object IdGenerator {
     private var id = 0
 

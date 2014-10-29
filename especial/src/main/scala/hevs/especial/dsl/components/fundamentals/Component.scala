@@ -8,11 +8,16 @@ import hevs.especial.dsl.components.ComponentManager
  * component has a unique `ìd` and each port of it has also a unique ID (`newUniquePortId` function) inside the
  * component. When a component is created, it is automatically added to the graph,
  * which is managed by the `ComponentManager`.
+ * By default, a components has no input and no output. `getOutputs` and
+ * `getInputs` methods must be overriding.
  */
 abstract class Component {
 
+  /**
+   * Optional description of the component.
+   */
+  protected val description: String = ""
   private val id = ComponentManager.createComponentId() // Id of component (must be unique)
-
   private var nbrOfPorts = 0 // Used to generate a unique ID for each port
 
   def newUniquePortId = {
@@ -22,20 +27,7 @@ abstract class Component {
 
   def getId = id
 
-  /**
-   * Optional description of the component.
-   */
-  protected val description: String = ""
-
   ComponentManager.registerComponent(this)
-
-  // List of outputs of the block, if any.
-  // The default implementation of a Seq is a List.
-  def getOutputs: Option[Seq[OutputPort[_]]]
-
-  // List of inputs of the block, if any.
-  // The default implementation of a Seq is a List.
-  def getInputs: Option[Seq[InputPort[_]]]
 
   /**
    * Check if at least one port of this component is not connected.
@@ -53,13 +45,23 @@ abstract class Component {
     (ins ++ outs).filter(c => c.isNotConnected)
   }
 
-  def getDescription = description
+  // List of outputs of the block, if any.
+  // The default implementation of a Seq is a List.
+  def getOutputs: Option[Seq[OutputPort[_]]]
+
+  // List of inputs of the block, if any.
+  // The default implementation of a Seq is a List.
+  def getInputs: Option[Seq[InputPort[_]]]
 
   def getFullDescriptor = {
     toString +
       "\n\tInputs:  " + getInputs.getOrElse("None") +
       "\n\tOutputs: " + getOutputs.getOrElse("None")
   }
+
+  override def toString = s"Cmp[$id] '$getDescription'"
+
+  def getDescription = description
 
   // Used by the graph library
   override def equals(other: Any) = other match {
@@ -70,8 +72,6 @@ abstract class Component {
 
   // Used by the graph library
   override def hashCode = id.##
-
-  override def toString = s"Cmp[$id] '$getDescription'"
 }
 
 

@@ -1,6 +1,15 @@
 package hevs.especial.dsl.components
 
-import hevs.especial.dsl.components.fundamentals.{InputPort, OutputPort}
+import hevs.especial.dsl.components.fundamentals.{Component, InputPort, OutputPort}
+
+/**
+ * A component without any input or output.
+ * Used to modify the generated C code.
+ */
+trait NoIO extends Component {
+  def getOutputs = None
+  def getInputs = None
+}
 
 trait In1 {
   def in: InputPort[_]

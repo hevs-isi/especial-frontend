@@ -3,10 +3,14 @@ package hevs.especial.genenator
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.dsl.components.target.Stm32stk
 
 class Sch1Code extends STM32TestSuite {
 
   def getDslCode = {
+
+    new Stm32stk()
+
     // Inputs
     val btn1 = DigitalInput(4)
     val cst1 = Constant(uint1(v = true))

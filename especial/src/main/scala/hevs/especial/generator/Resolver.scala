@@ -56,24 +56,24 @@ class Resolver extends Pipeline[Any, O] with Logging {
     // At least two components must be connected together, or nothing to resolve...
     if (connectedNbr == 1) {
       // Nothing to resolve. Just return the component id
-      log.warn(s"Nothing to resolve: $connectedNbr components ($unconnectedNbr unconnected)")
+      log.warn(s"Nothing to resolve: $connectedNbr connected component(s) ($unconnectedNbr unconnected)")
       map += (0 -> Set(ComponentManager.findConnectedInputHardware.head))
       return map.toMap
     }
     else if (connectedNbr == 0) {
       // Warning. No connected component found ?
-      log.warn(s"No connected components found ($unconnectedNbr unconnected)")
+      log.warn(s"No connected component found ($unconnectedNbr unconnected)")
       return Map.empty
     }
 
     // Normal case
-    trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
+    log.trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
     do {
-      map += (nbrOfPasses -> nextPass) // Resolve each pass for the current component graph
+      map += (nbrOfPasses -> nextPass(log)) // Resolve each pass for the current component graph
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < Settings.RESOLVER_MAX_PASSES)
 
     if (generatedCpId.size == connectedNbr) {
-      trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
+      log.trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
         s"components")
       return map.toMap // Return all components in the right order (immutable Map)
     }
@@ -94,16 +94,16 @@ class Resolver extends Pipeline[Any, O] with Logging {
    * Compute one pass of resolving the graph.
    * @return component to generate for this pass
    */
-  private def nextPass: Set[hw_implemented] = {
+  private def nextPass(l: Logger): Set[hw_implemented] = {
 
-    startPass()
+    startPass(l)
 
     nbrOfPasses match {
       // First passe. Generate code for all inputs.
       case 0 =>
         val in = ComponentManager.findConnectedInputHardware
         for (c <- in) {
-          trace(s" > Generate code for: $c")
+          l.trace(s" > Generate code for: $c")
           val cp = c.asInstanceOf[Component]
           codeGeneratedFor(cp.getId)
         }
@@ -128,17 +128,17 @@ class Resolver extends Pipeline[Any, O] with Logging {
               val pIds = predecessors.map(x => x.value.asInstanceOf[Component].getId)
               val ready = isCodeGenerated(pIds)
               if (!ready) {
-                trace(s" > Not ready: $cp")
+                l.trace(s" > Not ready: $cp")
               }
               else {
-                trace(s" > Generate code for: $cp")
+                l.trace(s" > Generate code for: $cp")
                 codeGeneratedFor(cp.getId)
                 genCp += cp.asInstanceOf[hw_implemented]
               }
             }
             else {
               // Code of this component already generated
-              trace(s" > Already done for: $cp")
+              l.trace(s" > Already done for: $cp")
             }
           }
         }
@@ -148,8 +148,8 @@ class Resolver extends Pipeline[Any, O] with Logging {
   }
 
   // Debug only. Print the nex phase number
-  private def startPass() = {
-    trace("Pass [%03d]".format(nbrOfPasses + 1))
+  private def startPass(l: Logger) = {
+    l.trace("Pass [%03d]".format(nbrOfPasses + 1))
   }
 
   // Count the number of phase
