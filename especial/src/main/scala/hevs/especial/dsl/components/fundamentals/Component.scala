@@ -74,7 +74,11 @@ abstract class Component {
   override def toString = s"Cmp[$id] '$getDescription'"
 }
 
+
 trait hw_implemented {
+
+  // Includes and header files
+  def getIncludeCode: Option[String] = None
 
   // Code inserted in the global section to declare global variables, constants, etc.
   def getGlobalCode: Option[String] = None
@@ -89,4 +93,7 @@ trait hw_implemented {
 
   // Code inserted in the main loop
   def getLoopableCode: Option[String] = None
+
+  // Final code after the main loop
+  def getExitCode: Option[String] = None
 }
