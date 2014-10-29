@@ -7,10 +7,11 @@ import grizzled.slf4j.{Logger => Log}
  *
  * This is basically a wrapper of the existing `Logging` class. The method `terminateIfErrors` can be used to
  * automatically terminate the program if any error has occurred.
+ * The logger can be configured using the file `src/main/resources/simplelogger.properties`.
  */
 class Logger {
 
-  private val logger = Log(classOf[Logger])
+  private val logger = Log("ContextLogger")
 
   /**
    * Warnings have occurred or not.

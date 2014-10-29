@@ -40,10 +40,10 @@ class CodeChecker extends Pipeline[Any, Boolean] {
       return false
     }
 
+    // Print all warnings found
     val warns = checkWarnings()
     if (warns.isDefined)
-      // Print warnings
-      ctx.log.warn("WARNINGS:\n\n" + warns.get)
+      ctx.log.warn("Warnings found:\n" + warns.get)
     else
       ctx.log.info("No warning found.")
 
@@ -51,7 +51,7 @@ class CodeChecker extends Pipeline[Any, Boolean] {
   }
 
   /**
-   * Run some checks to detect warnings.
+   * Run some checks to detect warnings in the DSL program.
    */
   private def checkWarnings(): Option[String] = {
 
@@ -60,18 +60,18 @@ class CodeChecker extends Pipeline[Any, Boolean] {
     // Unconnected components
     val c = ComponentManager.findUnconnectedComponents
     if (c.nonEmpty) {
-      out ++= s"WARN: ${
-        c.size
-      } component(s) declared but not connected at all:\n"
+      out ++= s"[WARN] ${c.size} "
+      out ++= (if(c.size < 2) "component" else "components")
+      out ++= " declared but not connected at all:\n"
       out ++= "\t- " + c.mkString("\n\t- ") + "\n\n"
     }
 
     // Unconnected ports
     val p = ComponentManager.findUnconnectedPorts
     if (p.nonEmpty) {
-      out ++= s"WARN: ${
-        p.size
-      } unconnected port(s) found:\n"
+      out ++= s"[WARN] ${p.size} unconnected "
+      out ++= (if(p.size < 2) "port" else "ports")
+      out ++= " found:\n"
       out ++= "\t- " + p.mkString("\n\t- ") + "\n"
     }
 
