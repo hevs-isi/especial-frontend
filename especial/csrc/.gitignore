@@ -3,4 +3,4 @@
 *.elf
 *.hex
 *.map
-main.c
+main.*
