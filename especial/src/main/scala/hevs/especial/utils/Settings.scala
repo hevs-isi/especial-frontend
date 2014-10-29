@@ -43,7 +43,7 @@ object Settings {
   /* CODE COMPILER */
 
   /** Path of the source file in the C project */
-  final val PROJECT_SRC_FILE = "csrc/src/main.c"
+  final val PROJECT_SRC_FILE = "csrc/src/main.cpp"
 
   /** Path of the binary (elf) file */
   final val PROJECT_BINARY_FILE = "csrc/target-qemu/csrc.elf"

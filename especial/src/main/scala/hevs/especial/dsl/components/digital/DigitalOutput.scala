@@ -24,4 +24,6 @@ case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with hw_i
     case true => Some(s"DigitalOutput($pin).init(); // Init of $this")
     case _ => None
   }
+
+  override def getIncludeCode = Some("""|#include "digitaloutput.h"""".stripMargin)
 }

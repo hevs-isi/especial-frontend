@@ -12,25 +12,25 @@ class Sch1Code extends STM32TestSuite {
     new Stm32stk()
 
     // Inputs
-    val btn1 = DigitalInput(4)
+    //val btn1 = DigitalInput(4)
     val cst1 = Constant(uint1(v = true))
 
-    val led4 = DigitalOutput(42) // NC
+    //val led4 = DigitalOutput(42) // NC
 
     // Outputs
-    val led1 = DigitalOutput(7)
-    val led2 = DigitalOutput(8)
-    val led3 = DigitalOutput(9)
+    val led1 = DigitalOutput(12)
+    //val led2 = DigitalOutput(8)
+    //val led3 = DigitalOutput(9)
 
     // Connecting stuff
-    btn1.out --> led1.in
-    btn1.out --> led2.in
+    //btn1.out --> led1.in
+    //btn1.out --> led2.in
 
-    cst1.out --> led3.in
+    cst1.out --> led1.in
   }
 
   runDotGeneratorTest()
-  runCodeCheckerTest(hasWarnings = true)
+  runCodeCheckerTest(hasWarnings = false)
 
   runCodeGenTest()
 }

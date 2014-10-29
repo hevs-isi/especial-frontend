@@ -42,7 +42,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
    */
   def run(ctx: Context)(input: Resolver.O): String = {
     // Generate the C file (the folder should exist and created by the resolver before)
-    val path = String.format(OUTPUT_PATH, ctx.progName) + ctx.progName + ".c"
+    val path = String.format(OUTPUT_PATH, ctx.progName) + ctx.progName + ".cpp"
     val f: RichFile = new File(path)
 
     val code = generateCode(ctx)(input)

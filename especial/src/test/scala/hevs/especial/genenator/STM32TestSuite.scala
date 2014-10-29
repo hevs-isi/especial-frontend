@@ -85,18 +85,19 @@ abstract class STM32TestSuite extends FunSuite {
     }
   }
 
-  def runCodeGenTest(): Unit = {
+  def runCodeGenTest(compile: Boolean = true): Unit = {
 
     test("Resolver and code gen") {
       val resolve = new Resolver()
       val gen = new CodeGenerator()
       val formatter = new CodeFormatter()
-      //val compiler = new CodeCompiler()
+      val compiler = new CodeCompiler()
 
-      // The pipeline
-      val pipe = resolve -> gen -> formatter //-> compiler
+      // The pipeline with or without the compile
+      val pipe = if (compile) resolve -> gen -> formatter -> compiler else resolve -> gen -> formatter
 
       val res = pipe.run(ctx)("")
+      ctx.log.info("Final result: " + res)
     }
   }
 }

@@ -56,7 +56,9 @@ class Resolver extends Pipeline[Any, O] with Logging {
     // At least two components must be connected together, or nothing to resolve...
     if (connectedNbr == 1) {
       // Nothing to resolve. Just return the component id
-      log.warn(s"Nothing to resolve: $connectedNbr connected component(s) ($unconnectedNbr unconnected)")
+      val warn = s"Nothing to resolve: $connectedNbr connected " +
+        (if (connectedNbr < 2) "component" else "components") + s" ($unconnectedNbr unconnected)"
+      log.warn(warn)
       map += (0 -> Set(ComponentManager.findConnectedInputHardware.head))
       return map.toMap
     }

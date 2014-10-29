@@ -28,8 +28,9 @@ class DotPipe extends Pipeline[String, Unit] {
    */
   def run(ctx: Context)(input: String): Unit = {
     // First block of the pipeline. Force to clean the output folder.
-    val folder: RichFile = new File("output/")
-    folder.createEmptyFolder()
+    // FIXME. clear the output folder before starting the test task
+    // val folder: RichFile = new File("output/")
+    // folder.createEmptyFolder()
 
     if (!Settings.PIPELINE_RUN_DOT) {
       ctx.log.info(s"$currentName is disabled.")
