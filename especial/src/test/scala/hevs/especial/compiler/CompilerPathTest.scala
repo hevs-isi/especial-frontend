@@ -15,35 +15,6 @@ import hevs.especial.utils.{Context, OSUtils, RichFile}
  */
 object CompilerPathTest extends App with Logging {
 
-  //FIXME: use pipeline to do this. Interrupt if any error occurs
-  class Code {
-    val cst1 = Constant(uint1(v = true))
-    val led1 = DigitalOutput(7)
-    cst1.out --> led1.in
-  }
-
-  val code = new Code
-
-  val ctx = new Context("Code")
-  val resolve = new Resolver().run(ctx)("")
-  val c = new CodeGenerator().run(ctx)(resolve)
-
-  //val f: RichFile = new File("csrc/src/main.c")
-
-  // Must be in "/usr/bin/"
-  // arm-none-eabi-size
-  // arm-none-eabi-gcc
-  // arm-none-eabi-g++
-  // arm-none-eabi-objcopy
-  info("Compiling...")
-  val makeRes = OSUtils.runWithCodeResult("/usr/bin/make -r -j4 -C csrc/target-qemu/ all")
-  // f.write(c) // TODO: write the generated code to the file
-
-  if (makeRes._1 != 0) {
-    error("Make error !")
-    error(makeRes._2)
-  }
-
   info("Start QEMU in a new process...")
 
   // Launch in graphic mode

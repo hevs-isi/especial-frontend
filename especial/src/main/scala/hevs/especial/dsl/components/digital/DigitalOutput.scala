@@ -21,7 +21,7 @@ case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with hw_i
   def getInputs = Some(Seq(in))
 
   override def getInitCode = in.isConnected match {
-    case true => Some(s"DigitalOutput($pin).init(); // Init of $this")
+    case true => Some(s"DigitalOutput($pin).initialize(); // Init of $this")
     case _ => None
   }
 

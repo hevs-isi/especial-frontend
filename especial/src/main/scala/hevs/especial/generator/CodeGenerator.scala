@@ -134,7 +134,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
   private final def endInit() = "}\n"
 
-  private final def beginMain() = "int main() {\n"
+  private final def beginMain() = "int main() {\ninit();\n"
 
   private final def beginMainLoop() = "while(1) {\n"
 
