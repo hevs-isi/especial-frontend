@@ -7,6 +7,7 @@ import hevs.especial.dsl.components.ComponentManager.Wire
 import hevs.especial.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
 import hevs.especial.utils._
 
+import scala.collection.mutable
 import scala.language.existentials
 import scalax.collection.Graph
 import scalax.collection.edge.LDiEdge
@@ -168,11 +169,23 @@ class DotGenerator(val graphName: String) {
     // The label is something like: {{<in1>in1|<in2>in2}|Cmp[01]|{<out1>out1|<out2>out2}}
     val in = makeLabelList(n.getInputs.getOrElse(Nil))
     val out = makeLabelList(n.getOutputs.getOrElse(Nil))
-    val label = s"{{$in}|${nodeName(n)}|{$out}}" // Double '{' are necessary with rankdir=LR !
 
-    // Change the color for unconnected nodes
-    val color = if (!n.isConnected) Seq(DotAttr("color", "orange")) else Nil
-    Some(root, DotNodeStmt(nodeId(n), Seq(DotAttr("label", label)) ++ color))
+    // Default node shape
+    var shape = s"{{$in}|${nodeName(n)}|{$out}}" // Double '{' are necessary with rankdir=LR !
+    val attrs = mutable.ArrayBuffer.empty[DotAttr]
+
+    // Different shape if o input and no output
+    if (in.isEmpty && out.isEmpty) {
+      shape = s"${nodeName(n)}"
+      attrs += DotAttr("color", "dimgrey")
+      attrs += DotAttr("shape", "Record")
+    }
+
+    // Change the border color for unconnected nodes
+    else if (!n.isConnected)
+      attrs += DotAttr("color", "orange")
+
+    Some(root, DotNodeStmt(nodeId(n), Seq(DotAttr("label", shape)) ++ attrs))
   }
 
   /**

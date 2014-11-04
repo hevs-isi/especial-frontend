@@ -1,15 +1,16 @@
 package hevs.especial.dsl.components.digital
 
+import hevs.especial.dsl.components.In1
 import hevs.especial.dsl.components.fundamentals.{InputPort, hw_implemented}
 
-case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with hw_implemented {
+case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with In1 with hw_implemented {
 
   override val description = s"digital output on pin $pin"
 
   /**
    * The `uint1` value to write to this digital output.
    */
-  val in = new InputPort[T](this) {
+  override val in = new InputPort[T](this) {
 
     override val description = "digital output value"
 
@@ -25,5 +26,5 @@ case class DigitalOutput(override val pin: Int) extends DigitalIO(pin) with hw_i
     case _ => None
   }
 
-  override def getIncludeCode = Some("""|#include "digitaloutput.h"""".stripMargin)
+  override def getIncludeCode = Some( """|#include "digitaloutput.h"""".stripMargin)
 }

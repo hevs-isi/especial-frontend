@@ -77,6 +77,7 @@ class Resolver extends Pipeline[Any, O] with Logging {
     if (generatedCpId.size == connectedNbr) {
       log.trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
         s"components")
+      log.trace("Resolver result:\n" + map.mkString("\n"))
       return map.toMap // Return all components in the right order (immutable Map)
     }
 

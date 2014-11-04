@@ -17,15 +17,29 @@ abstract class Component {
    * Optional description of the component.
    */
   protected val description: String = ""
-  private val id = ComponentManager.createComponentId() // Id of component (must be unique)
-  private var nbrOfPorts = 0 // Used to generate a unique ID for each port
+
+  // Id of component (must be unique)
+  private val id = ComponentManager.createComponentId()
+
+  // Used to generate a unique ID for each port
+  private var nbrOfPorts = 0
 
   def newUniquePortId = {
     nbrOfPorts += 1
     nbrOfPorts
   }
 
+  /**
+   * @see Component.hashCode
+   * @return unique ID of the component
+   */
   def getId = id
+
+  /**
+   * Helper function to create a unique variable name for a component.
+   * @return unique variable name for a component
+   */
+  def getVarId = s"cmp$id"
 
   ComponentManager.registerComponent(this)
 

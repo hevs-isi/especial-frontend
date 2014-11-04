@@ -7,47 +7,51 @@ import hevs.especial.dsl.components.fundamentals.{Component, InputPort, OutputPo
  * Used to modify the generated C code.
  */
 trait NoIO extends Component {
-  def getOutputs = None
-  def getInputs = None
+  // Override input and output definitions, so the code of the component is minimal.
+  override def getOutputs = None
+  override def getInputs = None
 }
 
+/* Inputs */
+
 trait In1 {
-  def in: InputPort[_]
+  val in: InputPort[_]
 }
 
 trait In2 {
   type I = InputPort[_]
 
-  def in1: I
+  val in1: I
 
-  def in2: I
+  val in2: I
 }
 
 trait In3 extends In2 {
-  def in3: I
+  val in3: I
 }
 
 trait In4 extends In3 {
-  def in4: I
+  val in4: I
 }
 
+/* Outputs */
 
 trait Out1 {
-  def out: OutputPort[_]
+  val out: OutputPort[_]
 }
 
 trait Out2 {
   type O = OutputPort[_]
 
-  def out1: O
+  val out1: O
 
-  def out2: O
+  val out2: O
 }
 
 trait Out3 extends Out2 {
-  def out3: O
+  val out3: O
 }
 
 trait Out4 extends Out3 {
-  def out4: O
+  val out4: O
 }

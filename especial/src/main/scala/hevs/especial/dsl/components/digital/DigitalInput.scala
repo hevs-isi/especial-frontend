@@ -1,11 +1,11 @@
 package hevs.especial.dsl.components.digital
 
-import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.{Out1, ComponentManager}
 import hevs.especial.dsl.components.fundamentals.{OutputPort, hw_implemented, uint1}
 
 import scala.collection.mutable.ListBuffer
 
-case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_implemented {
+case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with Out1 with hw_implemented {
 
   override val description = s"digital input on pin $pin"
 
@@ -14,7 +14,7 @@ case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with hw_im
   /**
    * The `uint1` value of this digital input.
    */
-  val out = new OutputPort[T](this) {
+  override val out = new OutputPort[T](this) {
 
     override val description = "digital input value"
 

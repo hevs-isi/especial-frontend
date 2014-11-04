@@ -10,7 +10,7 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_im
 
   override val description = "constant generator"
 
-  private val valName = s"cstComp$getId" // unique name
+  private val valName = s"cst$getVarId" // unique variable name
 
   val out = new OutputPort[T](this) {
 
@@ -29,7 +29,7 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_im
    */
   override def getGlobalCode = out.isConnected match {
     case true =>
-      // const bool_t cstComp1 = true;
+      // const bool_t cstCmp1 = true;
       Some(s"const ${value.getType} $valName = ${value.v}; // $out")
     case false => None
   }
