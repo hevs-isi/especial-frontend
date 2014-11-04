@@ -1,7 +1,6 @@
 package hevs.especial.dsl.components
 
 import grizzled.slf4j.Logging
-import hevs.especial.dsl.components.fundamentals._
 import hevs.especial.utils.ComponentNotFound
 
 import scala.collection.mutable
@@ -104,6 +103,13 @@ object ComponentManager extends Logging {
     ncPorts.toSeq
   }
 
+  def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()
+
+  /**
+   * @see findUnconnectedComponents
+   */
+  def numberOfUnconnectedHardware() = findUnconnectedComponents.size
+
   /**
    * Return all unconnected nodes of the graph.
    * A component is considered as unconnected if it has at least one input or output and no connections to other
@@ -124,13 +130,6 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * @see findUnconnectedComponents
-   */
-  def numberOfUnconnectedHardware() = findUnconnectedComponents.size
-
-  def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()
-
-  /**
    * Find all connected inputs nodes. An input node is a node without direct predecessor. To be considered as
    * connected, a node must have at least one input or output and connected with at least one other node.
    * A component without input and output is considered as connected.
@@ -138,14 +137,31 @@ object ComponentManager extends Logging {
    * @see findUnconnectedComponents
    * @return list of connected inputs
    */
-  def findConnectedInputHardware: Set[hw_implemented] = {
-    val in = cpGraph.nodes.filter { c =>
+  def findConnectedInputHardware: Set[Component] = findConnectedIOHardware(input = true)
+
+  /**
+   * Find all connected outputs nodes. An output node is a node without direct successors. To be considered as
+   * connected, a node must have at least one input or output and connected with at least one other node.
+   * A component without input and output is considered as connected.
+   *
+   * @see findUnconnectedComponents
+   * @return list of connected outputs
+   */
+  def findConnectedOutputHardware: Set[Component] = findConnectedIOHardware(input = false)
+
+  // Find connected input or output in the graph
+  private def findConnectedIOHardware(input: Boolean) = {
+    val ret = cpGraph.nodes.filter { c =>
       val cp = c.value.asInstanceOf[Component]
       val io = cp.getInputs.getOrElse(Nil) ++ cp.getOutputs.getOrElse(Nil)
 
-      c.diPredecessors.isEmpty && c.edges.size > 0 || io.size == 0
+      if (input) // Input = no direct predecessors
+        c.diPredecessors.isEmpty && c.edges.size > 0 || io.size == 0
+      else // Output = no direct successors
+        c.diSuccessors.isEmpty && c.edges.size > 0 || io.size == 0
     }
-    in.map(x => x.value.asInstanceOf[hw_implemented]).toSet
+    // Return the node value as a Component
+    ret.map(x => x.value.asInstanceOf[Component]).toSet
   }
 
   // Return a list of `InputPort`s that are connected

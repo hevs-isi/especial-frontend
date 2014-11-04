@@ -1,9 +1,8 @@
 package hevs.especial.ports
 
-import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.{uint1, ComponentManager}
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.{DigitalOutput, DigitalInput}
-import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.especial.utils.PortInputShortCircuit
 import org.scalatest.{FunSuite, Matchers}
 

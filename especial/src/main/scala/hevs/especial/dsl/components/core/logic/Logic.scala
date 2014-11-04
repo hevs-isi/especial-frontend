@@ -1,7 +1,7 @@
 package hevs.especial.dsl.components.logic
 
-import hevs.especial.dsl.components.fundamentals.hw_implemented
-import hevs.especial.dsl.components.{In2, In3, In4, Out1}
+import hevs.especial.dsl.components._
+import hevs.especial.dsl.components.core.logic.AbstractLogic
 
 case class And2() extends AbstractLogic(2, "&") with In2 with Out1 with hw_implemented {
   override val description = s"And2 gate"

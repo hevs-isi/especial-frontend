@@ -2,9 +2,8 @@ package hevs.especial.generator
 
 import java.io.File
 
-import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.ComponentManager.Wire
-import hevs.especial.dsl.components.fundamentals.{Component, InputPort, OutputPort, Port}
+import hevs.especial.dsl.components._
 import hevs.especial.utils._
 
 import scala.collection.mutable
@@ -242,15 +241,9 @@ class DotGenerator(val graphName: String) {
   }
 
   /**
-   * Display the type of the connection on thw wire.
+   * Display the type of the connection.
    * @param w the wire to display as a edge label
    * @return the type of the connection as a label value
    */
-  private def labelName(w: Wire): String = {
-    // Something like "hevs.especial.dsl.components.fundamentals.uint1"
-    val t = w.from.getType
-
-    // Return the child class (ex: uint1) as String
-    t.baseClasses.head.asClass.name.toString
-  }
+  private def labelName(w: Wire): String = w.from.getTypeAsString
 }

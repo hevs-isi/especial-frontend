@@ -1,4 +1,4 @@
-package hevs.especial.dsl.components.fundamentals
+package hevs.especial.dsl.components
 
 import hevs.especial.utils.Logger
 

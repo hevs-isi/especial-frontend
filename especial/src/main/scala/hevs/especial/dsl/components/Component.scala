@@ -1,6 +1,4 @@
-package hevs.especial.dsl.components.fundamentals
-
-import hevs.especial.dsl.components.ComponentManager
+package hevs.especial.dsl.components
 
 /**
  * Base class for all components (blocks) used in a program. These components, with there connections,
@@ -29,6 +27,8 @@ abstract class Component {
     nbrOfPorts
   }
 
+  private var init: Boolean = false
+
   /**
    * @see Component.hashCode
    * @return unique ID of the component
@@ -39,9 +39,13 @@ abstract class Component {
    * Helper function to create a unique variable name for a component.
    * @return unique variable name for a component
    */
-  def getVarId = s"cmp$id"
+  def getVarId = s"Cmp$id"
 
   ComponentManager.registerComponent(this)
+
+  def isInitialized: Boolean = init
+
+  def initialized() = init = true
 
   /**
    * Check if at least one port of this component is not connected.
@@ -60,11 +64,9 @@ abstract class Component {
   }
 
   // List of outputs of the block, if any.
-  // The default implementation of a Seq is a List.
   def getOutputs: Option[Seq[OutputPort[_]]]
 
   // List of inputs of the block, if any.
-  // The default implementation of a Seq is a List.
   def getInputs: Option[Seq[InputPort[_]]]
 
   def getFullDescriptor = {
@@ -92,7 +94,7 @@ abstract class Component {
 trait hw_implemented {
 
   // Includes and header files
-  def getIncludeCode: Option[String] = None
+  def getIncludeCode2: Option[String] = None
 
   // Code inserted in the global section to declare global variables, constants, etc.
   def getGlobalCode: Option[String] = None

@@ -1,11 +1,10 @@
 package hevs.especial.resolver
 
-import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.{uint1, ComponentManager}
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
-import hevs.especial.dsl.components.fundamentals.uint1
 import hevs.especial.dsl.components.logic.And2
-import hevs.especial.generator.{CodeChecker, CodeGenerator}
+import hevs.especial.generator.CodeChecker
 
 class ResolverCode1 {
   // Nothing to do, no inputs

@@ -1,7 +1,6 @@
-package hevs.especial.dsl.components.logic
+package hevs.especial.dsl.components.core.logic
 
-import hevs.especial.dsl.components.ComponentManager
-import hevs.especial.dsl.components.fundamentals._
+import hevs.especial.dsl.components._
 
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer

@@ -1,7 +1,8 @@
-package hevs.especial.dsl.components.fundamentals
+package hevs.especial.dsl.components
+
+import java.lang.reflect.Constructor
 
 import grizzled.slf4j.Logging
-import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch}
 
 import scala.reflect.runtime.universe._
@@ -15,8 +16,12 @@ import scala.reflect.runtime.universe._
 // Input ot output port of a component. Transport only one type of data.
 abstract class Port[T <: CType : TypeTag](owner: Component) {
 
+  val typeMirror = runtimeMirror(this.getClass.getClassLoader)
+  val instanceMirror = typeMirror.reflect(this)
+
   // Optional description
   protected val description: String = ""
+
   private val id = owner.newUniquePortId
   private val tpe: Type = typeOf[T]
   private var connected = false
@@ -25,8 +30,6 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   def getDescription = description
 
   def getOwnerId = getOwner.getId
-
-  def getOwner = owner
 
   def connect() = this match {
     case _: OutputPort[_] =>
@@ -74,20 +77,23 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   }
 
   /**
-   * Return the type of the Port.
-   * @return
+   * @return Return the type of the Port.
    */
   def getType = tpe
 
   import scala.reflect.runtime.universe._
-  val typeMirror = runtimeMirror(this.getClass.getClassLoader)
-  val instanceMirror = typeMirror.reflect(this)
 
-  override def toString = {
-   // instanceMirror.symbol.fullName
-    //
-    s"Port[$id] of $getOwner"
+  def getTypeAsString: String = {
+    // Something like "hevs.especial.dsl.components.fundamentals.uint1"
+    val t: Type = this.getType
+
+    // Return the child class (ex: uint1) as String
+    t.baseClasses.head.asClass.name.toString
   }
+
+  def getOwner = owner
+
+  override def toString = s"Port[$id] of $getOwner"
 }
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {

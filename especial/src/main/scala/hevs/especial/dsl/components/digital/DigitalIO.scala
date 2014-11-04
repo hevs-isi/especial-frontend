@@ -1,6 +1,6 @@
 package hevs.especial.dsl.components.digital
 
-import hevs.especial.dsl.components.fundamentals.{uint1, Component}
+import hevs.especial.dsl.components.{Component, uint1}
 
 /**
  * A digital input or output is defined by a unique pin number.

@@ -2,8 +2,8 @@ package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.digital.DigitalOutput
-import hevs.especial.dsl.components.fundamentals.uint1
 import hevs.especial.dsl.components.logic.{And2, And4}
+import hevs.especial.dsl.components.uint1
 
 class Sch4Code extends STM32TestSuite {
 

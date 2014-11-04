@@ -1,14 +1,11 @@
 package hevs.especial.dsl.components.digital
 
-import hevs.especial.dsl.components.{Out1, ComponentManager}
-import hevs.especial.dsl.components.fundamentals.{OutputPort, hw_implemented, uint1}
-
-import scala.collection.mutable.ListBuffer
+import hevs.especial.dsl.components._
 
 case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with Out1 with hw_implemented {
 
   override val description = s"digital input on pin $pin"
-
+  private val valName = s"digitalIn$getVarId" // unique variable name
   private val fctName = s"pollDigitalInput$pin"
 
   /**
@@ -18,37 +15,37 @@ case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with Out1 
 
     override val description = "digital input value"
 
-    override def getValue: String = s"pollButton$pin();"
+    override def getValue: String = s"$fctName();"
   }
 
   def getOutputs = Some(Seq(out))
 
   def getInputs = None
 
-  override def getInitCode = out.isConnected match {
-    case true => Some(s"DigitalInput($pin).initialize(); // Init of $this")
-    case _ => None
+
+
+  override def getGlobalCode = Some(s"DigitalInput $valName($pin); // $out")
+
+  override def getInitCode = {
+      initialized()
+      Some(s"$valName.initialize(); // Init of $this")
   }
 
-  override def getLoopableCode = out.isConnected match {
-    case true => Some(s"$fctName();")
-    case _ => None
+  override def getLoopableCode = Some(s"$fctName();")
+
+  override def getFunctionsDefinitions = {
+    val res = new StringBuilder
+    res ++= s"void $fctName() {"
+    res ++= "if(valueHasChanged) {"
+    res ++= s"${uint1().getType} val = $valName.read();"
+
+    val in = ComponentManager.findConnections(out)
+    for (inPort ← in)
+      res ++= inPort.setInputValue("val") + "; // " + inPort
+
+    res ++= "\n}}"
+    Some(res.result())
   }
 
-  override def getFunctionsDefinitions = out.isConnected match {
-    case true =>
-      val result: ListBuffer[String] = ListBuffer()
-      result += s"void $fctName() {"
-      result += "if(valueHasChanged) {"
-      result += s"${uint1().getType} val = DigitalInput($pin).read();"
-
-      val in = ComponentManager.findConnections(out)
-      for (inPort ← in)
-        result += inPort.setInputValue("val") + "; // " + inPort
-
-      result += "}"
-      result += "}"
-      Some(result.mkString("\n"))
-    case _ => None
-  }
+  override def getIncludeCode = Some("#include \"digitalinput.h\"")
 }

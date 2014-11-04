@@ -2,10 +2,8 @@ package hevs.especial.generator
 
 import java.io.File
 
-import hevs.especial.dsl.components.fundamentals.hw_implemented
+import hevs.especial.dsl.components.{hw_implemented, ComponentManager}
 import hevs.especial.utils._
-
-import scala.collection.mutable
 
 /**
  * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
@@ -78,27 +76,36 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     for (sec <- codeSections.zipWithIndex) {
       val idx = sec._2
 
-      if (idx == 4) result ++= beginMain()
+      if (idx == 4) result ++= beginMain + "\n"
       result ++= beginSection(idx)
 
+      // Add static code when sections start
       idx match {
-        case 3 => result ++= beginInit()
-        case 5 => result ++= beginMainLoop()
+        case 3 => {
+          // First init all outputs
+          result ++= beginOutputInit
+          result ++= initOutputs()
+          result ++= endInit + "\n"
+
+          // General init
+          result ++= beginInit
+        }
+        case 5 => result ++= beginMainLoop
         case _ =>
       }
 
-      // Apply the function for the current section on each components
-      cps map { hw =>
+      // Apply the current section function on all components
+      cps map { cp => sec._1(cp.asInstanceOf[hw_implemented]) match {
         // Add the code only if defined
-        sec._1(hw) match {
-          case Some(code) => result ++= code + "\n"
-          case None =>
-        }
+        case Some(code) => result ++= code + "\n"
+        case None =>
+      }
       }
 
+      // Add static code when sections end
       idx match {
-        case 3 => result ++= endInit()
-        case 5 => result ++= endMainLoop()
+        case 3 => result ++= endInit
+        case 5 => result ++= endMainLoop
         case _ =>
       }
 
@@ -106,9 +113,23 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     }
 
     // End of the file
-    result ++= endMain()
+    result ++= endMain
     result ++= endFile(ctx.progName)
     result.result()
+  }
+
+  // Init all outputs before the general init
+  private def initOutputs(): String = {
+    val ret = new StringBuilder
+    ret ++= "// Generated automatically for all connected output hardware\n"
+    val outputs = ComponentManager.findConnectedOutputHardware
+    outputs map { cp => cp.asInstanceOf[hw_implemented].getInitCode match {
+      // Add the code only if defined
+      case Some(code) => ret ++= code + "\n"
+      case None =>
+    }
+    }
+    ret.result()
   }
 
   /* Static code definitions */
@@ -130,17 +151,23 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     out.result()
   }
 
-  private final def beginInit() = "void init() {\n"
+  private final val beginInit = "void init() {\n"
 
-  private final def endInit() = "}\n"
+  private final val endInit = "}\n"
 
-  private final def beginMain() = "int main() {\ninit();\n"
+  private final val beginOutputInit = "void initOutputs() {\n"
 
-  private final def beginMainLoop() = "while(1) {\n"
+  private final val beginMain =
+    """int main() {
+      |initOutputs();
+      |init();
+    """.stripMargin
 
-  private final def endMainLoop() = "}\n"
+  private final val beginMainLoop = "while(1) {\n"
 
-  private final def endMain() = "}\n"
+  private final val endMainLoop = "}\n"
 
-  private final def endFile(fileName: String) = s"// END of file '$fileName.c'"
+  private final val endMain = "}\n"
+
+  private final def endFile(fileName: String) = s"// END of file '$fileName.cpp'"
 }

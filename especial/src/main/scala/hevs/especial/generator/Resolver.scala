@@ -1,16 +1,14 @@
 package hevs.especial.generator
 
-import grizzled.slf4j.Logging
-import hevs.especial.dsl.components.ComponentManager
-import hevs.especial.dsl.components.fundamentals.{Component, hw_implemented}
+import hevs.especial.dsl.components.{Component, ComponentManager}
 import hevs.especial.generator.Resolver.O
-import hevs.especial.utils.{Settings, Context, Logger, Pipeline}
+import hevs.especial.utils.{Context, Logger, Pipeline, Settings}
 
 import scala.collection.mutable
 
 object Resolver {
   // Output type of the resolver. Used by the Code generator.
-  type O = Map[Int, Set[hw_implemented]]
+  type O = Map[Int, Set[Component]]
 }
 
 /**
@@ -18,7 +16,7 @@ object Resolver {
  * code must be generated when.
  * Unconnected components are ignored.
  */
-class Resolver extends Pipeline[Any, O] with Logging {
+class Resolver extends Pipeline[Any, O] {
 
   // IDs of components that are generated. Order not valid !
   private val generatedCpId = mutable.Set.empty[Int]
@@ -28,6 +26,9 @@ class Resolver extends Pipeline[Any, O] with Logging {
 
   // Count the number of passes to generate the code
   private var nbrOfPasses = 0
+
+  // The result of the solver. The index is the pass number.
+  private val mapSolve = mutable.Map.empty[Int, Set[Component]]
 
   /**
    * Resolve the current graph.
@@ -51,7 +52,6 @@ class Resolver extends Pipeline[Any, O] with Logging {
 
     val connectedNbr = ComponentManager.numberOfConnectedHardware()
     val unconnectedNbr = ComponentManager.numberOfUnconnectedHardware()
-    val map = mutable.Map.empty[Int, Set[hw_implemented]]
 
     // At least two components must be connected together, or nothing to resolve...
     if (connectedNbr == 1) {
@@ -59,8 +59,8 @@ class Resolver extends Pipeline[Any, O] with Logging {
       val warn = s"Nothing to resolve: $connectedNbr connected " +
         (if (connectedNbr < 2) "component" else "components") + s" ($unconnectedNbr unconnected)"
       log.warn(warn)
-      map += (0 -> Set(ComponentManager.findConnectedInputHardware.head))
-      return map.toMap
+      mapSolve += (0 -> Set(ComponentManager.findConnectedInputHardware.head))
+      return mapSolve.toMap
     }
     else if (connectedNbr == 0) {
       // Warning. No connected component found ?
@@ -71,14 +71,14 @@ class Resolver extends Pipeline[Any, O] with Logging {
     // Normal case
     log.trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
     do {
-      map += (nbrOfPasses -> nextPass(log)) // Resolve each pass for the current component graph
+      mapSolve += (nbrOfPasses -> nextPass(log)) // Resolve each pass for the current component graph
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < Settings.RESOLVER_MAX_PASSES)
 
     if (generatedCpId.size == connectedNbr) {
       log.trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
         s"components")
-      log.trace("Resolver result:\n" + map.mkString("\n"))
-      return map.toMap // Return all components in the right order (immutable Map)
+      log.info(printResult())
+      return mapSolve.toMap // Return all components in the right order (immutable Map)
     }
 
     // Error: infinite loop. Report an error.
@@ -97,7 +97,7 @@ class Resolver extends Pipeline[Any, O] with Logging {
    * Compute one pass of resolving the graph.
    * @return component to generate for this pass
    */
-  private def nextPass(l: Logger): Set[hw_implemented] = {
+  private def nextPass(l: Logger): Set[Component] = {
 
     startPass(l)
 
@@ -115,7 +115,7 @@ class Resolver extends Pipeline[Any, O] with Logging {
 
       // From the second passe, the code of all direct successors of the components is generated.
       case _ =>
-        val genCp = mutable.Set.empty[hw_implemented]
+        val genCp = mutable.Set.empty[Component]
         val genId = nextPassCpId.clone()
         nextPassCpId.clear()
 
@@ -136,7 +136,7 @@ class Resolver extends Pipeline[Any, O] with Logging {
               else {
                 l.trace(s" > Generate code for: $cp")
                 codeGeneratedFor(cp.getId)
-                genCp += cp.asInstanceOf[hw_implemented]
+                genCp += cp
               }
             }
             else {
@@ -172,5 +172,17 @@ class Resolver extends Pipeline[Any, O] with Logging {
   // Check if the list of IDs has been already generated or not
   private def isCodeGenerated(cpListId: Set[Int]) = cpListId.foldLeft(true) {
     (acc, id) => acc & generatedCpId.contains(id)
+  }
+
+  // Print the resolver result in a pretty format.
+  private def printResult(): String = {
+    val ret = new mutable.StringBuilder()
+    ret ++= "Resolver result:"
+
+    // Print components IDs for all passes and order the result
+    for(p <- mapSolve.toSeq.sortBy(_._1)) {
+      ret ++= "\n\tPass %03d: %s".format(p._1 + 1, p._2.map(cp => s"Cmp[${cp.getId}]").mkString(", "))
+    }
+    ret.result()
   }
 }

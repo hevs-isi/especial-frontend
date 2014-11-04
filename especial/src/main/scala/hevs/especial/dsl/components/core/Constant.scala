@@ -1,7 +1,6 @@
 package hevs.especial.dsl.components.core
 
-import hevs.especial.dsl.components.ComponentManager
-import hevs.especial.dsl.components.fundamentals.{CType, Component, OutputPort, hw_implemented}
+import hevs.especial.dsl.components._
 
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
@@ -23,24 +22,13 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_im
 
   def getInputs = None
 
-  /**
-   * Constant declaration in the C code.
-   * @return the constant declaration as boolean if the constant is connected
-   */
-  override def getGlobalCode = out.isConnected match {
-    case true =>
-      // const bool_t cstCmp1 = true;
-      Some(s"const ${value.getType} $valName = ${value.v}; // $out")
-    case false => None
-  }
+  override def getGlobalCode = Some(s"const ${value.getType} $valName = ${value.v}; // $out")
 
-  override def getInitCode = out.isConnected match {
-    case true =>
-      val in = ComponentManager.findConnections(out)
-      val results: ListBuffer[String] = ListBuffer()
-      for (inPort ← in)
-        results += inPort.setInputValue(valName) + "; // " + inPort
-      Some(results.mkString("\n"))
-    case false => None
+  override def getInitCode = {
+    val in = ComponentManager.findConnections(out)
+    val results: ListBuffer[String] = ListBuffer()
+    for (inPort ← in)
+      results += inPort.setInputValue(valName) + "; // " + inPort
+    Some(results.mkString("\n"))
   }
 }

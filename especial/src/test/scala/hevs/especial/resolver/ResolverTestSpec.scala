@@ -1,8 +1,8 @@
 package hevs.especial.resolver
 
-import hevs.especial.dsl.components.fundamentals.hw_implemented
+import hevs.especial.dsl.components.Component
 import hevs.especial.generator.Resolver
-import hevs.especial.utils.{Context, Logger}
+import hevs.especial.utils.Context
 import org.scalatest.{FunSuite, Matchers}
 
 /**
@@ -18,7 +18,7 @@ abstract class ResolverTestSpec extends FunSuite with Matchers {
    * Resolve the current graph and return the result of the resolver.
    * @return the result of the resolver
    */
-  def testResolver(): Map[Int, Set[hw_implemented]] = {
+  def testResolver(): Map[Int, Set[Component]] = {
     // Create a new logger and a new resolver for each tests
     r = new Resolver
     val res = r.run(ctx)("")

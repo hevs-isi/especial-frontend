@@ -1,9 +1,9 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
-import hevs.especial.dsl.components.fundamentals.uint1
+import hevs.especial.dsl.components.digital.DigitalOutput
 import hevs.especial.dsl.components.target.Stm32stk
+import hevs.especial.dsl.components.uint1
 
 class Sch1Code extends STM32TestSuite {
 
