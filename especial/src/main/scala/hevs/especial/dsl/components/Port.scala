@@ -1,7 +1,5 @@
 package hevs.especial.dsl.components
 
-import java.lang.reflect.Constructor
-
 import grizzled.slf4j.Logging
 import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch}
 

@@ -13,12 +13,12 @@ class Sch1Code extends STM32TestSuite {
 
     // Inputs
     //val btn1 = DigitalInput(4)
-    val cst1 = Constant(uint1(v = true))
+    val cst1 = Constant(uint1(v = false))
 
     //val led4 = DigitalOutput(42) // NC
 
     // Outputs
-    val led1 = DigitalOutput(12)
+    val led1 = DigitalOutput(12, init = true)
     //val led2 = DigitalOutput(8)
     //val led3 = DigitalOutput(9)
 

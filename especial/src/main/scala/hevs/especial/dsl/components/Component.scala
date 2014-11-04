@@ -93,8 +93,11 @@ abstract class Component {
 
 trait hw_implemented {
 
-  // Includes and header files
-  def getIncludeCode2: Option[String] = None
+  /**
+   * Include a file name (header) on the top of the file.
+   * @return the name of the file to include with its extension
+   */
+  def getIncludeCode: Option[String] = None
 
   // Code inserted in the global section to declare global variables, constants, etc.
   def getGlobalCode: Option[String] = None

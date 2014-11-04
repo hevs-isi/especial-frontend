@@ -1,14 +1,8 @@
 package hevs.especial.compiler
 
-import java.io.File
-
 import grizzled.slf4j.Logging
-import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.DigitalOutput
-import hevs.especial.dsl.components.fundamentals.uint1
-import hevs.especial.generator.{Resolver, CodeGenerator}
 import hevs.especial.simulation.MonitorServer
-import hevs.especial.utils.{Context, OSUtils, RichFile}
+import hevs.especial.utils.OSUtils
 
 /**
  * Path example from a program to the QEMU simulation.

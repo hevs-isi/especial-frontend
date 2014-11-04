@@ -1,8 +1,9 @@
 package hevs.especial.generator
 
 import java.io.File
+import java.util.Date
 
-import hevs.especial.dsl.components.{hw_implemented, ComponentManager}
+import hevs.especial.dsl.components.{Component, ComponentManager, hw_implemented}
 import hevs.especial.utils._
 
 /**
@@ -19,7 +20,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
    * The order is important and correspond to the generation order.
    */
   private final val codeSections = Seq(
-    (hw: hw_implemented) => hw.getIncludeCode,
+    // (hw: hw_implemented) => hw.getIncludeCode, // Must remove duplicates files
     (hw: hw_implemented) => hw.getGlobalCode,
     (hw: hw_implemented) => hw.getFunctionsDefinitions,
     (hw: hw_implemented) => hw.getInitCode,
@@ -72,16 +73,21 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     val result = new StringBuilder
     result ++= beginFile(ctx.progName)
 
-    // Code sections
+    // Add include files and remove duplicates files
+    result ++= beginSection(0)
+    result ++= includeFiles(cps)
+    result ++= endSection()
+
+    // Generic code sections for all components
     for (sec <- codeSections.zipWithIndex) {
-      val idx = sec._2
+      val idx = sec._2 + 1
 
       if (idx == 4) result ++= beginMain + "\n"
       result ++= beginSection(idx)
 
       // Add static code when sections start
       idx match {
-        case 3 => {
+        case 3 =>
           // First init all outputs
           result ++= beginOutputInit
           result ++= initOutputs()
@@ -89,7 +95,6 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
           // General init
           result ++= beginInit
-        }
         case 5 => result ++= beginMainLoop
         case _ =>
       }
@@ -118,8 +123,20 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     result.result()
   }
 
+  // Include all necessary files and remove duplicates if necessary
+  private def includeFiles(cps: Seq[Component]): StringBuilder = {
+    val ret = new StringBuilder
+    val incs = for(c <- cps) yield c.asInstanceOf[hw_implemented].getIncludeCode
+    // Remove duplicates files
+    for(file <- incs.distinct) file match {
+      case Some(c) => ret ++= String.format("#include \"%s\"\n", c)
+      case None =>
+    }
+    ret
+  }
+
   // Init all outputs before the general init
-  private def initOutputs(): String = {
+  private def initOutputs(): StringBuilder = {
     val ret = new StringBuilder
     ret ++= "// Generated automatically for all connected output hardware\n"
     val outputs = ComponentManager.findConnectedOutputHardware
@@ -129,7 +146,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       case None =>
     }
     }
-    ret.result()
+    ret
   }
 
   /* Static code definitions */
@@ -143,10 +160,10 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     val out = new StringBuilder
 
     out ++= "/*" + "\n"
-    out ++= " " + "*".*(60) + "\n"
+    out ++= " " + "*".*(80) + "\n"
     out ++= s" Version $ver\n"
-    out ++= s" Code for '$progName' generated automatically.\n"
-    out ++= " " + "*".*(60) + "\n"
+    out ++= s" Code for '$progName' generated automatically on '${new Date()}'.\n"
+    out ++= " " + "*".*(80) + "\n"
     out ++= " */\n\n"
     out.result()
   }
