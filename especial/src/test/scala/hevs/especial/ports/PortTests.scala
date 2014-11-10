@@ -1,15 +1,15 @@
 package hevs.especial.ports
 
-import hevs.especial.dsl.components.{uint1, ComponentManager}
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
+import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput}
+import hevs.especial.dsl.components.{ComponentManager, Pin, uint1}
 import hevs.especial.utils.PortInputShortCircuit
 import org.scalatest.{FunSuite, Matchers}
 
 abstract class PortCode {
   val cst1 = Constant(uint1(v = true))
-  val btn1 = DigitalInput(4)
-  val led1 = DigitalOutput(7)
+  val btn1 = DigitalInput(Pin('C', 6))
+  val led1 = DigitalOutput(Pin('C', 12))
 }
 
 class PortCode1 extends PortCode {

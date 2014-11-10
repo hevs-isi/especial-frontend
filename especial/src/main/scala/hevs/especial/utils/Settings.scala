@@ -59,4 +59,5 @@ object Settings {
 
   /** Port used by the Scala TCP Monitor Server to communicate with the QEMU client. */
   final val MONITOR_TCP_CMD_PORT = 14001
+  final val MONITOR_TCP_EVT_PORT = 14002
 }

@@ -27,6 +27,10 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
     try {
       val out = new PrintWriter(s.getOutputStream, true)
       val in = new BufferedReader(new InputStreamReader(s.getInputStream))
+
+      out.write("1234\n".toCharArray)
+      out.flush()
+
       connected = true
       breakable {
         while (connected) {

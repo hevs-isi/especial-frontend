@@ -1,9 +1,8 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.DigitalOutput
-import hevs.especial.dsl.components.target.Stm32stk
-import hevs.especial.dsl.components.uint1
+import hevs.especial.dsl.components.target.stm32stk.{DigitalOutput, Stm32stk}
+import hevs.especial.dsl.components.{Pin, uint1}
 
 class Sch1Code extends STM32TestSuite {
 
@@ -18,7 +17,7 @@ class Sch1Code extends STM32TestSuite {
     //val led4 = DigitalOutput(42) // NC
 
     // Outputs
-    val led1 = DigitalOutput(12, init = true)
+    val led1 = DigitalOutput(Pin('C', 12), initValue = true)
     //val led2 = DigitalOutput(8)
     //val led3 = DigitalOutput(9)
 

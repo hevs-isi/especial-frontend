@@ -1,7 +1,7 @@
 package hevs.especial.genenator
 
-import hevs.especial.dsl.components.ComponentManager
-import hevs.especial.dsl.components.digital.DigitalOutput
+import hevs.especial.dsl.components.target.stm32stk.DigitalOutput
+import hevs.especial.dsl.components.{ComponentManager, Pin}
 import hevs.especial.generator._
 import hevs.especial.utils.{Context, Settings}
 import org.scalatest.FunSuite
@@ -14,7 +14,7 @@ abstract class STM32TestSuite extends FunSuite {
   /* I/O definition */
 
   /** Red led of the board */
-  protected val led1 = DigitalOutput(12)
+  protected val led1 = DigitalOutput(Pin('C', 12))
 
 
   /* Pipeline */

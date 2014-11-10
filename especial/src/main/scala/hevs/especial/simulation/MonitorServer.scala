@@ -4,43 +4,56 @@ import java.io.IOException
 import java.net.ServerSocket
 
 import grizzled.slf4j.Logging
+import hevs.especial.utils.Settings
 import hevs.especial.utils.Settings._
 
 /**
- * TCP Monitor Server used to communicate with a QEMU client. Limited to one connection only.
- * @param port the port of the TCP Server
+ * TCP Monitor Server used to communicate with a QEMU client.
  */
-class MonitorServer(port: Int = MONITOR_TCP_CMD_PORT) extends Logging {
+class MonitorServer() extends Logging {
 
-  var listener: ServerSocket = null
-  var server: MonitorServerThread = null
+  var cmdListener: ServerSocket = null
+  var cmdServer: MonitorServerThread = null
 
-  try {
-    listener = new ServerSocket(port)
-    info(s"MonitorServer listening on port $port.")
-  }
-  catch {
-    case e: IOException =>
-      error(s"Could not listen on port $port.")
-      System.exit(-1)
+  var evtListener: ServerSocket = null
+  var evtServer: MonitorServerThread = null
+
+  startServers()
+
+  def startServers() {
+    try {
+      cmdListener = new ServerSocket(Settings.MONITOR_TCP_CMD_PORT)
+      evtListener = new ServerSocket(Settings.MONITOR_TCP_EVT_PORT)
+      info(s"MonitorServer started.")
+    }
+    catch {
+      case e: IOException =>
+        error(s"Could not listen.")
+        System.exit(-1)
+    }
   }
 
   // Block until a client is connected
   def waitForClient(): MonitorServerThread = {
-    if (listener == null) {
+    if (cmdListener == null) {
       error("MonitorServer not listening !")
       System.exit(-1) // Fatal error
     }
 
-    if (server != null) {
+    if (cmdServer != null) {
       info("Already connected with a client.")
-      server
+      cmdServer
     }
     else {
       info("Waiting for a client...")
-      server = new MonitorServerThread(this, listener.accept())
-      server.start()
-      server
+
+      cmdServer = new MonitorServerThread(this, cmdListener.accept())
+      cmdServer.start()
+
+      evtServer = new MonitorServerThread(this, evtListener.accept())
+      evtServer.start()
+
+      cmdServer
     }
   }
 
@@ -48,10 +61,16 @@ class MonitorServer(port: Int = MONITOR_TCP_CMD_PORT) extends Logging {
    * Close the server Thread and the Socket. Do nothing if not connected.
    */
   def close() = {
-    if (server != null)
-      server.disconnect()
+    if (cmdServer != null)
+      cmdServer.disconnect()
 
-    if (listener != null)
-      listener.close()
+    if (cmdListener != null)
+      cmdListener.close()
+
+    if (evtServer != null)
+      evtServer.disconnect()
+
+    if (evtListener != null)
+      evtListener.close()
   }
 }

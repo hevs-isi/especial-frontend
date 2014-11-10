@@ -1,22 +1,22 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.especial.dsl.components.logic.And2
-import hevs.especial.dsl.components.uint1
+import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput}
+import hevs.especial.dsl.components.{Pin, uint1}
 
 class Sch3Code extends STM32TestSuite {
 
   def getDslCode = {
     // Inputs
     val cst1 = Constant(uint1(v = true))
-    val btn1 = DigitalInput(4)
+    val btn1 = DigitalInput(Pin('C', 6))
 
     // Logic
     val and1 = And2()
 
     // Output
-    val led1 = DigitalOutput(7)
+    val led1 = DigitalOutput(Pin('C', 12))
 
     // Connecting stuff
     and1.out --> led1.in

@@ -1,14 +1,14 @@
 package hevs.especial.resolver
 
-import hevs.especial.dsl.components.{uint1, ComponentManager}
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.{DigitalInput, DigitalOutput}
 import hevs.especial.dsl.components.logic.And2
+import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput}
+import hevs.especial.dsl.components.{ComponentManager, Pin, uint1}
 import hevs.especial.generator.CodeChecker
 
 class ResolverCode1 {
   // Nothing to do, no inputs
-  val btn1 = DigitalInput(4)
+  val btn1 = DigitalInput(Pin('C', 6))
 }
 
 // TODO: centraliser toutes ces applications et les utiliser pour tous les test, pas faire des cas particulier...
@@ -16,16 +16,16 @@ class ResolverCode1 {
 // 1 pass, 1 unconnected
 class ResolverCode2 {
   val cst1 = Constant(uint1(false))
-  val btn1 = DigitalInput(4)
-  val led1 = DigitalOutput(7)
+  val btn1 = DigitalInput(Pin('C', 6))
+  val led1 = DigitalOutput(Pin('C', 12))
   cst1.out --> led1.in
 }
 
 // 3 passes without warning
 class ResolverCode3 {
   val cst1 = Constant(uint1(false))
-  val btn1 = DigitalInput(4)
-  val led1 = DigitalOutput(7)
+  val btn1 = DigitalInput(Pin('C', 6))
+  val led1 = DigitalOutput(Pin('C', 12))
   val and1 = And2()
 
   cst1.out --> and1.in1
@@ -36,10 +36,10 @@ class ResolverCode3 {
 // 3 passes without warning
 class ResolverCode4 {
   // Same as ResolverCode3 in a different order
-  val led1 = DigitalOutput(7)
+  val led1 = DigitalOutput(Pin('C', 12))
   val cst1 = Constant(uint1(false))
   val and1 = And2()
-  val btn1 = DigitalInput(4)
+  val btn1 = DigitalInput(Pin('C', 6))
 
   and1.out --> led1.in
   btn1.out --> and1.in2
@@ -52,7 +52,7 @@ class ResolverCode5 {
   val and2 = And2()
   val and3 = And2()
   val cst2 = Constant(uint1(false))
-  val led1 = DigitalOutput(7)
+  val led1 = DigitalOutput(Pin('C', 12))
 
   cst1.out --> and1.in1
   and1.out --> and2.in2

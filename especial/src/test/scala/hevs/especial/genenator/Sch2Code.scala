@@ -1,9 +1,9 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.digital.DigitalOutput
 import hevs.especial.dsl.components.logic.And2
-import hevs.especial.dsl.components.uint1
+import hevs.especial.dsl.components.target.stm32stk.DigitalOutput
+import hevs.especial.dsl.components.{Pin, uint1}
 
 class Sch2Code extends STM32TestSuite {
 
@@ -16,8 +16,8 @@ class Sch2Code extends STM32TestSuite {
     val and1 = And2()
 
     // Output
-    val led1 = DigitalOutput(7)
-    val led2 = DigitalOutput(8)
+    val led1 = DigitalOutput(Pin('C', 11))
+    val led2 = DigitalOutput(Pin('C', 12))
 
     // Connecting stuff
     and1.out --> led1.in
