@@ -1,12 +1,17 @@
-package hevs.especial.dsl.components.digital
+package hevs.especial.dsl.components.target.stm32stk
 
 import hevs.especial.dsl.components._
 
-case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with Out1 with hw_implemented {
+/**
+ * Create a digital input for a specific pin.
+ *
+ * @param pin GPIO pin
+ */
+case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 with hw_implemented {
 
-  override val description = s"digital input on pin $pin"
-  private val valName = s"digitalIn$getVarId" // unique variable name
-  private val fctName = s"pollDigitalInput$pin"
+  override val description = s"digital input on '$pin'"
+  override val valName = s"digitalIn$getVarId"
+  private val fctName = s"pollDigitalInput${pin.port}${pin.pinNumber}"
 
   /**
    * The `uint1` value of this digital input.
@@ -22,13 +27,13 @@ case class DigitalInput(override val pin: Int) extends DigitalIO(pin) with Out1 
 
   def getInputs = None
 
+  /* Code generation */
 
-
-  override def getGlobalCode = Some(s"DigitalInput $valName($pin); // $out")
+  override def getGlobalCode = Some(s"DigitalInput $valName($pinName); // $out")
 
   override def getInitCode = {
-      initialized()
-      Some(s"$valName.initialize(); // Init of $this")
+    initialized()
+    Some(s"$valName.initialize(); // Init of $this")
   }
 
   override def getLoopableCode = Some(s"$fctName();")
