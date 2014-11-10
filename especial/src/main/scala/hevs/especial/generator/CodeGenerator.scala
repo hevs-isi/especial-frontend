@@ -138,7 +138,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   // Init all outputs before the general init
   private def initOutputs(): StringBuilder = {
     val ret = new StringBuilder
-    ret ++= "// Generated automatically for all connected output hardware\n"
+    ret ++= "// Initialize all connected outputs automatically\n"
     val outputs = ComponentManager.findConnectedOutputHardware
     outputs map { cp => cp.asInstanceOf[hw_implemented].getInitCode match {
       // Add the code only if defined
@@ -156,13 +156,14 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   private final def endSection() = "//*// ----------\n\n"
 
   private final def beginFile(progName: String) = {
-    val ver = Version.getVersion
+    val file = s"Code for '$progName'."
     val out = new StringBuilder
-
     out ++= "/*" + "\n"
     out ++= " " + "*".*(80) + "\n"
-    out ++= s" Version $ver\n"
-    out ++= s" Code for '$progName' generated automatically on '${new Date()}'.\n"
+    out ++= s" $file\n"
+    out ++= " " + "-".*(file.length) + "\n"
+    out ++= s" Generated automatically on ${new Date()}.\n"
+    out ++= s" $Version\n"
     out ++= " " + "*".*(80) + "\n"
     out ++= " */\n\n"
     out.result()
