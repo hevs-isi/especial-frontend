@@ -18,8 +18,16 @@ libraryDependencies ++= Seq(
   "org.clapper" %% "grizzled-slf4j" % "1.0.2"
 )
 
+// Lift-json
+// https://github.com/lift/lift/tree/master/framework/lift-base/lift-json/
+// http://liftweb.net/download
+libraryDependencies += "net.liftweb" %% "lift-json" % "2.6-M4"
+
 // Scala tests
 libraryDependencies += "org.scalatest" % "scalatest_2.11" % "2.2.1" % "test"
+
+
+
 
 // Disable parallel execution of tests because the ComponentManager is a single object used for all tests
 parallelExecution in ThisBuild := false
