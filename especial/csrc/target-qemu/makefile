@@ -10,6 +10,7 @@ RM := rm -rf
 -include sources.mk
 -include stm32f10x_lib/src/stm32f1/subdir.mk
 -include stm32f10x_lib/src/newlib/subdir.mk
+-include stm32f10x_lib/src/hal/controller/subdir.mk
 -include stm32f10x_lib/src/hal/subdir.mk
 -include stm32f10x_lib/src/freertos/subdir.mk
 -include stm32f10x_lib/src/diag/subdir.mk

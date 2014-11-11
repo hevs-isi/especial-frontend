@@ -30,6 +30,7 @@ SUBDIRS := \
 stm32f10x_lib/src/stm32f1 \
 stm32f10x_lib/src/newlib \
 stm32f10x_lib/src/hal \
+stm32f10x_lib/src/hal/controller \
 stm32f10x_lib/src/freertos \
 stm32f10x_lib/src/diag \
 stm32f10x_lib/src/cortexm \
