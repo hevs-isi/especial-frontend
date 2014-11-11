@@ -15,15 +15,15 @@ class MonitorServer() extends Logging {
   var cmdListener: ServerSocket = null
   var cmdServer: MonitorServerThread = null
 
-  var evtListener: ServerSocket = null
-  var evtServer: MonitorServerThread = null
+  //var evtListener: ServerSocket = null
+  //var evtServer: MonitorServerThread = null
 
   startServers()
 
   def startServers() {
     try {
       cmdListener = new ServerSocket(Settings.MONITOR_TCP_CMD_PORT)
-      evtListener = new ServerSocket(Settings.MONITOR_TCP_EVT_PORT)
+      //evtListener = new ServerSocket(Settings.MONITOR_TCP_EVT_PORT)
       info(s"MonitorServer started.")
     }
     catch {
@@ -50,8 +50,8 @@ class MonitorServer() extends Logging {
       cmdServer = new MonitorServerThread(this, cmdListener.accept())
       cmdServer.start()
 
-      evtServer = new MonitorServerThread(this, evtListener.accept())
-      evtServer.start()
+      //evtServer = new MonitorServerThread(this, evtListener.accept())
+      //evtServer.start()
 
       cmdServer
     }
@@ -67,10 +67,10 @@ class MonitorServer() extends Logging {
     if (cmdListener != null)
       cmdListener.close()
 
-    if (evtServer != null)
-      evtServer.disconnect()
+    //if (evtServer != null)
+    //  evtServer.disconnect()
 
-    if (evtListener != null)
-      evtListener.close()
+    //if (evtListener != null)
+    //  evtListener.close()
   }
 }
