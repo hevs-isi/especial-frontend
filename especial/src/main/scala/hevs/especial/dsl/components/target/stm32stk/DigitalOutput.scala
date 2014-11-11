@@ -18,9 +18,7 @@ hw_implemented {
    * The `uint1` value to write to this digital output.
    */
   override val in = new InputPort[T](this) {
-
     override val description = "digital output value"
-
     override def setInputValue(s: String): String = s"$valName.set($s)"
   }
 

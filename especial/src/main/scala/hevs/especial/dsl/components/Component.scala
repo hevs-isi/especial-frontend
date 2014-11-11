@@ -63,10 +63,16 @@ abstract class Component {
     (ins ++ outs).filter(c => c.isNotConnected)
   }
 
-  // List of outputs of the block, if any.
+  /**
+   * Component outputs, if any.
+   * @return outputs of the component
+   */
   def getOutputs: Option[Seq[OutputPort[_]]]
 
-  // List of inputs of the block, if any.
+  /**
+   * Component inputs, if any.
+   * @return inputs of the component
+   */
   def getInputs: Option[Seq[InputPort[_]]]
 
   def getFullDescriptor = {

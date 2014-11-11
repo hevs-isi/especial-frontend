@@ -127,7 +127,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   private def includeFiles(cps: Seq[Component]): StringBuilder = {
     val ret = new StringBuilder
     val incs = for(c <- cps) yield c.asInstanceOf[hw_implemented].getIncludeCode
-    // Remove duplicates files
+    // Remove duplicates files contains in the list using `distinct`
     for(file <- incs.distinct) file match {
       case Some(c) => ret ++= String.format("#include \"%s\"\n", c)
       case None =>

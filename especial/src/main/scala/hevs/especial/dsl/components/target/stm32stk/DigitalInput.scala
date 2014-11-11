@@ -5,6 +5,8 @@ import hevs.especial.dsl.components._
 /**
  * Create a digital input for a specific pin.
  *
+ * The value of this input is automatically read and save in the ISR (Interrupt Service Routine).
+ *
  * @param pin GPIO pin
  */
 case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 with hw_implemented {
@@ -17,9 +19,7 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
    * The `uint1` value of this digital input.
    */
   override val out = new OutputPort[T](this) {
-
     override val description = "digital input value"
-
     override def getValue: String = s"$fctName();"
   }
 
@@ -33,7 +33,10 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
 
   override def getInitCode = {
     initialized()
-    Some(s"$valName.initialize(); // Init of $this")
+    val res = new StringBuilder
+    res ++= s"$valName.initialize(); // Init of $this\n"
+    res ++= s"$valName.registerInterrupt(); // Use interrupts"
+    Some(res.result())
   }
 
   override def getLoopableCode = Some(s"$fctName();")
@@ -41,14 +44,14 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
   override def getFunctionsDefinitions = {
     val res = new StringBuilder
     res ++= s"void $fctName() {"
-    res ++= "if(valueHasChanged) {"
-    res ++= s"${uint1().getType} val = $valName.read();"
+    res ++= "// Get the cached value (read from interrupt)"
+    res ++= s"${uint1().getType} val = $valName.get();"
 
     val in = ComponentManager.findConnections(out)
     for (inPort ← in)
       res ++= inPort.setInputValue("val") + "; // " + inPort
 
-    res ++= "\n}}"
+    res ++= "\n}"
     Some(res.result())
   }
 
