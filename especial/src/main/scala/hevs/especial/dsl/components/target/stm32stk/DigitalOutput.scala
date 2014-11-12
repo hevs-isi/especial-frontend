@@ -35,11 +35,15 @@ hw_implemented {
     case true if !isInitialized =>
       initialized() // Init code called once only
     val res = new StringBuilder
-      res ++= s"$valName.initialize(); // Init of $this\n"
-      res ++= in.setInputValue(if (initValue) "true" else "false") + ";"
+      res ++= s"$valName.initialize(); // Init of $this"
+
+      // Default output value is off. Set to on afterwards if necessary.
+      if(initValue)
+        res ++= in.setInputValue(String.valueOf(initValue)) + ";"
+
       Some(res.result())
     case _ => None
   }
 
-  override def getIncludeCode = Some("digitaloutput.h")
+  override def getIncludeCode = Seq("digitaloutput.h")
 }

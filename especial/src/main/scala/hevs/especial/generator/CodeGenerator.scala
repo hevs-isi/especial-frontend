@@ -6,6 +6,8 @@ import java.util.Date
 import hevs.especial.dsl.components.{Component, ComponentManager, hw_implemented}
 import hevs.especial.utils._
 
+import scala.collection.mutable.ArrayBuffer
+
 /**
  * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
  * and then generate the code for each connected components in the right order.
@@ -80,10 +82,24 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
     // Generic code sections for all components
     for (sec <- codeSections.zipWithIndex) {
-      val idx = sec._2 + 1
+      val idx = sec._2 + 1 // Section 0 already done
 
-      if (idx == 4) result ++= beginMain + "\n"
-      result ++= beginSection(idx)
+      idx match {
+        case 4 =>
+          result ++= beginMain
+          if(ctx.isQemuLoggerEnabled)
+            result ++= QemuLogger.addStartEvent + "\n"
+
+          result ++= beginMainInit
+          if(ctx.isQemuLoggerEnabled)
+            result ++= QemuLogger.addEndInitEvent + "\n"
+        case 5 =>
+          if(ctx.isQemuLoggerEnabled)
+            result ++= QemuLogger.addLoopStartEvent + "\n"
+        case _ =>
+      }
+
+      result ++= beginSection(idx) // Print the section name
 
       // Add static code when sections start
       idx match {
@@ -109,13 +125,19 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
       // Add static code when sections end
       idx match {
-        case 3 => result ++= endInit
-        case 5 => result ++= endMainLoop
+        case 3 =>result ++= endInit
+        case 5 =>
+          if(ctx.isQemuLoggerEnabled)
+            result ++= "\n" + QemuLogger.addLoopTickEvent
+          result ++= endMainLoop
         case _ =>
       }
 
-      result ++= endSection()
+      result ++= endSection() // Print the end of the section
     }
+
+    if(ctx.isQemuLoggerEnabled)
+      result ++= QemuLogger.addLoopExitEvent
 
     // End of the file
     result ++= endMain
@@ -124,19 +146,17 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   }
 
   // Include all necessary files and remove duplicates if necessary
-  private def includeFiles(cps: Seq[Component]): StringBuilder = {
-    val ret = new StringBuilder
+  private def includeFiles(cps: Seq[Component]): String = {
+    // List of list of all files to include
     val incs = for(c <- cps) yield c.asInstanceOf[hw_implemented].getIncludeCode
-    // Remove duplicates files contains in the list using `distinct`
-    for(file <- incs.distinct) file match {
-      case Some(c) => ret ++= String.format("#include \"%s\"\n", c)
-      case None =>
-    }
-    ret
+
+    // Remove duplicates files contains in the flatten list using `distinct`
+    val files = for(f <- incs.flatten.distinct) yield String.format("#include \"%s\"", f)
+    files.mkString("\n") + "\n"
   }
 
   // Init all outputs before the general init
-  private def initOutputs(): StringBuilder = {
+  private def initOutputs(): String = {
     val ret = new StringBuilder
     ret ++= "// Initialize all connected outputs automatically\n"
     val outputs = ComponentManager.findConnectedOutputHardware
@@ -146,7 +166,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       case None =>
     }
     }
-    ret
+    ret.result()
   }
 
   /* Static code definitions */
@@ -175,11 +195,9 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
   private final val beginOutputInit = "void initOutputs() {\n"
 
-  private final val beginMain =
-    """int main() {
-      |initOutputs();
-      |init();
-    """.stripMargin
+  private final val beginMain = "int main() {\n"
+
+  private final val beginMainInit = "initOutputs();\ninit();\n\n"
 
   private final val beginMainLoop = "while(1) {\n"
 

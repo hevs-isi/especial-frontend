@@ -55,5 +55,5 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
     Some(res.result())
   }
 
-  override def getIncludeCode = Some("digitalinput.h")
+  override def getIncludeCode = Seq("digitalinput.h")
 }
