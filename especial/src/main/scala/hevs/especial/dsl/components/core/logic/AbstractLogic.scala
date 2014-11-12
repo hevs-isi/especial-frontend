@@ -15,6 +15,16 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
 
   type T = uint1 // Inputs are outputs are boolean values
 
+  /**
+   * List of inputs. Use the `in` method to access to it safely.
+   */
+  private val inputs = mutable.ListBuffer.empty[InputPort[uint1]]
+  private val tpe = uint1().getType
+  private val outputVarName = s"out$getVarId"
+
+  // Create input(s) of the component
+  createInputs()
+
   // One single boolean output
   val out = new OutputPort[T](this) {
     override val description = "the AND output"
@@ -25,15 +35,6 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
       inputs.mkString(s" $operator ") // Example: in1Comp2 & in2Comp2 & ...
     }
   }
-  /**
-   * List of inputs. Use the `in` method to access to it safely.
-   */
-  private val inputs = mutable.ListBuffer.empty[InputPort[uint1]]
-  private val tpe = uint1().getType
-
-  // Create input(s) of the component
-  createInputs()
-  private val outputVarName = s"outComp$getId"
 
   def getOutputs = Some(Seq(out))
 
@@ -57,7 +58,6 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
     case true =>
       val inputs = for (i <- 1 to nbrInput) yield inputVarName(i)
       // Example: bool_t in1Comp3, in2Comp3, in3Comp3;
-      // TODO: set default value ?
       Some(s"$tpe ${inputs.mkString(", ")}; // $this")
     case _ => None
   }

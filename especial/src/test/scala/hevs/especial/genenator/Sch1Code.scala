@@ -8,7 +8,7 @@ class Sch1Code extends STM32TestSuite {
 
   def getDslCode = {
 
-    new Stm32stk()
+    new Stm32stk
 
     // Inputs
     //val btn1 = DigitalInput(4)
@@ -17,7 +17,7 @@ class Sch1Code extends STM32TestSuite {
     //val led4 = DigitalOutput(42) // NC
 
     // Outputs
-    val led1 = DigitalOutput(Pin('C', 12), initValue = true)
+    val led1 = DigitalOutput(Pin('C', 12), initValue = false)
     //val led2 = DigitalOutput(8)
     //val led3 = DigitalOutput(9)
 

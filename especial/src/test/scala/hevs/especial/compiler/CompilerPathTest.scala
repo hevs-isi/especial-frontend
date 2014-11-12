@@ -16,22 +16,11 @@ object CompilerPathTest extends App with Logging {
     "csrc/target-qemu/csrc.elf -serial null -monitor null"
   val qemuProcess = OSUtils.runInBackground(runQemu)
 
-  // Monitor
-  val ms = new MonitorServer()
 
-  info("Start monitor. Wait for client...")
-  val m = ms.waitForClient()
-  var s = m.getMessagesSize
+  // **
+  MonitorServerTest.main(Array.empty)
+  // **
 
-  while (s < 10) {
-    s = m.getMessagesSize
-    Thread.sleep(100)
-  }
-
-  // Close the TCP server
-  info("Disconnect server.")
-  m.disconnect()
-  ms.close()
 
   // Close QEMU
   info("Kill QEMU.")

@@ -1,7 +1,7 @@
 package hevs.especial.resolver
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.logic.And2
+import hevs.especial.dsl.components.core.logic.And2
 import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput}
 import hevs.especial.dsl.components.{ComponentManager, Pin, uint1}
 import hevs.especial.generator.CodeChecker

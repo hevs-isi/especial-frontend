@@ -13,8 +13,8 @@ id2 match {
 val f = Pin('A', 12)
 
 f match {
-  case Pin('A', _) => println("A")
   case Pin('A', 12) => println("A12")
+  case Pin('A', _) => println("A")
 }
 
 val p = PeriphId(43)
@@ -41,4 +41,21 @@ def decodeJson(jsonStr: String): Unit = {
   }
 
   println("finish")
+
+  trait MyTrait {
+    def test() = {
+      println("test")
+    }
+
+    override def toString = "MyTrait"
+  }
+
+  case class MyClass() {
+    override def toString = "MyClass"
+  }
+
+  println(new MyClass)
+  println(new MyClass with MyTrait)
+
+
 }

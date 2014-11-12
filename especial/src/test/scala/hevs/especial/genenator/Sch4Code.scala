@@ -1,7 +1,7 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.logic.{And2, And4}
+import hevs.especial.dsl.components.core.logic.{And2, And4}
 import hevs.especial.dsl.components.target.stm32stk.DigitalOutput
 import hevs.especial.dsl.components.{Pin, uint1}
 

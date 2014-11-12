@@ -5,16 +5,13 @@ import hevs.especial.dsl.components._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 
-case class Constant[T <: CType : TypeTag](value: T) extends Component with hw_implemented {
+case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 with hw_implemented {
 
   override val description = "constant generator"
-
   private val valName = s"cst$getVarId" // unique variable name
 
   val out = new OutputPort[T](this) {
-
     override val description = "the constant value"
-
     override def getValue: String = valName
   }
 

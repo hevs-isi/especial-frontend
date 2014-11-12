@@ -10,8 +10,6 @@ class Stm32stk extends Component with hw_implemented with NoIO {
 
   override val description = "STM32-103STK board"
 
-  override def getIncludeCode: Option[String] = Some("helper.h")
-    //  """extern "C" {
-    //  |  #include "helper.h"
-    //  |}""".stripMargin)
+  // FIXME: use the context or settings to check if qemulogger is necessary or not
+  override def getIncludeCode = Seq("helper.h", "utils/qemulogger.h")
 }

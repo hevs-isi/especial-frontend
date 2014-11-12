@@ -12,12 +12,12 @@ object MonitorServerTest extends App with Logging {
   val m = ms.waitForClient()
   var s = m.getMessagesSize
 
-  while (s < 6) {
+  while (s < 7) {
     s = m.getMessagesSize
     Thread.sleep(100)
   }
 
-  info("6 commands received")
+  info("7 commands received")
   val v = m.getOutputValues
 
   // Close the TCP server
@@ -29,8 +29,7 @@ object MonitorServerTest extends App with Logging {
   printOutputValues(v)
 
   // Check values for one specific output
-  info("val: " + v(Pin('C', 12)))
-  val valid = v(Pin('C', 12)) == Seq(1, 0, 1, 0, 1)
+  val valid = v(Pin('C', 12)) == Seq(0, 1, 0, 1, 1, 1, 1)
   assert(valid)
 
   info("End")
