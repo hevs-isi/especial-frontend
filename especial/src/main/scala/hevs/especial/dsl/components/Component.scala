@@ -81,7 +81,7 @@ abstract class Component {
       "\n\tOutputs: " + getOutputs.getOrElse("None")
   }
 
-  override def toString = s"Cmp[$id] '$getDescription'"
+  override def toString = s"""Cmp[$id] \"$getDescription\""""
 
   def getDescription = description
 

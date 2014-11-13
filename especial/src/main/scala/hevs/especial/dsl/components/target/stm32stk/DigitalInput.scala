@@ -13,7 +13,7 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
 
   override val description = s"digital input on '$pin'"
   override val valName = s"digitalIn$getVarId"
-  private val fctName = s"pollDigitalInput${pin.port}${pin.pinNumber}"
+  private val fctName = s"getlDigitalInput${pin.port}${pin.pinNumber}"
 
   /**
    * The `uint1` value of this digital input.
@@ -42,16 +42,20 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
   override def getLoopableCode = Some(s"$fctName();")
 
   override def getFunctionsDefinitions = {
+    // Add a function to get the cached value of this input.
     val res = new StringBuilder
-    res ++= s"void $fctName() {"
-    res ++= "// Get the cached value (read from interrupt)"
-    res ++= s"${uint1().getType} val = $valName.get();"
 
+    // 1) Store the input value in a local variable
+    res ++= s"void $fctName() {\n"
+    res ++= "// Get the cached value (read from interrupt)\n"
+    res ++= s"${uint1().getType} val = $valName.get();\n"
+
+    // 2) Propagate this value to all connected components
     val in = ComponentManager.findConnections(out)
     for (inPort ← in)
-      res ++= inPort.setInputValue("val") + "; // " + inPort
+      res ++= inPort.setInputValue("val") + s"; //$inPort\n"
 
-    res ++= "\n}"
+    res ++= "}"
     Some(res.result())
   }
 

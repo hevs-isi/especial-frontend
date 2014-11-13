@@ -4,9 +4,8 @@ import java.io.File
 import java.util.Date
 
 import hevs.especial.dsl.components.{Component, ComponentManager, hw_implemented}
+import hevs.especial.simulation.QemuLogger
 import hevs.especial.utils._
-
-import scala.collection.mutable.ArrayBuffer
 
 /**
  * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
