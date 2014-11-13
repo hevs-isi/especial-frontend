@@ -6,18 +6,15 @@ import java.net.Socket
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.Pin
 import net.liftweb.json.DefaultFormats
+import net.liftweb.json.JsonAST.{JObject, JNothing$}
 import net.liftweb.json.JsonParser._
 
 import scala.collection.mutable
 import scala.util.control.Breaks._
 
 class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorServerThread") with Logging {
-  // All outputs pins
-  private val ioSet = mutable.Set.empty[Pin]
-  // All outputs values
-  private val ioStates = mutable.ListBuffer.empty[(Pin, Int)]
+
   private var connected = true
-  private var msgCount = 0
 
   /**
    * Check if a client is connected or not.
@@ -30,11 +27,21 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
    */
   def disconnect() = connected = false
 
-  /**
-   * Count the number of received messages (valid or not).
+
+  /* Messages */
+  private var msgCount = 0
+
+  // All outputs pins
+  private val ioSet = mutable.Set.empty[Pin]
+
+  // All outputs values
+  private val ioStates = mutable.ListBuffer.empty[(Pin, Int)]
+
+    /**
+   * Count the number of valid received messages.
    * @return the number of received message
    */
-  def getMessagesSize = msgCount
+  def getValidMessagesSize = msgCount
 
   /**
    * Return all values of each outputs.
@@ -58,6 +65,33 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
    */
   def getOutputPins: Set[Pin] = ioSet.toSet // Convert to immutable
 
+
+
+  /* Events */
+
+  // Store all received events with their value
+  private val events = mutable.ListBuffer.empty[Event]
+
+
+  def getEvents = events.toSeq // Convert to immutable
+
+  def getEventSize = events.size
+
+  def getLastEvent: Option[Event] = events match {
+      case c if c.size == 0 => None
+      case _ => Some(events.last)
+  }
+
+  def waitForLastEvent(evt: Event): Unit = {
+    // Must be defined and match with the current event
+    while (!(getLastEvent.isDefined && getLastEvent.get.equals(evt))) {
+      Thread.sleep(100) // Wait some time for a new event
+    }
+  }
+
+  // TODO: add more function to wait for event id, values, etc.
+
+
   /** TCP server Thread */
   override def run(): Unit = {
     info("New client connected.")
@@ -72,8 +106,9 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
           if (l == null)
             break()
           trace("Read: " + l)
-          decodeJson(l)
-          msgCount += 1
+          val valid = decodeJson(l)
+          if(!valid)
+            break()
         }
       }
 
@@ -82,6 +117,7 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
       out.close()
       in.close()
       s.close()
+      System.exit(-1)
     }
 
     catch {
@@ -94,23 +130,36 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
   }
 
   // Decode a command received from QEMU
-  private def decodeJson(jsonStr: String): Unit = {
+  private def decodeJson(jsonStr: String): Boolean = {
     implicit val formats = DefaultFormats // Brings in default date formats etc.
 
     // Parse the Json command received from QEMU
     val json = parse(jsonStr)
-    val cmd = json.extract[Command]
+   // val cmd = json.extract[Command] // Extract to predefined case classes
 
-    cmd.id match {
-      case DigitalOut => logOutputValue(cmd)
-      case PeriphId(id) => sys.error("Unknown command id " + id)
+    val read = json \ "pin" match {
+      case _: JObject => json.extract[Command].asInstanceOf[Command]
+      case _ => json.extract[Event].asInstanceOf[Event]
+    }
+
+    read.id match {
+      case DigitalOut | CEvent =>
+        info(read)
+        logMessageOrEvent(read)
+        true
+
+      case MsgId(id) =>
+        error("Unknown message id " + id)
+        false // Invalid JSON message
     }
   }
 
-  // Save the value of an output
-  private def logOutputValue(cmd: Command): Unit = {
-    ioSet add cmd.pin
-    ioStates += ((cmd.pin, cmd.value))
-    info("New output value for pin " + cmd.pin)
+  // Save the value of an output or an event value
+  private def logMessageOrEvent(msg: JsonMessage) = msg match {
+    case cmd: Command =>
+      ioSet add cmd.pin
+      ioStates += ((cmd.pin, cmd.value))
+      msgCount += 1
+    case evt: Event => events += evt
   }
 }

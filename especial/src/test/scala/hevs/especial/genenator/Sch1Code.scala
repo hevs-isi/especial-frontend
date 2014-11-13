@@ -1,31 +1,25 @@
 package hevs.especial.genenator
 
-import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.target.stm32stk.{DigitalOutput, Stm32stk}
-import hevs.especial.dsl.components.{Pin, uint1}
+import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, Stm32stk}
+import hevs.especial.simulation.QemuLogger
 
 class Sch1Code extends STM32TestSuite {
 
   def getDslCode = {
 
-    new Stm32stk
+    // Define the target with the QEMU debug option
+    new Stm32stk with QemuLogger
 
     // Inputs
-    //val btn1 = DigitalInput(4)
-    val cst1 = Constant(uint1(v = false))
-
-    //val led4 = DigitalOutput(42) // NC
+    val btn1 = DigitalInput(Stm32stk.p_btn)
+    // val cst1 = Constant(uint1(v = false))
 
     // Outputs
-    val led1 = DigitalOutput(Pin('C', 12), initValue = false)
-    //val led2 = DigitalOutput(8)
-    //val led3 = DigitalOutput(9)
+    val led1 = DigitalOutput(Stm32stk.p_led)
 
     // Connecting stuff
-    //btn1.out --> led1.in
-    //btn1.out --> led2.in
-
-    cst1.out --> led1.in
+    btn1.out --> led1.in
+    // cst1.out --> led1.in
   }
 
   runDotGeneratorTest()
