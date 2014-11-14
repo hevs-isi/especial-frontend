@@ -1,7 +1,9 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.ComponentManager
+import hevs.especial.dsl.components.target.stm32stk.Stm32stk
 import hevs.especial.generator._
+import hevs.especial.simulation.QemuLogger
 import hevs.especial.utils.{Context, Settings}
 import org.scalatest.FunSuite
 
@@ -11,14 +13,44 @@ import org.scalatest.FunSuite
  */
 abstract class STM32TestSuite extends FunSuite {
 
+  /** Enable the logger in QEMU or not. */
+  val qemuLoggerEnabled: Boolean
+  private var progExecuted = false
+
   /* Pipeline */
 
   /** Pipeline context */
   private val progName = this.getClass.getSimpleName
-  private val ctx = new Context(progName, true) // Enable the QEMU logger
+  private val ctx = new Context(progName, qemuLoggerEnabled) // Enable the QEMU logger
 
+  /** Pipeline blocks */
   private val dot = new DotPipe().run(ctx) _
   private val checker = new CodeChecker().run(ctx) _
+
+
+  private def executeProg(): Unit = {
+    if (progExecuted) {
+      ctx.log.info("Program ready.")
+      return // Execute once only
+    }
+
+    ComponentManager.reset() // Delete all previous components
+
+    // Add the target as a component with the logger or not
+    ctx.isQemuLoggerEnabled match {
+      case true =>
+        new Stm32stk with QemuLogger
+        ctx.log.info("QEMU logger is enabled.")
+      case _ =>
+        new Stm32stk
+        ctx.log.info("QEMU logger is disabled.")
+    }
+
+    // Execute the DSL program
+    getDslCode
+    progExecuted = true
+    ctx.log.info(s"Program '$progName' executed.")
+  }
 
   /**
    * The test fail if any error is reported to the logger.
@@ -26,7 +58,7 @@ abstract class STM32TestSuite extends FunSuite {
   private def checkErrors(): Unit = {
     if (ctx.log.hasErrors) {
       // assert(!log.hasErrors)
-      fail("Errors reported to the Logger.")
+      fail("Errors reported to the Logger.") // Test failed
     }
   }
 
@@ -43,14 +75,12 @@ abstract class STM32TestSuite extends FunSuite {
     if (!Settings.PIPELINE_RUN_DOT)
       return // Test disabled
 
-    // Reset and run the DSL program
-    ComponentManager.reset()
     test("Dot generator") {
       ctx.log.info(s"Dot generator test for '$progName' started.")
 
-      getDslCode
-      dot(progName)
+      executeProg() // Run the DSL code
 
+      dot(progName) // Execute the DOT pipeline
       checkErrors()
     }
   }
@@ -66,7 +96,10 @@ abstract class STM32TestSuite extends FunSuite {
     test("Code checker") {
       ctx.log.info(s"Code checker test for '$progName' started.")
 
-      val warns = checker("")
+      executeProg() // Run the DSL code
+
+      // Run the code checker
+      val warns = checker(null)
       assert(ctx.log.hasWarnings == hasWarnings)
 
       // Not excepted result
@@ -80,7 +113,6 @@ abstract class STM32TestSuite extends FunSuite {
   }
 
   def runCodeGenTest(compile: Boolean = true): Unit = {
-
     test("Resolver and code gen") {
       val resolve = new Resolver()
       val gen = new CodeGenerator()

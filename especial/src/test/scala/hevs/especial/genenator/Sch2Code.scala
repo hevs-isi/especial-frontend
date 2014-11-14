@@ -7,6 +7,8 @@ import hevs.especial.dsl.components.{Pin, uint1}
 
 class Sch2Code extends STM32TestSuite {
 
+  val qemuLoggerEnabled = true
+
   def getDslCode = {
     // Inputs
     val cst1 = Constant(uint1(v = true))
@@ -24,11 +26,10 @@ class Sch2Code extends STM32TestSuite {
     and1.out --> led2.in
     cst1.out --> and1.in1
     cst1.out --> and1.in2
-
-    // cst2.out --> and1(3) // Test with 14 // 1
   }
 
   runDotGeneratorTest()
+
   runCodeCheckerTest(hasWarnings = true)
 
   runCodeGenTest()

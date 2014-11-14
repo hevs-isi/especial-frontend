@@ -22,9 +22,9 @@ class Stm32stk extends Component with hw_implemented with NoIO {
 object Stm32stk {
 
   /** The red LED is on `GPIOC.12` */
-  val p_led = Pin('C', 0xC)
+  val pin_led = Pin('C', 0xC)
 
   /** The center joystick button is on `GPIOC.6` */
-  val p_btn = Pin('C', 0x6)
+  val pin_btn = Pin('C', 0x6)
 }
 
