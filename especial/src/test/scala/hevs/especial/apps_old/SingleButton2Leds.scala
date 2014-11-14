@@ -6,6 +6,8 @@ import hevs.especial.genenator.STM32TestSuite
 @Deprecated
 object SingleButton2Leds extends STM32TestSuite {
 
+  override val qemuLoggerEnabled = false
+
   def getDslCode = ""
 
  /* val b1 = DigitalInput(3)

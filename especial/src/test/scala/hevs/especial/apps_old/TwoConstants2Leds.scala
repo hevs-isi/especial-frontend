@@ -6,6 +6,8 @@ import hevs.especial.genenator.STM32TestSuite
 @Deprecated
 object TwoConstants2Leds extends STM32TestSuite {
 
+  override val qemuLoggerEnabled = false
+
   def getDslCode = ""
 
   /* val c1 = Constant(uint1())

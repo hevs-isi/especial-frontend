@@ -6,6 +6,8 @@ import hevs.especial.genenator.STM32TestSuite
 @Deprecated
 object Constant2Led extends STM32TestSuite {
 
+  override val qemuLoggerEnabled = false
+
   def getDslCode = ""
 
   /*val c = Constant(uint1(false))
