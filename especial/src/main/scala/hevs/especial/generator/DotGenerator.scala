@@ -14,19 +14,20 @@ import scalax.collection.io.dot._
 
 /**
  * Depending on the Settings, export the DOT and the PDF file.
- * The DOT diagram and the PDF are exported to the "output/<input>/dot" folder.
+ * The DOT diagram and the PDF are exported to the "output/<progName>/dot" folder.
+ * No input is necessary. The program name is available in the context.
  */
-class DotPipe extends Pipeline[String, Unit] {
+class DotPipe extends Pipeline[Unit, Unit] {
 
   /**
    * Create the DOT and the PDF file that correspond to a DSL program.
    * Files written directly in the output folder (pipeline output not used).
    *
    * @param ctx the context of the program with the logger
-   * @param input the name of the program
+   * @param input nothing (not used)
    * @return nothing (not used)
    */
-  def run(ctx: Context)(input: String): Unit = {
+  def run(ctx: Context)(input: Unit): Unit = {
     // First block of the pipeline. Force to clean the output folder.
     // FIXME. clear the output folder before starting the test task
     // val folder: RichFile = new File("output/")
@@ -38,7 +39,7 @@ class DotPipe extends Pipeline[String, Unit] {
     }
 
     // Generate the DOT file
-    val res = DotGenerator.generateDotFile(input)
+    val res = DotGenerator.generateDotFile(ctx.progName)
     if (!res)
       ctx.log.error("Unable to generate the DOT file !")
     else
@@ -55,7 +56,7 @@ class DotPipe extends Pipeline[String, Unit] {
         return
       }
 
-      val res = DotGenerator.convertDotToPdf(input)
+      val res = DotGenerator.convertDotToPdf(ctx.progName)
       if (res._1 == 0)
         ctx.log.info("PDF file generated.")
       else

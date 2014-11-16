@@ -24,7 +24,7 @@ class MonitorServerTest extends FunSuite {
     printOutputValues(v)
 
     // Check values for one specific output
-    val ledValues = v(Stm32stk.p_led)
+    val ledValues = v(Stm32stk.pin_led)
     assert(ledValues.length == 11)
     assert(ledValues == Seq(0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1))
 

@@ -7,7 +7,7 @@ import hevs.especial.utils.{Context, Logger, Pipeline, Settings}
 import scala.collection.mutable
 
 object Resolver {
-  // Output type of the resolver. Used by the Code generator.
+  // Output type of the resolver and the input of code generator.
   type O = Map[Int, Set[Component]]
 }
 
@@ -16,7 +16,7 @@ object Resolver {
  * code must be generated when.
  * Unconnected components are ignored.
  */
-class Resolver extends Pipeline[Any, O] {
+class Resolver extends Pipeline[Unit, O] {
 
   // IDs of components that are generated. Order not valid !
   private val generatedCpId = mutable.Set.empty[Int]
@@ -37,7 +37,7 @@ class Resolver extends Pipeline[Any, O] {
    * @param input nothing (not used)
    * @return the resolver graph
    */
-  def run(ctx: Context)(input: Any): O = resolve(ctx.log)
+  def run(ctx: Context)(input: Unit): O = resolve(ctx.log)
 
   /**
    * Resolve a graph of components. Unconnected components are ignored.

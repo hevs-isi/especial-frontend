@@ -23,10 +23,6 @@ abstract class STM32TestSuite extends FunSuite {
   private val progName = this.getClass.getSimpleName
   private val ctx = new Context(progName, qemuLoggerEnabled) // Enable the QEMU logger
 
-  /** Pipeline blocks */
-  private val dot = new DotPipe().run(ctx) _
-  private val checker = new CodeChecker().run(ctx) _
-
 
   private def executeProg(): Unit = {
     if (progExecuted) {
@@ -80,7 +76,7 @@ abstract class STM32TestSuite extends FunSuite {
 
       executeProg() // Run the DSL code
 
-      dot(progName) // Execute the DOT pipeline
+      new DotPipe().run(ctx)(Unit) // Execute the DOT pipeline
       checkErrors()
     }
   }
@@ -99,7 +95,7 @@ abstract class STM32TestSuite extends FunSuite {
       executeProg() // Run the DSL code
 
       // Run the code checker
-      val warns = checker(null)
+      val warns = new CodeChecker().run(ctx)(Unit)
       assert(ctx.log.hasWarnings == hasWarnings)
 
       // Not excepted result
@@ -122,7 +118,7 @@ abstract class STM32TestSuite extends FunSuite {
       // The pipeline with or without the compile
       val pipe = if (compile) resolve -> gen -> formatter -> compiler else resolve -> gen -> formatter
 
-      val res = pipe.run(ctx)("")
+      val res = pipe.run(ctx)(Unit)
       ctx.log.info("Final result: " + res)
     }
   }

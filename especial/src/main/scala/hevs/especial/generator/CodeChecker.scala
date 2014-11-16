@@ -25,7 +25,7 @@ object CodeChecker {
  *
  * For now, it check only if components or inputs are not connected. This check can be disabled in the settings.
  */
-class CodeChecker extends Pipeline[Any, Boolean] {
+class CodeChecker extends Pipeline[Unit, Boolean] {
 
   /**
    * Analyse the `ComponentManager` and print some warnings if any.
@@ -34,7 +34,7 @@ class CodeChecker extends Pipeline[Any, Boolean] {
    * @param input nothing (not used)
    * @return true if warnings found, false otherwise
    */
-  def run(ctx: Context)(input: Any): Boolean = {
+  def run(ctx: Context)(input: Unit): Boolean = {
     if (!Settings.PIPELINE_RUN_CODE_CHECKER) {
       ctx.log.info(s"$currentName is disabled.")
       return false

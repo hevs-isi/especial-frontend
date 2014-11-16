@@ -18,7 +18,8 @@ object CompilerPathTest extends App with Logging {
 
 
   // **
-  MonitorServerTest.main(Array.empty)
+  // FIXME
+  // MonitorServerTest.main(Array.empty)
   // **
 
 
