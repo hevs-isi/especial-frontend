@@ -14,14 +14,17 @@ import org.scalatest.FunSuite
 abstract class STM32TestSuite extends FunSuite {
 
   /** Enable the logger in QEMU or not. */
-  val qemuLoggerEnabled: Boolean
+  def isQemuLoggerEnabled: Boolean
+
   private var progExecuted = false
 
   /* Pipeline */
 
   /** Pipeline context */
   private val progName = this.getClass.getSimpleName
-  private val ctx = new Context(progName, qemuLoggerEnabled) // Enable the QEMU logger
+
+  // Create the context depending on the user parameter
+  private val ctx = new Context(progName, isQemuLoggerEnabled)
 
 
   private def executeProg(): Unit = {

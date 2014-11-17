@@ -8,11 +8,11 @@ package hevs.especial.utils
 class Context(val progName: String, loggerEnable: Boolean = false) {
 
   /**
-   * Check if the QEMU logger enabled or not.
+   * Check if the QEMU logger is enabled or not.
    * Used to trace output information from QEMU to the monitor server. Somme additional code is added in the
    * generated code if it is enabled.
    */
-  def isQemuLoggerEnabled = loggerEnable
+  val isQemuLoggerEnabled = loggerEnable
 
   /** Logger used by the pipeline blocks to report any error or information. */
   val log = new Logger

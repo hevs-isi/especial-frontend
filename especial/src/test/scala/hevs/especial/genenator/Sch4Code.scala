@@ -7,7 +7,7 @@ import hevs.especial.dsl.components.{Pin, uint1}
 
 class Sch4Code extends STM32TestSuite {
 
-  val qemuLoggerEnabled = true
+  def isQemuLoggerEnabled = true
 
   def getDslCode = {
     // Inputs

@@ -4,7 +4,7 @@ import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput
 
 class Sch1Code extends STM32TestSuite {
 
-  val qemuLoggerEnabled = true
+  def isQemuLoggerEnabled = true
 
   def getDslCode = {
     // Inputs
