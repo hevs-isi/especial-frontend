@@ -29,5 +29,8 @@ case class Pin(port: Char, pinNumber: Int) {
   require(port >= 'A' && port <= 'G', "Invalid port name")
   require(pinNumber >= 0 && pinNumber <= 15, "Invalid pin number")
 
-  override def toString = s"GPIO$port#$pinNumber"
+  // Pin identifier as a String value. Used as identifier in the VCD file. Cannot contains any special character.
+  def getIdentifier = s"$port$pinNumber"
+
+  override def toString = s"Pin $port#$pinNumber"
 }
