@@ -3,12 +3,15 @@ package hevs.especial.apps_old
 import hevs.especial.genenator.STM32TestSuite
 
 //FIXME: use this test
+
 @Deprecated
 object MuxApp1 extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = ""
+  def getDslCode = {
+
+  }
 
   /*val c = Constant(uint8())
   val d = Constant(uint8())

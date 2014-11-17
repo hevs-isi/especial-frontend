@@ -53,7 +53,7 @@ sealed abstract class CType(val v: Any) {
  *
  * @param v the value
  */
-case class uint1(override val v: Boolean = false) extends CType(v) {
+case class bool(override val v: Boolean = false) extends CType(v) {
   override def getType = "bool"
 
   override def asBool = v

@@ -3,12 +3,15 @@ package hevs.especial.apps_old
 import hevs.especial.genenator.STM32TestSuite
 
 //FIXME: use this test
+
 @Deprecated
 object TwoConstants2Leds extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = ""
+  def getDslCode = {
+
+  }
 
   /* val c1 = Constant(uint1())
   val c2 = Constant(uint1())

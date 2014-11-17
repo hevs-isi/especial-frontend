@@ -3,7 +3,7 @@ package hevs.especial.genenator
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.core.logic.{And2, And4}
 import hevs.especial.dsl.components.target.stm32stk.DigitalOutput
-import hevs.especial.dsl.components.{Pin, uint1}
+import hevs.especial.dsl.components.{Pin, bool}
 
 class Sch4Code extends STM32TestSuite {
 
@@ -11,8 +11,8 @@ class Sch4Code extends STM32TestSuite {
 
   def getDslCode = {
     // Inputs
-    val cst1 = Constant(uint1(v = false))
-    val cst2 = Constant(uint1(v = false))
+    val cst1 = Constant(bool(v = false))
+    val cst2 = Constant(bool(v = false))
 
     // Logic
     val and1 = And2()
