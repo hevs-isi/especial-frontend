@@ -13,37 +13,34 @@ import hevs.especial.utils.Logger
  */
 sealed abstract class CType(val v: Any) {
 
-  //TODO Bake with spire ? https://github.com/non/spire
-
-  val l = new Logger
-
   /**
    * @return a `scala.Long` value
    */
-  def asLong: Long = l.fatal("Conversion not available.")
+  def asLong: Long = sys.error("Conversion not available.")
 
   /**
    * @return a `scala.String` value
    */
-  def asString: String = l.fatal("Conversion not available.")
+  def asString: String = sys.error("Conversion not available.")
 
   /**
    * @return a `scala.Boolean` value
    */
-  def asBool: Boolean = l.fatal("Conversion not available.")
+  def asBool: Boolean = sys.error("Conversion not available.")
 
   /**
    * @return a `scala.Float` value
    */
-  def asFloat: Float = l.fatal("Conversion not available.")
+  def asFloat: Float = sys.error("Conversion not available.")
 
   /**
    * @return a `scala.Double` value
    */
-  def asDouble: Double = l.fatal("Conversion not available.")
+  def asDouble: Double = sys.error("Conversion not available.")
 
   /**
-   * @return the C type as a `scala.String`
+   * The string name of the type (according to `<stdint.h>`)
+   * @return the C type as a `String` to add in the generated code
    */
   def getType: String
 

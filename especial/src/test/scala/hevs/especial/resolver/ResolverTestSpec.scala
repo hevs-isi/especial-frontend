@@ -21,7 +21,7 @@ abstract class ResolverTestSpec extends FunSuite with Matchers {
   def testResolver(): Map[Int, Set[Component]] = {
     // Create a new logger and a new resolver for each tests
     r = new Resolver
-    val res = r.run(ctx)()
+    val res = r.run(ctx)(Unit)
 
     ctx.log.terminateIfErrors(r)
     ctx.log.info("Result:\n" + res.mkString("\n"))
