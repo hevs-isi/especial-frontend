@@ -32,5 +32,5 @@ case class Pin(port: Char, pinNumber: Int) {
   // Pin identifier as a String value. Used as identifier in the VCD file. Cannot contains any special character.
   def getIdentifier = s"$port$pinNumber"
 
-  override def toString = s"Pin $port#$pinNumber"
+  override def toString = s"pin $port#$pinNumber"
 }

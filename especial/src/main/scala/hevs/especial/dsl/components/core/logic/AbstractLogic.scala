@@ -13,13 +13,13 @@ import scala.collection.mutable.ListBuffer
  */
 abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component with hw_implemented {
 
-  type T = uint1 // Inputs are outputs are boolean values
+  type T = bool // Inputs are outputs are boolean values
 
   /**
    * List of inputs. Use the `in` method to access to it safely.
    */
-  private val inputs = mutable.ListBuffer.empty[InputPort[uint1]]
-  private val tpe = uint1().getType
+  private val inputs = mutable.ListBuffer.empty[InputPort[bool]]
+  private val tpe = bool().getType
   private val outputVarName = s"out$getVarId"
 
   // Create input(s) of the component
@@ -27,6 +27,7 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
 
   // One single boolean output
   val out = new OutputPort[T](this) {
+    override val name = s"out"
     override val description = "the AND output"
 
     // Compute the AND value as output from all inputs (as global variables)
@@ -83,6 +84,7 @@ abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component 
     for (i <- 1 to nbrInput) {
       val inVar = inputVarName(i)
       val in = new InputPort[T](this) {
+        override val name = s"in$i"
         override val description = s"input $i"
 
         // Use global variable

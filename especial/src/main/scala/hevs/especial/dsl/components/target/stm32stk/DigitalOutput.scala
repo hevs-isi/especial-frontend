@@ -11,13 +11,14 @@ import hevs.especial.dsl.components.{In1, InputPort, Pin, hw_implemented}
 case class DigitalOutput(override val pin: Pin, initValue: Boolean = false) extends DigitalIO(pin) with In1 with
 hw_implemented {
 
-  override val description = s"digital output on '$pin'"
+  override val description = s"digital output\\non $pin"
   override val valName = s"digitalOut$getVarId"
 
   /**
    * The `uint1` value to write to this digital output.
    */
   override val in = new InputPort[T](this) {
+    override val name = s"in"
     override val description = "digital output value"
     override def setInputValue(s: String): String = s"$valName.set($s)"
   }

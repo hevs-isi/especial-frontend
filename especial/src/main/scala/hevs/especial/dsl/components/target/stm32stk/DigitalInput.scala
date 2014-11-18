@@ -11,7 +11,7 @@ import hevs.especial.dsl.components._
  */
 case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 with hw_implemented {
 
-  override val description = s"digital input on '$pin'"
+  override val description = s"digital input\\non $pin"
   override val valName = s"digitalIn$getVarId"
   private val fctName = s"getlDigitalInput${pin.port}${pin.pinNumber}"
 
@@ -19,6 +19,7 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
    * The `uint1` value of this digital input.
    */
   override val out = new OutputPort[T](this) {
+    override val name = s"out"
     override val description = "digital input value"
     override def getValue: String = s"$fctName();"
   }
@@ -48,7 +49,7 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
     // 1) Store the input value in a local variable
     res ++= s"void $fctName() {\n"
     res ++= "// Get the cached value (read from interrupt)\n"
-    res ++= s"${uint1().getType} val = $valName.get();\n"
+    res ++= s"${bool().getType} val = $valName.get();\n"
 
     // 2) Propagate this value to all connected components
     val in = ComponentManager.findConnections(out)

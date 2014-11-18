@@ -17,10 +17,13 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   val typeMirror = runtimeMirror(this.getClass.getClassLoader)
   val instanceMirror = typeMirror.reflect(this)
 
+  // Name required
+  val name: String
+
   // Optional description
   protected val description: String = ""
 
-  private val id = owner.newUniquePortId
+  private val id = owner.nextPortId // Unique port ID generated from the component
   private val tpe: Type = typeOf[T]
   private var connected = false
   private var connections = 0
@@ -91,7 +94,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   def getOwner = owner
 
-  override def toString = s"Port[$id] of $getOwner"
+  override def toString = s"Port[$id] '$name' of Cmp[$getOwnerId] '${getOwner.name}'"
 }
 
 abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) with Logging {

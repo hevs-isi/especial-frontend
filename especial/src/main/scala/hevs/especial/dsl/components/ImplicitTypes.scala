@@ -8,7 +8,7 @@ import scala.language.implicitConversions
 object ImplicitTypes {
 
   // From CTypes to Scala
-  implicit def uint1ToLong(v: uint1) = v.asLong
+  implicit def boolToLong(v: bool) = v.asLong
 
   implicit def uint8ToLong(v: uint8) = v.asLong
 
@@ -27,7 +27,7 @@ object ImplicitTypes {
   implicit def doubleToFloat(v: double) = v.asFloat
 
   // From Scala to CTypes
-  implicit def BooleanToUint1(v: Boolean): uint1 = uint1(v)
+  implicit def BooleanToUint1(v: Boolean): bool = bool(v)
 
   // implicit def intToUInt(x: Int): UInt = UInt(x)
   // implicit def booleanToBool(x: Boolean): Bool = Bool(x)

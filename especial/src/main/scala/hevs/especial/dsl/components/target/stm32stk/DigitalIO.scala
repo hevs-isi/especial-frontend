@@ -1,6 +1,6 @@
 package hevs.especial.dsl.components.target.stm32stk
 
-import hevs.especial.dsl.components.{Component, Pin, uint1}
+import hevs.especial.dsl.components.{Component, Pin, bool}
 
 /**
  * A digital input or output is defined by a unique pin number.
@@ -9,7 +9,7 @@ import hevs.especial.dsl.components.{Component, Pin, uint1}
  */
 abstract class DigitalIO(val pin: Pin) extends Component {
   /** A digital input/output can read/write boolean values. */
-  type T = uint1
+  type T = bool
 
   /** Unique global variable name to control/access the GPIO */
   protected val valName: String

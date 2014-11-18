@@ -65,7 +65,7 @@ abstract class STM32TestSuite extends FunSuite {
    * The DSL program to run for this test.
    * @return the DSl program to execute
    */
-  def getDslCode: Any
+  def getDslCode: Unit
 
   /**
    * Run the DOT pipeline block and check if any errors occurs.

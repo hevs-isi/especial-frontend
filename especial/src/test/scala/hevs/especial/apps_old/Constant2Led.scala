@@ -8,7 +8,9 @@ object Constant2Led extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  def getDslCode = ""
+  def getDslCode = {
+
+  }
 
   /*val c = Constant(uint1(false))
   val d = Constant(uint1(true))

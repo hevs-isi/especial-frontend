@@ -195,9 +195,9 @@ class DotGenerator(val graphName: String) {
    */
   private def nodeName(c: Component): String = {
     // Display the component id and description on two lines
-    val title = s"Cmp[${c.getId}]"
+    val title = c.name + s" [${c.getId}]"
     val connected = if (c.isConnected) "" else "\\n(NC)"
-    s"$title\\n${c.getDescription}$connected"
+    s"$title\\n${c.description}$connected"
   }
 
   /**
@@ -219,8 +219,8 @@ class DotGenerator(val graphName: String) {
         val id = x.getId
         val nc = if (x.isNotConnected) " (NC)" else ""
         x match {
-          case _: InputPort[_] => s"<$id>In[$id]$nc"
-          case _: OutputPort[_] => s"<$id>Out[$id]$nc"
+          case _: InputPort[_] => s"<$id>${x.name}\\n$nc" // In[$id]
+          case _: OutputPort[_] => s"<$id>${x.name}\\n$nc" // In[$id]
         }
       }
     ).mkString("|")

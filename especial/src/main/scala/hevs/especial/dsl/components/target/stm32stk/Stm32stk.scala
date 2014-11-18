@@ -10,6 +10,7 @@ import hevs.especial.dsl.components.{Pin, Component, NoIO, hw_implemented}
  */
 class Stm32stk extends Component with hw_implemented with NoIO {
 
+  override val name = "Stm32stk"
   override val description = "STM32-103STK board"
 
   /* Code generation */
