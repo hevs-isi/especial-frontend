@@ -8,6 +8,8 @@ import hevs.especial.utils._
 
 import scala.collection.mutable
 
+//TODO: add the events as a bus. How to synchronize the event bus with I/O ?
+
 /**
  * Generate a VCD file to export values of outputs.
  *
@@ -34,7 +36,8 @@ class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Unit] {
       ctx.log.error(s"Unable to create the VCD file to '$path'.")
 
     // Create the VCD file
-    val f: RichFile = new File(path + ctx.progName + ".vcd")
+    val fileName = path + ctx.progName + ".vcd"
+    val f: RichFile = new File(fileName)
 
     val str = new StringBuilder
     str ++= startHeader(ctx)
@@ -45,9 +48,10 @@ class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Unit] {
     str ++= setDumpVars(input.keySet)
     str ++= setValueChange(input)
 
-    f.write(str.result())
-
-    ctx.log.info(s"VCD file generated to '$path'.")
+    f.write(str.result()) match {
+      case true => ctx.log.info(s"VCD file generated to '$fileName'.")
+      case _ => ctx.log.error(s"Unable to generate the VCD file to '$fileName'.")
+    }
   }
 
   private def startHeader(ctx: Context): String = {
@@ -129,7 +133,7 @@ class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Unit] {
     // Timestamps must be ordered ascending.
     val res = new StringBuilder
     for ((time, values) <- dump.toSeq.sortBy(_._1)) {
-      res ++= s"#$time\n" // add the timestamp
+      res ++= s"#$time\n" // Add the timestamp value
       res ++= values.mkString("\n")
       res ++= "\n\n"
     }
