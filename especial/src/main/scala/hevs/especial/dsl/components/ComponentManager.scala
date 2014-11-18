@@ -17,11 +17,18 @@ object ComponentManager extends Logging {
   /** Mutable graph representation of all the components of the program. */
   val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
 
+  // Used to generate a unique ID for each component
+  private val cmpIdGen = {
+    val g = new IdGenerator()
+    g.reset()
+    g
+  }
+
   /**
    * Create a unique component id to store in the graph.
    * @return a unique component id
    */
-  def createComponentId() = IdGenerator.newUniqueId
+  def nextComponentId() = cmpIdGen.nextId
 
   /**
    * Insert a component in the graph. Each component has a unique ID. It cannot appears more than once in the graph.
@@ -37,7 +44,7 @@ object ComponentManager extends Logging {
    */
   def reset() = {
     cpGraph.clear()
-    IdGenerator.reset() // Restart id generation from 0
+    cmpIdGen.reset() // Restart id generation from 0
   }
 
   /**
@@ -195,18 +202,20 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Helper class used to generate a unique ID to all components stored in the graph.
-   * This is necessary to equals nodes in the graph.
+   * Helper class used to generate a unique ID.
+   *
+   * Each component stored in the graph has a unique ID. This is necessary to equals nodes in the graph.
+   * Each port of a component has also a unique ID. Used to equal ports and find connections (wires).
    */
-  private object IdGenerator {
-    private var id = 0
+  class IdGenerator {
+    private var id: Int = 0
 
-    def newUniqueId = {
+    def nextId = {
+      val currId = id
       id += 1
-      id
+      currId
     }
 
     def reset() = id = 0
   }
-
 }

@@ -1,5 +1,7 @@
 package hevs.especial.dsl.components
 
+import hevs.especial.dsl.components.ComponentManager.IdGenerator
+
 /**
  * Base class for all components (blocks) used in a program. These components, with there connections,
  * are stored only once in the graph. Methods `equals` and `hashCode` are used for that (class equality). Each
@@ -12,20 +14,30 @@ package hevs.especial.dsl.components
 abstract class Component {
 
   /**
-   * Optional description of the component.
+   * Name of the component class. Default is the class name.
    */
-  protected val description: String = ""
+  val name: String = this.getClass.getSimpleName // Example: Component
+
+  /**
+   * Description of the component. Default is empty.
+   */
+  val description: String = ""
 
   // Id of component (must be unique)
-  private val id = ComponentManager.createComponentId()
+  private val id = ComponentManager.nextComponentId()
 
   // Used to generate a unique ID for each port
-  private var nbrOfPorts = 0
-
-  def newUniquePortId = {
-    nbrOfPorts += 1
-    nbrOfPorts
+  private val portIdGen = {
+    val g = new IdGenerator
+    g.reset()
+    g
   }
+
+  /**
+   * Generate a unique ID for a component port.
+   * @return a unique port id inside the component
+   */
+  def nextPortId = portIdGen.nextId
 
   private var init: Boolean = false
 
@@ -76,14 +88,13 @@ abstract class Component {
   def getInputs: Option[Seq[InputPort[_]]]
 
   def getFullDescriptor = {
-    toString +
-      "\n\tInputs:  " + getInputs.getOrElse("None") +
-      "\n\tOutputs: " + getOutputs.getOrElse("None")
+    toString + ": " + description +
+      "\n\t- Inputs:  " + (if(getInputs.isDefined) getInputs.get.mkString(", ") else "None") +
+      "\n\t- Outputs: " + (if(getOutputs.isDefined) getOutputs.get.mkString(", ") else "None") + "\n"
   }
 
-  override def toString = s"""Cmp[$id] \"$getDescription\""""
+  override def toString = s"Cmp[$id] '$name'"
 
-  def getDescription = description
 
   // Used by the graph library
   override def equals(other: Any) = other match {
