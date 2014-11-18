@@ -37,7 +37,7 @@ abstract class Component {
    * Generate a unique ID for a component port.
    * @return a unique port id inside the component
    */
-  def nextPortId = portIdGen.nextId
+  private[components] def nextPortId = portIdGen.nextId
 
   private var init: Boolean = false
 
@@ -51,13 +51,13 @@ abstract class Component {
    * Helper function to create a unique variable name for a component.
    * @return unique variable name for a component
    */
-  def getVarId = s"Cmp$id"
+  private[components] def getVarId = s"Cmp$id"
 
   ComponentManager.registerComponent(this)
 
   def isInitialized: Boolean = init
 
-  def initialized() = init = true
+  private[components] def initialized() = init = true
 
   /**
    * Check if at least one port of this component is not connected.
@@ -105,31 +105,4 @@ abstract class Component {
 
   // Used by the graph library
   override def hashCode = id.##
-}
-
-
-trait hw_implemented {
-
-  /**
-   * Include (header) files on the top of the generated code.
-   * @return the list of path/file name to include with its extension
-   */
-  def getIncludeCode: Seq[String] = Nil
-
-  // Code inserted in the global section to declare global variables, constants, etc.
-  def getGlobalCode: Option[String] = None
-
-  // Code inserted in for function definitions (pre-main)
-  def getFunctionsDefinitions: Option[String] = None
-
-  // Code inserted to init the component (executed once)
-  def getInitCode: Option[String] = None
-
-  def getBeginOfMainAfterInit: Option[String] = None
-
-  // Code inserted in the main loop
-  def getLoopableCode: Option[String] = None
-
-  // Final code after the main loop
-  def getExitCode: Option[String] = None
 }

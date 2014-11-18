@@ -3,7 +3,7 @@ package hevs.especial.generator
 import java.io.File
 import java.util.Date
 
-import hevs.especial.dsl.components.{Component, ComponentManager, hw_implemented}
+import hevs.especial.dsl.components.{HwImplemented, Component, ComponentManager}
 import hevs.especial.simulation.QemuLogger
 import hevs.especial.utils._
 
@@ -22,12 +22,12 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
    */
   private final val codeSections = Seq(
     // (hw: hw_implemented) => hw.getIncludeCode, // Must remove duplicates files
-    (hw: hw_implemented) => hw.getGlobalCode,
-    (hw: hw_implemented) => hw.getFunctionsDefinitions,
-    (hw: hw_implemented) => hw.getInitCode,
-    (hw: hw_implemented) => hw.getBeginOfMainAfterInit,
-    (hw: hw_implemented) => hw.getLoopableCode,
-    (hw: hw_implemented) => hw.getExitCode
+    (hw: HwImplemented) => hw.getGlobalCode,
+    (hw: HwImplemented) => hw.getFunctionsDefinitions,
+    (hw: HwImplemented) => hw.getInitCode,
+    (hw: HwImplemented) => hw.getBeginOfMainAfterInit,
+    (hw: HwImplemented) => hw.getLoopableCode,
+    (hw: HwImplemented) => hw.getExitCode
   )
 
   /**
@@ -115,7 +115,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       }
 
       // Apply the current section function on all components
-      cps map { cp => sec._1(cp.asInstanceOf[hw_implemented]) match {
+      cps map { cp => sec._1(cp.asInstanceOf[HwImplemented]) match {
         // Add the code only if defined
         case Some(code) => result ++= code + "\n"
         case None =>
@@ -147,7 +147,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   // Include all necessary files and remove duplicates if necessary
   private def includeFiles(cps: Seq[Component]): String = {
     // List of list of all files to include
-    val incs = for(c <- cps) yield c.asInstanceOf[hw_implemented].getIncludeCode
+    val incs = for(c <- cps) yield c.asInstanceOf[HwImplemented].getIncludeCode
 
     // Remove duplicates files contains in the flatten list using `distinct`
     val files = for(f <- incs.flatten.distinct) yield String.format("#include \"%s\"", f)
@@ -159,7 +159,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     val ret = new StringBuilder
     ret ++= "// Initialize all connected outputs automatically\n"
     val outputs = ComponentManager.findConnectedOutputHardware
-    outputs map { cp => cp.asInstanceOf[hw_implemented].getInitCode match {
+    outputs map { cp => cp.asInstanceOf[HwImplemented].getInitCode match {
       // Add the code only if defined
       case Some(code) => ret ++= code + "\n"
       case None =>

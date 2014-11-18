@@ -5,7 +5,7 @@ import hevs.especial.dsl.components._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 
-case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 with hw_implemented {
+case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 with HwImplemented {
 
   override val description = s"constant generator\\n(${value.v})"
 

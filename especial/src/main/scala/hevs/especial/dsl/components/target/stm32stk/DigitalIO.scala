@@ -11,9 +11,6 @@ abstract class DigitalIO(val pin: Pin) extends Component {
   /** A digital input/output can read/write boolean values. */
   type T = bool
 
-  /** Unique global variable name to control/access the GPIO */
-  protected val valName: String
-
   /** Value of the pin structure formatted for the generated code. */
   protected val pinName: String = s"'${pin.port}', ${pin.pinNumber}"
 }

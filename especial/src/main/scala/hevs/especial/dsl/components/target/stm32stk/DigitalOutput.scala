@@ -1,6 +1,6 @@
 package hevs.especial.dsl.components.target.stm32stk
 
-import hevs.especial.dsl.components.{In1, InputPort, Pin, hw_implemented}
+import hevs.especial.dsl.components.{HwImplemented, In1, InputPort, Pin}
 
 /**
  * Create a digital output for a specific pin.
@@ -9,10 +9,10 @@ import hevs.especial.dsl.components.{In1, InputPort, Pin, hw_implemented}
  * @param initValue the default value of the output when initialized
  */
 case class DigitalOutput(override val pin: Pin, initValue: Boolean = false) extends DigitalIO(pin) with In1 with
-hw_implemented {
+HwImplemented {
 
   override val description = s"digital output\\non $pin"
-  override val valName = s"digitalOut$getVarId"
+  private val valName = s"digitalOut$getVarId"
 
   /**
    * The `uint1` value to write to this digital output.

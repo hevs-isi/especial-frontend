@@ -1,6 +1,6 @@
 package hevs.especial.dsl.components.target.stm32stk
 
-import hevs.especial.dsl.components.{Pin, Component, NoIO, hw_implemented}
+import hevs.especial.dsl.components.{HwImplemented, Component, NoIO, Pin}
 
 /**
  * STM32-103STK board
@@ -8,7 +8,7 @@ import hevs.especial.dsl.components.{Pin, Component, NoIO, hw_implemented}
  *
  * Some pins are defines for led and buttons.
  */
-class Stm32stk extends Component with hw_implemented with NoIO {
+class Stm32stk extends Component with HwImplemented with NoIO {
 
   override val name = "Stm32stk"
   override val description = "STM32-103STK board"

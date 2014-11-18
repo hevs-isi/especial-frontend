@@ -11,7 +11,7 @@ import scala.collection.mutable.ListBuffer
  * @param nbrInput number of inputs of the component
  * @param operator Boolean operator to compute
  */
-abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component with hw_implemented {
+abstract class AbstractLogic(nbrInput: Int, operator: String) extends Component with HwImplemented {
 
   type T = bool // Inputs are outputs are boolean values
 
