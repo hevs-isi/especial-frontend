@@ -12,9 +12,23 @@ import net.liftweb.json.JsonParser._
 import scala.collection.mutable
 import scala.util.control.Breaks._
 
-class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorServerThread") with Logging {
+class MonitorReader(s: Socket) extends Thread("MonitorReader") with Logging {
 
-  private var connected = true
+  // All outputs pins
+  private val ioPin = mutable.Set.empty[Pin]
+
+  /* Messages */
+  // All outputs values
+  private val ioStates = mutable.ListBuffer.empty[(Pin, Int)]
+  // Store all received events with their value.
+  // Queue not used because we want to store all events after execution.
+  private val events = mutable.ListBuffer.empty[Event]
+
+
+  /* Events */
+  // `true` when ready and connected with a TCP client
+  private var connected = false
+  private var lastEventIdx = 0
 
   /**
    * Check if a client is connected or not.
@@ -26,22 +40,6 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
    * Force to close the server.
    */
   def disconnect() = connected = false
-
-
-  /* Messages */
-  private var msgCount = 0
-
-  // All outputs pins
-  private val ioSet = mutable.Set.empty[Pin]
-
-  // All outputs values
-  private val ioStates = mutable.ListBuffer.empty[(Pin, Int)]
-
-    /**
-   * Count the number of valid received messages.
-   * @return the number of received message
-   */
-  def getValidMessagesSize = msgCount
 
   /**
    * Return all values of each outputs.
@@ -63,40 +61,39 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
    * All defined outputs.
    * @return a set of defined output in qemu
    */
-  def getOutputPins: Set[Pin] = ioSet.toSet // Convert to immutable
+  def getOutputPins: Set[Pin] = ioPin.toSet // Convert to immutable
 
+  /**
+   * Wait for an event. Blocking method until the event is received.
+   * Search only for new events. Past events are stored but ignored in this case.
+   * @param evt the event to wait one
+   */
+  def waitForEvent(evt: Event): Unit = {
+    // Blocking method
+    while (true) {
+      // Search for the event in the current range
+      val r: Range = lastEventIdx until events.size by 1
+      for (idx <- r if evt equals events(idx)) {
+        // Event found. Update the new range (can be 0 if no new events are received).
+        lastEventIdx = idx + 1
+        return // Exit when the first event is found in the range
+      }
 
-
-  /* Events */
-
-  // Store all received events with their value
-  private val events = mutable.ListBuffer.empty[Event]
-
-
-  def getEvents = events.toSeq // Convert to immutable
-
-  def getEventSize = events.size
-
-  def getLastEvent: Option[Event] = events match {
-      case c if c.size == 0 => None
-      case _ => Some(events.last)
-  }
-
-  def waitForLastEvent(evt: Event): Unit = {
-    // Must be defined and match with the current event
-    while (!(getLastEvent.isDefined && getLastEvent.get.equals(evt))) {
-      Thread.sleep(100) // Wait some time for a new event
+      Thread.sleep(100) // Wait some time so new events can be added in the queue
     }
   }
 
-  // TODO: add more function to wait for event id, values, etc.
-
+  /**
+   * Search for an event in the current event list.
+   * @param evt the event to search for
+   * @return `true` if found, `false` otherwise
+   */
+  def hasEvent(evt: Event): Boolean = events.contains(evt)
 
   /** TCP server Thread */
   override def run(): Unit = {
     info("New client connected.")
     try {
-      val out = new PrintWriter(s.getOutputStream, true)
       val in = new BufferedReader(new InputStreamReader(s.getInputStream))
 
       connected = true
@@ -105,19 +102,18 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
           val l = in.readLine()
           if (l == null)
             break()
+
           trace("Read: " + l)
           val valid = decodeJson(l)
-          if(!valid)
+          if (!valid)
             break()
         }
       }
 
       // Connection closed by the user
       info("Connection closed.")
-      out.close()
       in.close()
       s.close()
-      System.exit(-1)
     }
 
     catch {
@@ -129,37 +125,39 @@ class MonitorServerThread(ms: MonitorServer, s: Socket) extends Thread("MonitorS
     }
   }
 
-  // Decode a command received from QEMU
+  /**
+   * Decode a Json message received from QEMU.
+   * @param jsonStr the received string from QEMU
+   * @return `true` if the Json message was decoded sucessfully, `false` otherwise
+   */
   private def decodeJson(jsonStr: String): Boolean = {
-    implicit val formats = DefaultFormats // Brings in default date formats etc.
-
     // Parse the Json command received from QEMU
     val json = parse(jsonStr)
-   // val cmd = json.extract[Command] // Extract to predefined case classes
 
+    // Check if the pin number is available or not.
+    // Extract the message or the command from the Json message.
+    implicit val formats = DefaultFormats // Brings in default date formats etc.
     val read = json \ "pin" match {
-      case _: JObject => json.extract[Command].asInstanceOf[Command]
-      case _ => json.extract[Event].asInstanceOf[Event]
-    }
+        case _: JObject => json.extract[Command].asInstanceOf[Command]
+        case _ => json.extract[Event].asInstanceOf[Event]
+      }
 
     read.id match {
       case DigitalOut | CEvent =>
-        info(read)
         logMessageOrEvent(read)
         true
-
       case MsgId(id) =>
         error("Unknown message id " + id)
         false // Invalid JSON message
     }
   }
 
-  // Save the value of an output or an event value
+  // Save the command or the event
   private def logMessageOrEvent(msg: JsonMessage) = msg match {
     case cmd: Command =>
-      ioSet add cmd.pin
+      ioPin add cmd.pin
       ioStates += ((cmd.pin, cmd.value))
-      msgCount += 1
-    case evt: Event => events += evt
+    case evt: Event =>
+      events += evt // Add the new event to the end of the linked list.
   }
 }

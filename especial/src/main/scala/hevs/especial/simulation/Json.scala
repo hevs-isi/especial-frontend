@@ -12,6 +12,7 @@ object MsgId {
     case DigitalOut.id => DigitalOut
     case DigitalIn.id => DigitalIn
     case CEvent.id => CEvent
+    case Empty.id => Empty
     case _ => new Id(id)
   }
 
@@ -21,7 +22,6 @@ object MsgId {
   }
 
   private class Id(id: Int) extends MsgId(id)
-
 }
 
 /* Available commands */
@@ -30,9 +30,11 @@ sealed abstract class MsgId(val id: Int) {
 }
 
 // According to the C structure `EventId` in file `stm32_p103_emul.h`
-case object DigitalOut extends MsgId(0)
-case object DigitalIn extends MsgId(1)
-case object CEvent extends MsgId(16)
+private case object DigitalOut extends MsgId(0)
+private case object DigitalIn extends MsgId(1)
+private case object CEvent extends MsgId(16)
+private case object Empty extends MsgId(255)
+
 
 
 abstract class JsonMessage(msgId: Int) {
@@ -71,10 +73,16 @@ class Event(val msgId: Int, val value: Int) extends JsonMessage(msgId) {
   protected def this(id: MsgId, value: Int) = this(id.id, value)
 }
 
+/**
+ * Contains all available event types.
+ */
+object Events {
 
-// According to the C structure `EventId` of the file `qemulogger.h`
-case object MainStart extends Event(CEvent, '0')
-case object EndInit extends Event(CEvent, 'A')
-case object LoopStart extends Event(CEvent, 'B')
-case object LoopTick extends Event(CEvent, 'C')
-case object LoopExit extends Event(CEvent, 'F')
+  // According to the C structure `EventId` of the file `qemulogger.h`
+  case object MainStart extends Event(CEvent, '0')
+  case object EndInit extends Event(CEvent, 'A')
+  case object LoopStart extends Event(CEvent, 'B')
+  case object LoopTick extends Event(CEvent, 'C')
+  case object MainEnd extends Event(CEvent, 'F')
+  case object NullEvent extends Event(Empty, '0')
+}

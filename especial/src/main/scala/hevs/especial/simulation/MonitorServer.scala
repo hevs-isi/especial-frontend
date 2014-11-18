@@ -12,18 +12,20 @@ import hevs.especial.utils.Settings._
  */
 class MonitorServer() extends Logging {
 
+  // Reader from QEMU
   var cmdListener: ServerSocket = null
-  var cmdServer: MonitorServerThread = null
+  var cmdServer: MonitorReader = null
 
-  //var evtListener: ServerSocket = null
-  //var evtServer: MonitorServerThread = null
+  // Writer to QEMU
+  var evtListener: ServerSocket = null
+  var evtServer: MonitorWriter = null
 
   startServers()
 
   def startServers() {
     try {
       cmdListener = new ServerSocket(Settings.MONITOR_TCP_CMD_PORT)
-      //evtListener = new ServerSocket(Settings.MONITOR_TCP_EVT_PORT)
+      evtListener = new ServerSocket(Settings.MONITOR_TCP_EVT_PORT)
       info(s"MonitorServer started.")
     }
     catch {
@@ -34,7 +36,7 @@ class MonitorServer() extends Logging {
   }
 
   // Block until a client is connected
-  def waitForClient(): MonitorServerThread = {
+  def waitForClient(): (MonitorReader, MonitorWriter) = {
     if (cmdListener == null) {
       error("MonitorServer not listening !")
       System.exit(-1) // Fatal error
@@ -42,18 +44,23 @@ class MonitorServer() extends Logging {
 
     if (cmdServer != null) {
       info("Already connected with a client.")
-      cmdServer
+      (cmdServer, evtServer)
     }
     else {
       info("Waiting for a client...")
 
-      cmdServer = new MonitorServerThread(this, cmdListener.accept())
+      // Blocking until a client is connected
+      cmdServer = new MonitorReader(cmdListener.accept())
       cmdServer.start()
 
-      //evtServer = new MonitorServerThread(this, evtListener.accept())
-      //evtServer.start()
+      evtServer = new MonitorWriter(evtListener.accept())
+      evtServer.start()
 
-      cmdServer
+      // Wait until the initialization is completed
+      while(!cmdServer.isConnected)
+        Thread.sleep(100)
+
+      (cmdServer, evtServer)
     }
   }
 
@@ -67,10 +74,10 @@ class MonitorServer() extends Logging {
     if (cmdListener != null)
       cmdListener.close()
 
-    //if (evtServer != null)
-    //  evtServer.disconnect()
+    if (evtServer != null)
+      evtServer.disconnect()
 
-    //if (evtListener != null)
-    //  evtListener.close()
+    if (evtListener != null)
+      evtListener.close()
   }
 }
