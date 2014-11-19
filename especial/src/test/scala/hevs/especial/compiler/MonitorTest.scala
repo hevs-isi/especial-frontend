@@ -15,8 +15,11 @@ class MonitorTest extends FunSuite with Logging {
 
     // Start the monitor and wait for a client
     val ms = new Monitor()
-    ms.waitForClient()
-    ms
+    ms.waitForClient() match {
+      case true => ms
+      case false =>
+        fail("Timeout. Test aborted.")
+    }
   }
 
   private def disconnect(ms: Monitor) = ms.close()

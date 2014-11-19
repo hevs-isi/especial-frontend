@@ -1,7 +1,7 @@
 package hevs.especial.simulation
 
 import java.io.IOException
-import java.net.ServerSocket
+import java.net.{ServerSocket, SocketTimeoutException}
 
 import grizzled.slf4j.Logging
 import hevs.especial.utils.Settings
@@ -21,8 +21,9 @@ class Monitor extends Logging {
 
   /**
    * Blocking function util a client is connected.
+   * @return `true` if a client is connected, `false` if timeout
    */
-  def waitForClient(): Unit = {
+  def waitForClient(): Boolean = {
     if (cmdListener == null) {
       error("MonitorServer not listening !")
       System.exit(-1) // Fatal error
@@ -30,21 +31,33 @@ class Monitor extends Logging {
 
     if (reader != null && writer != null) {
       info("Already connected.")
-      return
+      return true
     }
 
     info("Waiting for a client...")
 
     // Blocking until a client is connected
-    reader = new MonitorReader(cmdListener.accept())
-    reader.start()
+    cmdListener.setSoTimeout(5000)
+    evtListener.setSoTimeout(5000)
 
-    writer = new MonitorWriter(evtListener.accept())
-    writer.start()
+    try {
+      reader = new MonitorReader(cmdListener.accept())
+      reader.start()
+
+
+      writer = new MonitorWriter(evtListener.accept())
+      writer.start()
+    }
+    catch {
+      case e: SocketTimeoutException =>
+        error("Connection timeout.")
+        return false
+    }
 
     // Wait until the initialization is completed
     while (reader.isNotReady || writer.isNotReady)
       Thread.sleep(100)
+    true
   }
 
   /**
