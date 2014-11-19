@@ -37,8 +37,8 @@ class Monitor extends Logging {
     info("Waiting for a client...")
 
     // Blocking until a client is connected
-    cmdListener.setSoTimeout(5000)
-    evtListener.setSoTimeout(5000)
+    cmdListener.setSoTimeout(8000)
+    evtListener.setSoTimeout(8000)
 
     try {
       reader = new MonitorReader(cmdListener.accept())

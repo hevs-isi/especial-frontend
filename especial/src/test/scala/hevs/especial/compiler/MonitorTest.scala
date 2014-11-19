@@ -2,32 +2,29 @@ package hevs.especial.compiler
 
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.Pin
+import hevs.especial.generator.VcdGenerator
 import hevs.especial.simulation._
+import hevs.especial.utils.Context
 import org.scalatest.FunSuite
+
 
 class MonitorTest extends FunSuite with Logging {
 
-  // Output values
-  var v: Map[Pin, Seq[Int]] = Map.empty[Pin, Seq[Int]]
+  protected var pins = Map.empty[Pin, Seq[Int]]
 
-  private def waitForClient(): Monitor = {
+  protected def waitForClient(): Monitor = {
     info("Monitor test. Wait for client...")
 
     // Start the monitor and wait for a client
-    val ms = new Monitor()
-    ms.waitForClient() match {
-      case true => ms
+    val m = new Monitor()
+    m.waitForClient() match {
+      case true => m
       case false =>
         fail("Timeout. Test aborted.")
     }
   }
 
-  private def disconnect(ms: Monitor) = ms.close()
-
-  // Format output values and print them
-  private def printOutputValues(values: Map[Pin, Seq[Int]]) = {
-    values foreach (x => info(s"Pin ${x._1} has ${x._2.length} values: ${x._2.mkString("-")}"))
-  }
+  protected def disconnect(ms: Monitor) = ms.close()
 
   /*test("Monitor code Sch1") {
     val m = startTest()
@@ -49,7 +46,12 @@ class MonitorTest extends FunSuite with Logging {
     assert(ticks == 10)
   }*/
 
-  test("Monitor for 'Sch3'") {
+  // Format output values and print them
+  protected def printOutputValues(values: Map[Pin, Seq[Int]]) = {
+    values foreach (x => info(s"Pin ${x._1} has ${x._2.length} values: ${x._2.mkString("-")}"))
+  }
+
+  /* test("Monitor for 'Sch3'") {
     val m = waitForClient()
 
     m.reader.waitForEvent(Events.MainStart)
@@ -70,9 +72,21 @@ class MonitorTest extends FunSuite with Logging {
     info(s"${countTick + 1} loop ticks. Exit.")
 
     // Print output values
-    v = m.reader.getOutputValues
-    printOutputValues(v)
+    pins = m.reader.getOutputValues
+    printOutputValues(pins)
 
     disconnect(m)
-  }
+  } */
+
+  /*test("VCD generator") {
+    val gen = new VcdGenerator()
+    val ctx = new Context("Sch3Code", true)
+
+    // Generate the VCD file using the pipeline block
+    gen.run(ctx)(pins)
+
+    // Check if errors have been reported or not
+    assert(!ctx.log.hasWarnings)
+    assert(!ctx.log.hasErrors)
+  }*/
 }

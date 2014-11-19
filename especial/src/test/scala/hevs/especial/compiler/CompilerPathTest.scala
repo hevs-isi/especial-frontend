@@ -1,32 +1,73 @@
 package hevs.especial.compiler
 
-import grizzled.slf4j.Logging
-import hevs.especial.simulation.MonitorServer
-import hevs.especial.utils.OSUtils
+import hevs.especial.generator.VcdGenerator
+import hevs.especial.simulation.{Events, Monitor}
+import hevs.especial.utils.{Context, OSUtils, Settings}
 
 /**
  * Path example from a program to the QEMU simulation.
  */
-object CompilerPathTest extends App with Logging {
+class CompilerPathTest extends MonitorTest {
 
-  info("Start QEMU in a new process...")
+  test("Compiler path test") {
 
-  // Launch in graphic mode
-  final var runQemu = "./../../stm32/qemu_stm32/arm-softmmu/qemu-system-arm -M stm32-p103 -kernel " +
-    "csrc/target-qemu/csrc.elf -serial null -monitor null"
-  val qemuProcess = OSUtils.runInBackground(runQemu)
+    val m = new Monitor()
 
+    val runQemu = s"./${Settings.PATH_QEMU_STM32}/arm-softmmu/qemu-system-arm -M stm32-p103 -kernel " +
+      "csrc/target-qemu/csrc.elf -serial null -monitor null -nographic"
 
-  // **
-  // FIXME
-  // MonitorServerTest.main(Array.empty)
-  // **
+    info("Start QEMU in a new process...")
+    val qemuProcess = OSUtils.runInBackground(runQemu)
+    Thread.sleep(1000)
+    info("-----------------------------------------\n\n")
 
+    m.waitForClient() match {
+      case true => m
+      case false =>
+        fail("Timeout. Test aborted.")
+    }
 
-  // Close QEMU
-  info("Kill QEMU.")
-  qemuProcess.destroy()
+    // *********************************
+    m.reader.waitForEvent(Events.MainStart)
+    info("Program started.")
+    m.writer.ackEvent(Events.MainStart)
+    info("> MainStart ACK")
 
-  info("End")
-  System.exit(0)
+    var countTick = 0
+    while (countTick < 5) {
+      m.reader.waitForEvent(Events.LoopTick)
+      info("LoopTick event: " + countTick)
+      countTick += 1
+
+      m.writer.ackEvent(Events.LoopTick)
+      info("> LoopTick ACK")
+    }
+    Thread.sleep(100)
+    info(s"${countTick + 1} loop ticks. Exit.")
+
+    // Print output values
+    pins = m.reader.getOutputValues
+    printOutputValues(pins)
+
+    disconnect(m)
+    // *********************************
+
+    // Close QEMU
+    info("Kill QEMU.")
+    qemuProcess.destroy()
+
+    if (pins.nonEmpty) {
+
+      // generate the VCD file
+      val gen = new VcdGenerator()
+      val ctx = new Context("Sch3Code", true)
+
+      // Generate the VCD file using the pipeline block
+      gen.run(ctx)(pins)
+
+      // Check if errors have been reported or not
+      assert(!ctx.log.hasWarnings)
+      assert(!ctx.log.hasErrors)
+    }
+  }
 }
