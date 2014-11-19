@@ -5,25 +5,21 @@ import hevs.especial.dsl.components.Pin
 import hevs.especial.simulation._
 import org.scalatest.FunSuite
 
-class MonitorServerTest extends FunSuite with Logging {
+class MonitorTest extends FunSuite with Logging {
 
   // Output values
   var v: Map[Pin, Seq[Int]] = Map.empty[Pin, Seq[Int]]
 
-  private def waitForClient(): (MonitorReader, MonitorWriter) = {
+  private def waitForClient(): Monitor = {
     info("Monitor test. Wait for client...")
 
     // Start the monitor and wait for a client
-    val ms = new MonitorServer()
-    val m = ms.waitForClient()
-    m
+    val ms = new Monitor()
+    ms.waitForClient()
+    ms
   }
 
-  private def disconnect(m: (MonitorReader, MonitorWriter)): Unit = {
-    // Close the TCP servers at the end
-    m._1.disconnect()
-    m._2.disconnect()
-  }
+  private def disconnect(ms: Monitor) = ms.close()
 
   // Format output values and print them
   private def printOutputValues(values: Map[Pin, Seq[Int]]) = {
@@ -50,30 +46,28 @@ class MonitorServerTest extends FunSuite with Logging {
     assert(ticks == 10)
   }*/
 
-  test("Monitor code Sch3") {
+  test("Monitor for 'Sch3'") {
     val m = waitForClient()
-    val reader = m._1
-    val writer = m._2
 
-    reader.waitForEvent(Events.MainStart)
+    m.reader.waitForEvent(Events.MainStart)
     info("Program started.")
-    writer.ackEvent()
+    m.writer.ackEvent(Events.MainStart)
     info("> MainStart ACK")
 
     var countTick = 0
     while (countTick < 5) {
-      reader.waitForEvent(Events.LoopTick)
+      m.reader.waitForEvent(Events.LoopTick)
       info("LoopTick event: " + countTick)
       countTick += 1
 
-      writer.ackEvent()
+      m.writer.ackEvent(Events.LoopTick)
       info("> LoopTick ACK")
     }
     Thread.sleep(100)
     info(s"${countTick + 1} loop ticks. Exit.")
 
     // Print output values
-    v = reader.getOutputValues
+    v = m.reader.getOutputValues
     printOutputValues(v)
 
     disconnect(m)

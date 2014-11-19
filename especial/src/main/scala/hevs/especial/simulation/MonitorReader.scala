@@ -3,43 +3,25 @@ package hevs.especial.simulation
 import java.io._
 import java.net.Socket
 
-import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.Pin
 import net.liftweb.json.DefaultFormats
-import net.liftweb.json.JsonAST.{JObject, JNothing$}
+import net.liftweb.json.JsonAST.JObject
 import net.liftweb.json.JsonParser._
 
 import scala.collection.mutable
-import scala.util.control.Breaks._
 
-class MonitorReader(s: Socket) extends Thread("MonitorReader") with Logging {
+class MonitorReader(s: Socket) extends MonitorThread(s) {
 
   // All outputs pins
   private val ioPin = mutable.Set.empty[Pin]
 
-  /* Messages */
   // All outputs values
   private val ioStates = mutable.ListBuffer.empty[(Pin, Int)]
+
   // Store all received events with their value.
   // Queue not used because we want to store all events after execution.
   private val events = mutable.ListBuffer.empty[Event]
-
-
-  /* Events */
-  // `true` when ready and connected with a TCP client
-  private var connected = false
   private var lastEventIdx = 0
-
-  /**
-   * Check if a client is connected or not.
-   * @return true if the client is connected, false otherwise
-   */
-  def isConnected = connected
-
-  /**
-   * Force to close the server.
-   */
-  def disconnect() = connected = false
 
   /**
    * Return all values of each outputs.
@@ -91,42 +73,21 @@ class MonitorReader(s: Socket) extends Thread("MonitorReader") with Logging {
   def hasEvent(evt: Event): Boolean = events.contains(evt)
 
   /** TCP server Thread */
-  override def run(): Unit = {
-    info("New client connected.")
-    try {
-      val in = new BufferedReader(new InputStreamReader(s.getInputStream))
+  override protected def loop(in: BufferedReader, out: OutputStream): Unit = {
+    connected = true // Ready
 
-      connected = true
-      breakable {
-        while (connected) {
-          val l = in.readLine()
-          if (l == null)
-            break()
+    while (connected) {
+      val l = in.readLine()
+      if (l != null) {
+        trace("Read: " + l)
 
-          trace("Read: " + l)
-          val valid = decodeJson(l)
-          if (!valid)
-            break()
-        }
+        decodeJson(l) // Decode and store
       }
-
-      // Connection closed by the user
-      info("Connection closed.")
-      in.close()
-      s.close()
-    }
-
-    catch {
-      // Client disconnected or socket closed
-      case e: Exception =>
-        connected = false
-        info(s"> MonitorServer closed.")
-        e.printStackTrace()
     }
   }
 
   /**
-   * Decode a Json message received from QEMU.
+   * Decode a Json message received from QEMU and store the message if valid.
    * @param jsonStr the received string from QEMU
    * @return `true` if the Json message was decoded sucessfully, `false` otherwise
    */
@@ -147,7 +108,7 @@ class MonitorReader(s: Socket) extends Thread("MonitorReader") with Logging {
         logMessageOrEvent(read)
         true
       case MsgId(id) =>
-        error("Unknown message id " + id)
+        error(s"Unknown message id '$id'.")
         false // Invalid JSON message
     }
   }
