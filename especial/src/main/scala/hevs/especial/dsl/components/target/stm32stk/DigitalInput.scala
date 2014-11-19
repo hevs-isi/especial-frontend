@@ -6,12 +6,15 @@ import hevs.especial.dsl.components._
  * Create a digital input for a specific pin.
  *
  * The value of this input is automatically read and save in the ISR (Interrupt Service Routine).
+ * Interrupts are used by default with this implementation.
+ * The input is initialized in the `ìnit` function when needed (once only).
  *
- * @param pin GPIO pin
+ * @param pin the GPIO pin
  */
 case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 with HwImplemented {
 
   override val description = s"digital input\\non $pin"
+
   private val valName = s"digitalIn$getVarId"
   private val fctName = s"getlDigitalInput${pin.port}${pin.pinNumber}"
 
@@ -33,7 +36,6 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
   override def getGlobalCode = Some(s"DigitalInput $valName($pinName); // $out")
 
   override def getInitCode = {
-    initialized()
     val res = new StringBuilder
     res ++= s"$valName.initialize(); // Init of $this\n"
     res ++= s"$valName.registerInterrupt(); // Use interrupts"

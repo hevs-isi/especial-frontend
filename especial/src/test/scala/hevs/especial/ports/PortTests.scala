@@ -6,6 +6,12 @@ import hevs.especial.dsl.components.{ComponentManager, bool}
 import hevs.especial.utils.PortInputShortCircuit
 import org.scalatest.{FunSuite, Matchers}
 
+/**
+ * Test input and output port connections.
+ *
+ * Connection types must be the same. An output can be connected to different inputs,
+ * but an input can only have one connection, or a `PortInputShortCircuit` exception is thrown.
+ */
 class PortTests extends FunSuite with Matchers {
 
   abstract class PortCode {
@@ -24,19 +30,20 @@ class PortTests extends FunSuite with Matchers {
     btn1.out --> led1.in
   }
 
-
   test("Input to output") {
     ComponentManager.reset()
-    new PortCode1() // Connections are fine
-    info("Connections are Ok.")
+    new PortCode1() // Connections are ok
+    info("Connections are ok.")
   }
 
   test("Input short circuit") {
     ComponentManager.reset()
 
-    intercept[PortInputShortCircuit] {
+    val e = intercept[PortInputShortCircuit] {
       new PortCode2() // Short circuit detected
     }
-    info("Short circuit detected.")
+
+    // Short circuit: the input 'in' of Cmp[2] 'DigitalOutput' is already connected !
+    info(e.getMessage) // Print exception message
   }
 }

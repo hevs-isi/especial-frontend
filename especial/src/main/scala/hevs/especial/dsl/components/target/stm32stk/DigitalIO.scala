@@ -9,7 +9,7 @@ import hevs.especial.dsl.components.{Component, Pin, bool}
  */
 abstract class DigitalIO(val pin: Pin) extends Component {
   /** A digital input/output can read/write boolean values. */
-  type T = bool
+  protected type T = bool
 
   /** Value of the pin structure formatted for the generated code. */
   protected val pinName: String = s"'${pin.port}', ${pin.pinNumber}"

@@ -8,19 +8,14 @@ import hevs.especial.dsl.components.ComponentManager.IdGenerator
  * component has a unique `ìd` and each port of it has also a unique ID (`newUniquePortId` function) inside the
  * component. When a component is created, it is automatically added to the graph,
  * which is managed by the `ComponentManager`.
- * By default, a components has no input and no output. `getOutputs` and
- * `getInputs` methods must be overriding.
+ * By default, a components has no input and no output. `getOutputs` and `getInputs` methods must be overriding.
  */
 abstract class Component {
 
-  /**
-   * Name of the component class. Default is the class name.
-   */
+  /** Name of the component class. Default is the class name. */
   val name: String = this.getClass.getSimpleName // Example: Component
 
-  /**
-   * Description of the component. Default is empty.
-   */
+  /** Description of the component. Default is empty. */
   val description: String = ""
 
   // Id of component (must be unique)
@@ -33,13 +28,15 @@ abstract class Component {
     g
   }
 
+  // Once the component is instantiated, a unique ID is generated
+  // and it is registered automatically to the graph.
+  ComponentManager.registerComponent(this)
+
   /**
    * Generate a unique ID for a component port.
    * @return a unique port id inside the component
    */
   private[components] def nextPortId = portIdGen.nextId
-
-  private var init: Boolean = false
 
   /**
    * @see Component.hashCode
@@ -53,12 +50,6 @@ abstract class Component {
    */
   private[components] def getVarId = s"Cmp$id"
 
-  ComponentManager.registerComponent(this)
-
-  def isInitialized: Boolean = init
-
-  private[components] def initialized() = init = true
-
   /**
    * Check if at least one port of this component is not connected.
    * @return true if one or more ports are not connected
@@ -69,32 +60,35 @@ abstract class Component {
    * Get the list of all unconnected ports of this component.
    * @return all unconnected ports (input or output)
    */
-  def getUnconnectedPorts: Seq[Port[_]] = {
+  private[components] def getUnconnectedPorts: Seq[Port[_]] = {
     val ins = getInputs.getOrElse(Nil)
     val outs = getOutputs.getOrElse(Nil)
     (ins ++ outs).filter(c => c.isNotConnected)
   }
 
   /**
-   * Component outputs, if any.
+   * Component outputs ports, if any.
    * @return outputs of the component
    */
   def getOutputs: Option[Seq[OutputPort[_]]]
 
   /**
-   * Component inputs, if any.
+   * Component inputs ports, if any.
    * @return inputs of the component
    */
   def getInputs: Option[Seq[InputPort[_]]]
 
+  /**
+   * Print a description of the component with the list of input and output ports.
+   * @return the component description with I/O ports
+   */
   def getFullDescriptor = {
     toString + ": " + description +
-      "\n\t- Inputs:  " + (if(getInputs.isDefined) getInputs.get.mkString(", ") else "None") +
-      "\n\t- Outputs: " + (if(getOutputs.isDefined) getOutputs.get.mkString(", ") else "None") + "\n"
+      "\n\t- Inputs:  " + (if (getInputs.isDefined) getInputs.get.mkString(", ") else "None") +
+      "\n\t- Outputs: " + (if (getOutputs.isDefined) getOutputs.get.mkString(", ") else "None") + "\n"
   }
 
   override def toString = s"Cmp[$id] '$name'"
-
 
   // Used by the graph library
   override def equals(other: Any) = other match {
