@@ -1,25 +1,42 @@
 package hevs.especial.simulation
 
-import hevs.especial.dsl.components.hw_implemented
+import hevs.especial.dsl.components.HwImplemented
+import hevs.especial.simulation.Events._
+import hevs.especial.utils.Settings
 
 /**
  * Use to trace event of the code running in QEMU.
  *
  * The logger is called automatically in the generated C code to trace event of the code. These events are received
  * by the Scala monitor to check code results and its behaviour.
+ * See the `qemulogger.h` file for more information.
  */
 object QemuLogger {
 
-  private final val LOGGER_NAME = "QemuLogger"
+  // Name of events.
+  // See the C `EventId_t` structure in file `qemulogger.h` for more information.
+  private val EVENTS_NAMES: Map[Event, String] = Map(
+    MainStart -> "SECTION_START", EndInit -> "SECTION_INIT_END",
+    LoopStart -> "SECTION_LOOP_START", LoopTick -> "SECTION_LOOP_TICK",
+    MainEnd -> "SECTION_END")
 
-  final val addStartEvent = printEvent("SECTION_START")
-  final val addEndInitEvent = printEvent("SECTION_INIT_END")
-  final val addLoopStartEvent = printEvent("SECTION_LOOP_START")
-  final val addLoopTickEvent = printEvent("SECTION_LOOP_TICK")
-  final val addLoopExitEvent = printEvent("SECTION_LOOP_EXIT")
+  val addStartEvent = addAckEvent(MainStart)  // ACK required
+  val addEndInitEvent = addEvent(EndInit)
+  val addLoopStartEvent = addEvent(LoopStart)
+  val addLoopTickEvent = addAckEvent(LoopTick) // ACK required
+  val addLoopExitEvent = addEvent(MainEnd)
 
-  private def printEvent(event: String) = {
-    s"$LOGGER_NAME::send_event($event);\n" // C code to call the logger
+  private def addAckEvent(evt: Event): String = addEvent(evt, ack = true)
+
+  private def addEvent(evt: Event, ack: Boolean = false) = {
+    val name = EVENTS_NAMES(evt)
+
+    // Check if events acknowledge is enabled
+    var sAck = ""
+    if(Settings.MONITOR_ACK_EVENTS)
+      sAck = if(ack) ", true" else "" // Default parameter is false
+
+    s"QemuLogger::send_event($name$sAck);\n" // C code to call the logger
   }
 }
 
@@ -28,8 +45,10 @@ object QemuLogger {
  *
  * An include file will be append to other.
  */
-trait QemuLogger extends hw_implemented {
+trait QemuLogger extends HwImplemented {
 
   // Include the necessary to use the logger
   override def getIncludeCode = super.getIncludeCode :+ "utils/qemulogger.h"
+
+  // Logger events are added by the code generator directly to force a specific position on the code.
 }

@@ -61,6 +61,9 @@ object Settings {
   val MONITOR_TCP_CMD_PORT = 14001
   val MONITOR_TCP_EVT_PORT = 14002
 
+  /** Enable events with acknowledge or not */
+  val MONITOR_ACK_EVENTS = true
+
 
   /* VCD generator */
 
