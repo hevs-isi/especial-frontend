@@ -15,8 +15,7 @@ class Sch3Code extends STM32TestSuite {
     val btn1 = DigitalInput(Stm32stk.pin_btn)
 
     // Logic
-    val mux2 = Mux2(2)
-    val id = mux2.getInputs
+    val mux2 = Mux2[bool]()
 
     // Output
     val led1 = DigitalOutput(Stm32stk.pin_led)
@@ -29,12 +28,6 @@ class Sch3Code extends STM32TestSuite {
 
     mux2.out --> led1.in
     mux2.out --> led2.in
-
-    val a = mux2.out.isConnected
-    if(a)
-      println("OK: connected")
-    else
-      println("KO: not connected")
   }
 
   runDotGeneratorTest()

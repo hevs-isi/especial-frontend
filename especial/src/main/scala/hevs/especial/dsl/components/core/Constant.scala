@@ -9,7 +9,7 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 
 
   override val description = s"constant generator\\n(${value.v})"
 
-  private val valName = s"cst$getVarId" // unique variable name
+  private val valName: String = valName("cst") // unique variable name
 
   val out = new OutputPort[T](this) {
     override val name = s"out"

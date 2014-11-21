@@ -5,64 +5,63 @@ import hevs.especial.dsl.components._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 
-// FIXME: test version for 2 inputs and only boolean
-case class Mux2(nbrInput: Int) extends Component with HwImplemented with In3 with Out1 {
+/**
+ * Helper class used to create a `Mux` with a generic number of inputs.
+ * All I/O have the same type. Output and selection pin are added manually.
+ *
+ * @param nbrIn number of generic inputs for the component (without the selection pin)
+ * @tparam T I/O type of the component
+ */
+abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn, 0) with HwImplemented {
 
-  private type T = bool // FIXME
+  // FIXME: not all types are compatible for now. Switch case is used...
+  assert(typeOf[T] == typeOf[bool])
 
-  /* Global variables names */
-  private val valNameIn = for(i <- 0 to nbrInput) yield s"in${i+1}$getVarId" // in1Cmp5, in2Cmp5, etc
-  private val valNameSel = s"sel$getVarId"
-  private val valNameOut = s"out$getVarId"
+  private val selValName = valName("sel") // Global variable used to store the selection pin value
 
-  override val in1 = createInput(1)
-  override val in2 = createInput(2)
-
-  // Input n°3 is the selection pin
+  // Input n°3 is the selection pin. The type of this input is the same type as other inputs.
   val sel = new InputPort[T](this) {
     override val name = "sel"
     override val description = "the selection input"
 
     // Connection an output to the sel input
-    override def setInputValue(s: String) = s"$valNameSel = $s"
+    override def setInputValue(s: String) = s"$selValName = $s"
   }
-
-  override val in3 = sel
-
-  private def createInput(n: Int) = new InputPort[T](this) {
-    override val name = s"in$n"
-    override def setInputValue(s: String) = s"${valNameIn(n-1)} = $s"
-  }
+  addCustomIn(sel)
 
   val out = new OutputPort[T](this) {
     override val name = s"out"
     override val description = "the selection input"
 
+    // FIXME: not generic
+    // FIXME: check if the input is a boolean or an int
     override def getValue = {
       s"""
-        |// ${Mux2.this}
-        |${bool().getType} $valNameOut;
-        | switch($valNameSel) {
+        |// ${Mux.this}
+        |${bool().getType} ${outValName(0)};
+        | switch($selValName) {
         |  case 0:
-        |    $valNameOut = ${valNameIn(0)};
+        |    ${outValName(0)} = ${inValName(0)};
         |    break;
         |
         |  case 1:
-        |    $valNameOut = ${valNameIn(1)};
+        |    ${outValName(0)} = ${inValName(1)};
         |    break;
         |}
       """.stripMargin
     }
   }
+  addCustomOut(out)
 
-  def getOutputs = Some(Seq(out))
+  override def setInputValue(index: Int, s: String) = s"${inValName(index)} = $s"
 
-  def getInputs = Some(Seq(in1, in2, sel))
+  override def getOutputValue(index: Int) = null // No generic output used
+
 
   /* Code generation */
 
   // Global variables
-  override def getGlobalCode = Some(s"${bool().getType} $valNameSel, ${valNameIn(0)}, ${valNameIn(1)}; // $this")
+  override def getGlobalCode = Some(s"${bool().getType} $selValName, ${inValName(0)}, ${inValName(1)}; // $this")
 
   override def getLoopableCode = out.isConnected match {
     case true =>
@@ -73,9 +72,16 @@ case class Mux2(nbrInput: Int) extends Component with HwImplemented with In3 wit
 
       // Set the output value to connected components
       for (inPort ← ComponentManager.findConnections(out))
-        result += inPort.setInputValue(s"$valNameOut") + "; // " + inPort
+        result += inPort.setInputValue(s"${outValName(0)}") + "; // " + inPort
 
       Some(result.mkString("\n"))
     case _ => None
   }
+}
+
+
+case class Mux2[T <: CType : TypeTag]() extends Mux[T](2) with In3 with Out1 {
+  override val in1 = in(0)
+  override val in2 = in(1)
+  override val in3 = sel // `in3` is an alias for `sel`
 }

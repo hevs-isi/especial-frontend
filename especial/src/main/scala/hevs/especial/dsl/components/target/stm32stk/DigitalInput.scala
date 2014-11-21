@@ -15,7 +15,7 @@ case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 
 
   override val description = s"digital input\\non $pin"
 
-  private val valName = s"digitalIn$getVarId"
+  private val valName = inValName()
   private val fctName = s"getlDigitalInput${pin.port}${pin.pinNumber}"
 
   /**

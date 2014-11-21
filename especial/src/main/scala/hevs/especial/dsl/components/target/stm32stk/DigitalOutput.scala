@@ -15,7 +15,7 @@ HwImplemented {
 
   override val description = s"digital output\\non $pin"
 
-  private val valName = s"digitalOut$getVarId"
+  private val valName = outValName()
   private var initialized: Boolean = false
 
   /**

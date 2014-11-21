@@ -44,11 +44,28 @@ abstract class Component {
    */
   def getId = id
 
+
+  /* Component variables names */
+
+  /** @see valName */
+  private[components] def inValName(index: Int) = valName("in" + String.valueOf(index + 1))
+
+  /** @see valName */
+  private[components] def inValName() = valName("in")
+
+  /** @see valName */
+  private[components] def outValName(index: Int) = valName("out" + String.valueOf(index + 1))
+
+  /** @see valName */
+  private[components] def outValName() = valName("out")
+
   /**
-   * Helper function to create a unique variable name for a component.
-   * @return unique variable name for a component
+   * Create a custom and unique variable name.
+   * Used by the component in the generated code.
+   * @param prefix name of the variable (used as prefix)
+   * @return variable name with the component number as suffix
    */
-  private[components] def getVarId = s"Cmp$id"
+  private[components] def valName(prefix: String) = s"${prefix}_cmp$id"
 
   /**
    * Check if at least one port of this component is not connected.
