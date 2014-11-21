@@ -24,7 +24,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   // Unique port ID generated from the component owner
   private val id = owner.nextPortId
-  private val tpe: Type = typeOf[T]
+  private val tpe = typeOf[T]
 
   // Count the number of connection with/to this port.
   // - An input port can only have one single connection.
@@ -62,7 +62,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   protected[components] def getDescription = description
 
-  protected[components] def connect() = this match {
+  protected[components] def connect(): Unit = this match {
     case _: OutputPort[_] =>
       // Connected with at least one other input
       connections += 1
@@ -80,7 +80,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   protected[components] def getOwner = owner
 
-  protected[components] def disconnect() = {
+  protected[components] def disconnect(): Unit = {
     // FIXME: implementation is missing. Not allowed for now... Must remove the connection in the graph.
     connections = 0
     ???
@@ -129,21 +129,6 @@ abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T]
  */
 abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
-  /**
-   * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
-   * @param that the input to connect with this output
-   * @return
-   */
-  def -->(that: InputPort[T]) = {
-    // Check the type of the connection. An error is thrown if the connection is not valid.
-    checkType(that)
-
-    that.connect()
-    this.connect()
-
-    ComponentManager.addWire(this, that) // Add the directed edge in the graph
-  }
-
   override def toString = "Output" + super.toString
 
   /**
@@ -151,4 +136,18 @@ abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T
    * @return the C code to read the output value
    */
   protected[components] def getValue: String
+
+
+  /**
+   * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
+   * @param that the input to connect with this output
+   */
+  def -->(that: InputPort[T]): Unit = {
+    checkType(that) // Connection types check. `PortTypeMismatch` is thrown if not valid.
+
+    that.connect()
+    this.connect()
+
+    ComponentManager.addWire(this, that) // Add the directed edge in the graph
+  }
 }

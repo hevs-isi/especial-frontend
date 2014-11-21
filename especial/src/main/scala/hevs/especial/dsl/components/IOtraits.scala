@@ -17,10 +17,8 @@ trait In1 {
 }
 
 trait In2 {
-  type I = InputPort[_]
-
+  protected type I = InputPort[_]
   val in1: I
-
   val in2: I
 }
 
@@ -39,10 +37,8 @@ trait Out1 {
 }
 
 trait Out2 {
-  type O = OutputPort[_]
-
+  protected type O = OutputPort[_]
   val out1: O
-
   val out2: O
 }
 

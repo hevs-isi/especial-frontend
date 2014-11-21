@@ -47,13 +47,19 @@ abstract class Component {
 
   /* Component variables names */
 
-  /** @see valName */
+  /**
+   * Input variable name if more than one. Add the index as suffix.
+   * @see valName
+   */
   private[components] def inValName(index: Int) = valName("in" + String.valueOf(index + 1))
 
   /** @see valName */
   private[components] def inValName() = valName("in")
 
-  /** @see valName */
+  /**
+   * Output variable name if more than one. Add the index as suffix.
+   * @see valName
+   */
   private[components] def outValName(index: Int) = valName("out" + String.valueOf(index + 1))
 
   /** @see valName */
@@ -63,7 +69,7 @@ abstract class Component {
    * Create a custom and unique variable name.
    * Used by the component in the generated code.
    * @param prefix name of the variable (used as prefix)
-   * @return variable name with the component number as suffix
+   * @return variable name with the component number
    */
   private[components] def valName(prefix: String) = s"${prefix}_cmp$id"
 

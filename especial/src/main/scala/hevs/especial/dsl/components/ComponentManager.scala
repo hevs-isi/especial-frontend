@@ -18,7 +18,7 @@ object ComponentManager extends Logging {
   val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
 
   // Used to generate a unique ID for each component
-  private val cmpIdGen = {
+  private val cmpIdGen: IdGenerator = {
     val g = new IdGenerator()
     g.reset()
     g
@@ -35,14 +35,14 @@ object ComponentManager extends Logging {
    * If it is already in the graph,  it will not be added.
    * @param c the component to add as node in the graph
    */
-  def registerComponent(c: Component) = {
+  def registerComponent(c: Component): Unit = {
     cpGraph += c // Add the component as a node to the graph
   }
 
   /**
    * Remove all components from the graph and clear all previous IDs.
    */
-  def reset() = {
+  def reset(): Unit = {
     cpGraph.clear()
     cmpIdGen.reset() // Restart id generation from 0
   }
@@ -56,7 +56,7 @@ object ComponentManager extends Logging {
    * @param to port to
    * @return
    */
-  def addWire(from: OutputPort[_], to: InputPort[_]) = {
+  def addWire(from: OutputPort[_], to: InputPort[_]): Unit = {
     // Get components "from" and "to". These components must be in the graph, or an exception is thrown.
     val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
@@ -216,6 +216,6 @@ object ComponentManager extends Logging {
       currId
     }
 
-    def reset() = id = 0
+    def reset(): Unit = id = 0
   }
 }
