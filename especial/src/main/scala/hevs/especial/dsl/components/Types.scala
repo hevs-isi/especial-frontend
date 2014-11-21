@@ -1,7 +1,5 @@
 package hevs.especial.dsl.components
 
-import hevs.especial.utils.Logger
-
 /**
  * Abstract type that can be used in the native C code.
  *
