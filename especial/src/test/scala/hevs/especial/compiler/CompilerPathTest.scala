@@ -60,7 +60,7 @@ class CompilerPathTest extends MonitorTest {
 
       // generate the VCD file
       val gen = new VcdGenerator()
-      val ctx = new Context("Sch3Code", true)
+      val ctx = new Context("vcdTest", true)
 
       // Generate the VCD file using the pipeline block
       gen.run(ctx)(pins)

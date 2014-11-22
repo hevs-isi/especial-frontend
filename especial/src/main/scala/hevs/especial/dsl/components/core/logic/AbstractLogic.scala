@@ -11,7 +11,8 @@ import scala.collection.mutable.ListBuffer
  * @param nbrIn The number of generic input of the component
  * @param operator Boolean operator to compute
  */
-abstract class AbstractLogic(nbrIn: Int, operator: String) extends GenericCmp[bool, bool](nbrIn, 1) with HwImplemented {
+abstract class AbstractLogic(nbrIn: Int, operator: String) extends GenericCmp[bool, bool](nbrIn,
+  1) with HwImplemented with Out1 {
 
   private val tpe = bool().getType
 
@@ -25,6 +26,9 @@ abstract class AbstractLogic(nbrIn: Int, operator: String) extends GenericCmp[bo
     val inputs = for (i <- 0 until nbrIn) yield inValName(i)
     inputs.mkString(s" $operator ")
   }
+
+  // Single output connected here
+  override val out: OutputPort[bool] = out(0)
 
   /* Code generation */
 

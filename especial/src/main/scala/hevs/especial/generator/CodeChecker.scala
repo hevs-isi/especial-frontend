@@ -72,7 +72,7 @@ class CodeChecker extends Pipeline[Unit, Boolean] {
       out ++= s"[WARN] ${p.size} unconnected "
       out ++= (if(p.size < 2) "port" else "ports")
       out ++= " found:\n"
-      out ++= "\t- " + p.mkString("\n\t- ") + "\n"
+      out ++= "\t- " + p.mkString("\n\t- ")
     }
 
     if (out.isEmpty)

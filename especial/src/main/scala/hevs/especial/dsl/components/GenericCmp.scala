@@ -48,7 +48,7 @@ abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int
   private def selectIO[A](index: Int, io: ListBuffer[A]) = {
     // Print a custom message when an IndexOutOfBoundsException is thrown
     if (index < 0 || index >= io.size)
-      throw new IndexOutOfBoundsException(s"Index $index does not exit (0 to ${io.size - 1} only) !")
+      throw new IndexOutOfBoundsException(s"Index $index does not exit. Index from [0 to ${io.size - 1}] only !")
     io(index)
   }
 

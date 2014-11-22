@@ -12,10 +12,11 @@ import scala.reflect.runtime.universe._
  * @param nbrIn number of generic inputs for the component (without the selection pin)
  * @tparam T I/O type of the component
  */
-abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn, 0) with HwImplemented {
+abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn, 1) with HwImplemented with Out1 {
 
-  // FIXME: not all types are compatible for now. Switch case is used...
-  assert(typeOf[T] == typeOf[bool])
+  // FIXME: Available for bool and all unit types
+  assert(typeOf[T] == typeOf[bool] || typeOf[T] == typeOf[uint8] || typeOf[T] == typeOf[uint16] ||
+    typeOf[T] == typeOf[uint32])
 
   private val selValName = valName("sel") // Global variable used to store the selection pin value
 
@@ -27,41 +28,57 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
     // Connection an output to the sel input
     override def setInputValue(s: String) = s"$selValName = $s"
   }
-  addCustomIn(sel)
-
-  val out = new OutputPort[T](this) {
-    override val name = s"out"
-    override val description = "the selection input"
-
-    // FIXME: not generic
-    // FIXME: check if the input is a boolean or an int
-    override def getValue = {
-      s"""
-        |// ${Mux.this}
-        |${bool().getType} ${outValName(0)};
-        | switch($selValName) {
-        |  case 0:
-        |    ${outValName(0)} = ${inValName(0)};
-        |    break;
-        |
-        |  case 1:
-        |    ${outValName(0)} = ${inValName(1)};
-        |    break;
-        |}
-      """.stripMargin
-    }
-  }
-  addCustomOut(out)
 
   override def setInputValue(index: Int, s: String) = s"${inValName(index)} = $s"
 
-  override def getOutputValue(index: Int) = null // No generic output used
+  addCustomIn(sel)
+
+  override def getOutputValue(index: Int) = {
+    assert(index == 0) // Only one output
+
+    // Simple if/else with 2 boolean values
+    if(nbrIn == 2) {
+       s"""
+          |// ${Mux.this}
+          |if($selValName == 0)
+          |  ${outValName(0)} = ${inValName(0)};
+          |else
+          |  ${outValName(0)} = ${inValName(1)};""".stripMargin
+    }
+    else {
+      // Create all cases statements in the switch/case
+      val cases = for(i <- 0 until nbrIn) yield addCaseStatement(i)
+      // Store the result in a temporary variable
+      s"""
+        |// ${Mux.this}
+        |${bool().getType} ${outValName(0)};
+        |switch($selValName) {
+        |${cases.mkString("\n")}
+        |}""".stripMargin
+    }
+  }
+
+  private def addCaseStatement(index: Int) = {
+    s"""case $index:
+        |  ${outValName(0)} = ${inValName(index)};
+        |  break;"""
+  }
+
+  // Single output connected here
+  override val out: OutputPort[T] = out(0)
 
 
   /* Code generation */
 
   // Global variables
-  override def getGlobalCode = Some(s"${bool().getType} $selValName, ${inValName(0)}, ${inValName(1)}; // $this")
+  override def getGlobalCode = {
+    // Define inputs, output and sel as global variables
+    val varIn = for(i <- 0 until nbrIn) yield inValName(i)
+    val vars = List(selValName, outValName(0)) ++ varIn
+
+    // Print all boolean variables to declare from the list
+    Some(s"${bool().getType} ${vars.mkString(", ")}; // $this")
+  }
 
   override def getLoopableCode = out.isConnected match {
     case true =>
@@ -80,8 +97,22 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
 }
 
 
-case class Mux2[T <: CType : TypeTag]() extends Mux[T](2) with In3 with Out1 {
+/* Predefined Mux components */
+
+case class Mux2[T <: CType : TypeTag]() extends Mux[T](2) with In2 {
   override val in1 = in(0)
   override val in2 = in(1)
-  override val in3 = sel // `in3` is an alias for `sel`
+}
+
+case class Mux3[T <: CType : TypeTag]() extends Mux[T](3) with In3 {
+  override val in1 = in(0)
+  override val in2 = in(1)
+  override val in3 = in(2)
+}
+
+case class Mux4[T <: CType : TypeTag]() extends Mux[T](4) with In4 {
+  override val in1 = in(0)
+  override val in2 = in(1)
+  override val in3 = in(2)
+  override val in4 = in(3)
 }

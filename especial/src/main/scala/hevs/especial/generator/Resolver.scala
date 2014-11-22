@@ -181,7 +181,7 @@ class Resolver extends Pipeline[Unit, O] {
 
     // Print components IDs for all passes and order the result
     for(p <- mapSolve.toSeq.sortBy(_._1)) {
-      ret ++= "\n\tPass %03d: %s".format(p._1 + 1, p._2.map(cp => s"Cmp[${cp.getId}]").mkString(", "))
+      ret ++= "\n\tPass %03d: %s".format(p._1 + 1, p._2.mkString(", "))
     }
     ret.result()
   }
