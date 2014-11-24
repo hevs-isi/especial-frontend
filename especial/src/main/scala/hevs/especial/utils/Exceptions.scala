@@ -1,10 +1,34 @@
 package hevs.especial.utils
 
+import hevs.especial.dsl.components.{CType, Port}
+
+object PortTypeMismatch {
+
+  /** Format the exception message. */
+  def create[A <: CType](from: Port[A], to: Port[A]) = {
+    // Construct the error message
+    val res = new StringBuilder
+    res ++= "Ports types mismatch. Connection error !\n"
+    res ++= s"Cannot connect the output `${from.name}` (type `${from.getTypeAsString}`) of ${from.getOwner}"
+    res ++= s" to the input `${to.name}` (type `${to.getTypeAsString}`) of ${to.getOwner}."
+    new PortTypeMismatch(res.result())
+  }
+}
+
 /**
  * Try to connect two `Ports` with different types. This is not allowed. The input and output types must be the same.
  * @param msg exception details
  */
 class PortTypeMismatch(msg: String) extends RuntimeException(msg)
+
+object PortInputShortCircuit {
+
+  /** Format the exception message. */
+  def create[A <: CType](in: Port[A]) = {
+    val error = s"Short circuit !\nThe input '${in.name}' of ${in.getOwner} is already connected."
+    new PortInputShortCircuit(error)
+  }
+}
 
 /**
  * Try to connect two outputs to the same input. This is not allowed.
