@@ -1,6 +1,6 @@
 package hevs.especial.dsl.components.target.stm32stk
 
-import hevs.especial.dsl.components.{HwImplemented, In1, InputPort, Pin}
+import hevs.especial.dsl.components._
 
 /**
  * Create a digital output for a specific pin.
@@ -10,7 +10,7 @@ import hevs.especial.dsl.components.{HwImplemented, In1, InputPort, Pin}
  * @param pin the GPIO pin
  * @param initValue the default value of the output when initialized
  */
-case class DigitalOutput(override val pin: Pin, initValue: Boolean = false) extends DigitalIO(pin) with In1 with
+case class DigitalOutput(pin: Pin, initValue: Boolean = false) extends DigitalIO(pin) with In1 with
 HwImplemented {
 
   override val description = s"digital output\\non $pin"
@@ -18,19 +18,21 @@ HwImplemented {
   private val valName = outValName()
   private var initialized: Boolean = false
 
+  /* I/O management */
+
   /**
    * The `uint1` value to write to this digital output.
    */
-  override val in = new InputPort[T](this) {
+  override val in = new InputPort[bool](this) {
     override val name = s"in"
     override val description = "digital output value"
 
     override def setInputValue(s: String): String = s"$valName.set($s)"
   }
 
-  def getOutputs = None
+  override def getOutputs = None
 
-  def getInputs = Some(Seq(in))
+  override def getInputs = Some(Seq(in))
 
   /* Code generation */
 

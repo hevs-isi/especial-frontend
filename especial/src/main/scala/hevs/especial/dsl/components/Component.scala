@@ -83,7 +83,7 @@ abstract class Component {
    * Get the list of all unconnected ports of this component.
    * @return all unconnected ports (input or output)
    */
-  private[components] def getUnconnectedPorts: Seq[Port[_]] = {
+  private[components] def getUnconnectedPorts: Seq[Port[CType]] = {
     val ins = getInputs.getOrElse(Nil)
     val outs = getOutputs.getOrElse(Nil)
     (ins ++ outs).filter(c => c.isNotConnected)
@@ -93,13 +93,13 @@ abstract class Component {
    * Component outputs ports, if any.
    * @return outputs of the component
    */
-  def getOutputs: Option[Seq[OutputPort[_]]]
+  def getOutputs: Option[Seq[OutputPort[CType]]]
 
   /**
    * Component inputs ports, if any.
    * @return inputs of the component
    */
-  def getInputs: Option[Seq[InputPort[_]]]
+  def getInputs: Option[Seq[InputPort[CType]]]
 
   /**
    * Print a description of the component with the list of input and output ports.

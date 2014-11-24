@@ -11,15 +11,19 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 
 
   private val valName: String = valName("cst") // unique variable name
 
+  /* I/O management */
+
   val out = new OutputPort[T](this) {
     override val name = s"out"
     override val description = "the constant value"
     override def getValue: String = valName
   }
 
-  def getOutputs = Some(Seq(out))
+  override def getOutputs= Some(Seq(out))
 
-  def getInputs = None
+  override def getInputs = None
+
+  /* Code generation */
 
   override def getGlobalCode = Some(s"const ${value.getType} $valName = ${value.v}; // $out")
 

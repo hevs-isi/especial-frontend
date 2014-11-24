@@ -14,7 +14,7 @@ import scala.reflect.runtime.universe._
  * @param owner the component owner of the port
  * @tparam T the type of the data transported through the port
  */
-abstract class Port[T <: CType : TypeTag](owner: Component) {
+abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
   // Name required
   val name: String
@@ -50,9 +50,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
   def getTypeAsString: String = {
     // Something like "hevs.especial.dsl.components.fundamentals.uint1"
     val t: Type = this.getType
-
-    // Return the child class (ex: uint1) as String
-    t.baseClasses.head.asClass.name.toString
+    t.baseClasses.head.asClass.name.toString // Return the child class (ex: uint1) as String
   }
 
   /**
@@ -62,6 +60,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   protected[components] def getDescription = description
 
+  @throws(classOf[PortInputShortCircuit])
   protected[components] def connect(): Unit = this match {
     case _: OutputPort[_] =>
       // Connected with at least one other input
@@ -69,8 +68,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
     case _: InputPort[_] =>
       // Cannot connect an input with more than one output
       if (connections > 0)
-        throw new PortInputShortCircuit(s"Short circuit: the input '$name' of Cmp[$getOwnerId] '${getOwner.name}'" +
-          " is already connected !")
+        throw PortInputShortCircuit.create(this)
       else {
         connections = 1
       }
@@ -78,7 +76,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   protected[components] def getOwnerId = getOwner.getId
 
-  protected[components] def getOwner = owner
+  def getOwner = owner
 
   protected[components] def disconnect(): Unit = {
     // FIXME: implementation is missing. Not allowed for now... Must remove the connection in the graph.
@@ -88,16 +86,19 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
 
   /**
    * Helper method to check if two `Port` are of the same type. If not, an `PortTypeMismatch` exception is thrown.
-   * @tparam A the type of the port
    * @param that the port to connect with
+   * @tparam A the type of the input port to connect with
    * @return true if the types are the same, or an exception is thrown
    */
-  protected def checkType[A <: CType : TypeTag](that: Port[A]): Boolean = {
-    val tpA = typeOf[A]
-    val tpB = typeOf[T]
-    if (tpA != tpB)
-      throw new PortTypeMismatch(s"Cannot connected '${this.name}' of type '$tpA' to '${that.name}' of type $tpB !")
-    true
+  @throws(classOf[PortTypeMismatch])
+  protected def checkType[A <: CType : TypeTag](that: InputPort[A]): Boolean = {
+    val tpB = typeOf[A]
+    // The output type must be the same type as the input type
+    if (tpe != tpB) {
+      throw PortTypeMismatch.create(this, that)
+      false
+    }
+    true // Type are correct. Connection is valid !
   }
 }
 
@@ -108,7 +109,7 @@ abstract class Port[T <: CType : TypeTag](owner: Component) {
  * @param owner the component owner of the port
  * @tparam T the type of the data transported through the port
  */
-abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
+abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
   override def toString = "Input" + super.toString
 
@@ -127,27 +128,28 @@ abstract class InputPort[T <: CType : TypeTag](owner: Component) extends Port[T]
  * @param owner the component owner of the port
  * @tparam T the type of the data transported through the port
  */
-abstract class OutputPort[T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
+abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
   override def toString = "Output" + super.toString
+
+  /**
+   * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
+   * @param that the input to connect with this output
+   */
+  def -->[A <: CType : TypeTag](that: InputPort[A]): Boolean = {
+    // Connection types check. `PortTypeMismatch` is thrown if not valid.
+    checkType(that)
+    that.connect() // Thrown an exception if not valid
+    this.connect()
+
+    ComponentManager.addWire(this, that) // Add the directed edge in the graph
+
+    true // Valid if no exception have been thrown
+  }
 
   /**
    * generate the C code to read the value of this output port.
    * @return the C code to read the output value
    */
   protected[components] def getValue: String
-
-
-  /**
-   * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
-   * @param that the input to connect with this output
-   */
-  def -->(that: InputPort[T]): Unit = {
-    checkType(that) // Connection types check. `PortTypeMismatch` is thrown if not valid.
-
-    that.connect()
-    this.connect()
-
-    ComponentManager.addWire(this, that) // Add the directed edge in the graph
-  }
 }

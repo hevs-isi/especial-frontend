@@ -14,17 +14,16 @@ import scala.reflect.runtime.universe._
 abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int, nbrOut: Int) extends Component {
 
   /* Generic I/O access */
+  private val inputs = ListBuffer.empty[InputPort[CType]]
+  private val outputs = ListBuffer.empty[OutputPort[CType]]
 
-  private val inputs = ListBuffer.empty[InputPort[S]]
-  private val outputs = ListBuffer.empty[OutputPort[T]]
+  protected def in(index: Int = 0) = selectIO(index, inputs).asInstanceOf[InputPort[S]]
+  override def getInputs = if (inputs.size == 0) None else Some(inputs.toSeq)
+  protected def addCustomIn[A <: CType](in: InputPort[A]) = inputs += in
 
-  protected def in(index: Int = 0) = selectIO(index, inputs)
-  override def getInputs = if (inputs.size == 0) None else Some(inputs)
-  protected def addCustomIn(in: InputPort[S]) = inputs += in
-
-  protected def out(index: Int = 0) = selectIO(index, outputs)
-  override def getOutputs = if (outputs.size == 0) None else Some(outputs)
-  protected def addCustomOut(out: OutputPort[T]) = outputs += out
+  protected def out(index: Int = 0) = selectIO(index, outputs).asInstanceOf[OutputPort[T]]
+  override def getOutputs = if (outputs.size == 0) None else Some(outputs.toSeq)
+  protected def addCustomOut[A <: CType](out: OutputPort[A]) = outputs += out
 
   /* Abstract functions */
 
@@ -45,7 +44,7 @@ abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int
    * @param index element index
    * @return the corresponding element to connect if index is valid
    */
-  private def selectIO[A](index: Int, io: ListBuffer[A]) = {
+  private def selectIO(index: Int, io: ListBuffer[_]) = {
     // Print a custom message when an IndexOutOfBoundsException is thrown
     if (index < 0 || index >= io.size)
       throw new IndexOutOfBoundsException(s"Index $index does not exit. Index from [0 to ${io.size - 1}] only !")

@@ -4,7 +4,7 @@ import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.target.stm32stk.Stm32stk
 import hevs.especial.generator._
 import hevs.especial.simulation.QemuLogger
-import hevs.especial.utils.{Context, Settings}
+import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch, Context, Settings}
 import org.scalatest.FunSuite
 
 /**
@@ -46,9 +46,17 @@ abstract class STM32TestSuite extends FunSuite {
     }
 
     // Execute the DSL program
-    getDslCode
-    progExecuted = true
-    ctx.log.info(s"Program '$progName' executed.")
+    try {
+      runDslCode()
+      progExecuted = true
+      ctx.log.info(s"Program '$progName' executed.")
+    }
+    catch {
+      case e: Exception =>
+        ctx.log.error(e.getMessage)
+        ctx.log.error(s"Error when running the '$progName' program.")
+        sys.exit(-1)
+    }
   }
 
   /**
@@ -63,9 +71,15 @@ abstract class STM32TestSuite extends FunSuite {
 
   /**
    * The DSL program to run for this test.
+   *
+   * Can thrown Exception at runtime if ports types mismatch.
+   * @throws PortTypeMismatch ports types mismatch. Connection error
+   * @throws PortInputShortCircuit more than one output is connected to the same input
    * @return the DSl program to execute
    */
-  def getDslCode: Unit
+  @throws(classOf[PortTypeMismatch])
+  @throws(classOf[PortInputShortCircuit])
+  def runDslCode(): Unit
 
   /**
    * Run the DOT pipeline block and check if any errors occurs.

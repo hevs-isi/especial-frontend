@@ -56,7 +56,7 @@ object ComponentManager extends Logging {
    * @param to port to
    * @return
    */
-  def addWire(from: OutputPort[_], to: InputPort[_]): Unit = {
+  def addWire(from: OutputPort[CType], to: InputPort[CType]): Unit = {
     // Get components "from" and "to". These components must be in the graph, or an exception is thrown.
     val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
@@ -101,8 +101,8 @@ object ComponentManager extends Logging {
    * Return unconnected ports of all components of the graph.
    * @return all unconnected ports of all components
    */
-  def findUnconnectedPorts: Seq[Port[_]] = {
-    val ncPorts = mutable.ListBuffer.empty[Port[_]]
+  def findUnconnectedPorts: Seq[Port[CType]] = {
+    val ncPorts = mutable.ListBuffer.empty[Port[CType]]
     for (n <- cpGraph.nodes) {
       val cp = n.value.asInstanceOf[Component]
       ncPorts ++= cp.getUnconnectedPorts
@@ -172,7 +172,7 @@ object ComponentManager extends Logging {
   }
 
   // Return a list of `InputPort`s that are connected
-  def findConnections(port: OutputPort[_]): Seq[InputPort[_]] = {
+  def findConnections(port: OutputPort[CType]): Seq[InputPort[CType]] = {
     val cpFrom = cpGraph.nodes find (c => c.value.asInstanceOf[Component].equals(port.getOwner))
     val edges = cpFrom.get.edges // all connections of this component (from and to components)
 
@@ -189,7 +189,7 @@ object ComponentManager extends Logging {
 
   // This a basically a Tuple2, but they cannot be override
   // Also used by the DotGenerator
-  class Wire(val from: OutputPort[_], val to: InputPort[_]) {
+  class Wire(val from: OutputPort[CType], val to: InputPort[CType]) {
 
     override def equals(other: Any) = other match {
       case that: Wire => that.from == from && that.to == to

@@ -11,25 +11,27 @@ import hevs.especial.dsl.components._
  *
  * @param pin the GPIO pin
  */
-case class DigitalInput(override val pin: Pin) extends DigitalIO(pin) with Out1 with HwImplemented {
+case class DigitalInput(pin: Pin) extends DigitalIO(pin) with Out1 with HwImplemented {
 
   override val description = s"digital input\\non $pin"
 
   private val valName = inValName()
   private val fctName = s"getlDigitalInput${pin.port}${pin.pinNumber}"
 
+  /* I/O management */
+
   /**
    * The `uint1` value of this digital input.
    */
-  override val out = new OutputPort[T](this) {
+  override val out = new OutputPort[bool](this) {
     override val name = s"out"
     override val description = "digital input value"
     override def getValue: String = s"$fctName();"
   }
 
-  def getOutputs = Some(Seq(out))
+  override def getOutputs = Some(Seq(out))
 
-  def getInputs = None
+  override def getInputs = None
 
   /* Code generation */
 
