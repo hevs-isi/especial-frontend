@@ -8,7 +8,7 @@ class Sch0Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = {
+  def runDslCode(): Unit = {
     // Input
     val cst1 = Constant(bool(v = true))
 

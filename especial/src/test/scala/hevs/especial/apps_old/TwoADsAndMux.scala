@@ -9,7 +9,7 @@ object TwoADsAndMux extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = {
+  def runDslCode = {
 
   }
 

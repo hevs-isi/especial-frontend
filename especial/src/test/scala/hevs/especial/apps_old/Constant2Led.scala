@@ -8,7 +8,7 @@ object Constant2Led extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  def getDslCode = {
+  def runDslCode = {
 
   }
 

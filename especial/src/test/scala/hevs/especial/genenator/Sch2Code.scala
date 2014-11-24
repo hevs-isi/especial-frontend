@@ -9,7 +9,7 @@ class Sch2Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = {
+  def runDslCode(): Unit = {
     // Inputs
     val cst1 = Constant(bool(v = true))
     val cst2 = Constant(bool(v = true))

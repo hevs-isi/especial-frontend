@@ -9,7 +9,7 @@ object MuxApp1 extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = {
+  def runDslCode = {
 
   }
 

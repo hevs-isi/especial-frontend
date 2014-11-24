@@ -1,15 +1,15 @@
 package hevs.especial.genenator
 
-import hevs.especial.dsl.components.core.{Mux2, Constant}
 import hevs.especial.dsl.components.core.logic.{And2, And4}
+import hevs.especial.dsl.components.core.{Mux3, Constant, Mux2}
 import hevs.especial.dsl.components.target.stm32stk.DigitalOutput
-import hevs.especial.dsl.components.{Pin, bool}
+import hevs.especial.dsl.components.{Pin, bool, uint8}
 
 class Sch4Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = {
+  def runDslCode(): Unit = {
     // Inputs
     val cst1 = Constant(bool(v = false))
     val cst2 = Constant(bool(v = false))

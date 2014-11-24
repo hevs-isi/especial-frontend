@@ -27,10 +27,9 @@ abstract class STM32TestSuite extends FunSuite {
   private val ctx = new Context(progName, isQemuLoggerEnabled)
 
 
-  private def executeProg(): Unit = {
+  private def executeProg(): Boolean = {
     if (progExecuted) {
-      ctx.log.info("Program ready.")
-      return // Execute once only
+      return checkErrors() // Execute the DSL code only once
     }
 
     ComponentManager.reset() // Delete all previous components
@@ -48,25 +47,28 @@ abstract class STM32TestSuite extends FunSuite {
     // Execute the DSL program
     try {
       runDslCode()
-      progExecuted = true
       ctx.log.info(s"Program '$progName' executed.")
     }
     catch {
       case e: Exception =>
         ctx.log.error(e.getMessage)
         ctx.log.error(s"Error when running the '$progName' program.")
-        sys.exit(-1)
     }
+
+    progExecuted = true
+    checkErrors()
   }
 
   /**
    * The test fail if any error is reported to the logger.
+   * @return `true` if errors found, `false` otherwise
    */
-  private def checkErrors(): Unit = {
+  private def checkErrors(): Boolean = {
     if (ctx.log.hasErrors) {
-      // assert(!log.hasErrors)
       fail("Errors reported to the Logger.") // Test failed
+      true
     }
+    false
   }
 
   /**
@@ -127,6 +129,10 @@ abstract class STM32TestSuite extends FunSuite {
 
   def runCodeGenTest(compile: Boolean = true): Unit = {
     test("Resolver and code gen") {
+      ctx.log.info(s"Code generator for '$progName' started.")
+
+      executeProg()
+
       val resolve = new Resolver()
       val gen = new CodeGenerator()
       val formatter = new CodeFormatter()

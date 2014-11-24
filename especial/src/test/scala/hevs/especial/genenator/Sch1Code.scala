@@ -6,7 +6,7 @@ class Sch1Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  def getDslCode = {
+  def runDslCode(): Unit = {
     // Input
     val btn1 = DigitalInput(Stm32stk.pin_btn)
 
