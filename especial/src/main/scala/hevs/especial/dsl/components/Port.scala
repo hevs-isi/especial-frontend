@@ -29,7 +29,7 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
   // Count the number of connection with/to this port.
   // - An input port can only have one single connection.
   // - An output port can have many.
-  private var connections = 0
+  protected var connections = 0
 
   def isNotConnected = !isConnected
 
@@ -57,7 +57,10 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
   override def hashCode = id.## // Use by the graph library
 
-  override def toString = s"Port[$id] '$name' of Cmp[$getOwnerId] '${getOwner.name}'"
+  override def toString = {
+    val sConn = if(isConnected) "" else " (NC)"
+    s"Port[$id] '$name' of Cmp[$getOwnerId] '${getOwner.name}'$sConn"
+  }
 
   /**
    * Return the value type of the port as a `String`.
@@ -84,29 +87,20 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
    */
   protected[components] def getDescription = description
 
-  @throws(classOf[PortInputShortCircuit])
-  protected[components] def connect(): Unit = this match {
-    case _: OutputPort[_] =>
-      // Connected with at least one other input
-      connections += 1
-    case _: InputPort[_] =>
-      // Cannot connect an input with more than one output
-      if (connections > 0)
-        throw PortInputShortCircuit.create(this)
-      else {
-        connections = 1
-      }
+  /**
+   * Set this port as connected.
+   */
+  protected[components] def connect(): Unit
+
+  private[components] def disconnect(): Unit = {
+    // Just reset the number of connection.
+    // The port is now considered as unconnected, but the graph will NOT be modified in this method.
+    connections = 0
   }
 
   protected[components] def getOwnerId = getOwner.getId
 
   def getOwner = owner
-
-  protected[components] def disconnect(): Unit = {
-    // FIXME: implementation is missing. Not allowed for now... Must remove the connection in the graph.
-    connections = 0
-    ???
-  }
 
   /**
    * Helper method to check if two `Port` are of the same type. If not, an `PortTypeMismatch` exception is thrown.
@@ -137,6 +131,21 @@ abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T
 
   override def toString = "Input" + super.toString
 
+  /**
+   * Set this port as connected.
+   * An input can be connected once only. An exception is thrown if already connected.
+   *
+   * @throws hevs.especial.utils.PortInputShortCircuit in the input is already connected
+   */
+  @throws(classOf[PortInputShortCircuit])
+  final override def connect(): Unit = {
+      // Cannot connect an input with more than one output
+      if (connections > 0)
+        throw PortInputShortCircuit.create(this)
+      else
+        connections = 1
+  }
+
   // FIXME: pass the type of the port with the variable as argument, not a String ?
 
   /**
@@ -157,6 +166,15 @@ abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T
 abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
   override def toString = "Output" + super.toString
+
+  /**
+   * Set this port as connected.
+   * An output can be connected many times.
+   */
+  final override def connect(): Unit = {
+      // Connect this output port with one more input
+      connections += 1
+  }
 
   /**
    * Connect and `OutputPort` to an `InputPort`.

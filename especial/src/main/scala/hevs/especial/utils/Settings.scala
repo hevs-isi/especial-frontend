@@ -15,10 +15,13 @@ object Settings {
 
 
 
-  /* WARNINGS */
+  /* OPTIMIZER */
 
-  /** Print warnings before generating the code from the DSL program. */
-  val PIPELINE_RUN_CODE_CHECKER: Boolean = true
+  /**
+   * Print warnings before generating the code from the DSL program.
+   * Optimize the code and remove all unused components.
+   */
+  val PIPELINE_RUN_CODE_OPTIMIZER: Boolean = true
 
 
 

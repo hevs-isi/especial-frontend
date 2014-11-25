@@ -38,10 +38,10 @@ abstract class STM32TestSuite extends FunSuite {
     ctx.isQemuLoggerEnabled match {
       case true =>
         new Stm32stk with QemuLogger
-        ctx.log.info("QEMU logger is enabled.")
+        ctx.log.trace("QEMU logger is enabled.")
       case _ =>
         new Stm32stk
-        ctx.log.info("QEMU logger is disabled.")
+        ctx.log.trace("QEMU logger is disabled.")
     }
 
     // Execute the DSL program
@@ -105,7 +105,7 @@ abstract class STM32TestSuite extends FunSuite {
    * @param hasWarnings true if the DSL program has warnings
    */
   def runCodeCheckerTest(hasWarnings: Boolean = false): Unit = {
-    if (!Settings.PIPELINE_RUN_CODE_CHECKER)
+    if (!Settings.PIPELINE_RUN_CODE_OPTIMIZER)
       return // Test disabled
 
     test("Code checker") {
@@ -114,7 +114,7 @@ abstract class STM32TestSuite extends FunSuite {
       executeProg() // Run the DSL code
 
       // Run the code checker
-      val warns = new CodeChecker().run(ctx)(Unit)
+      val warns = new CodeOptimizer().run(ctx)(Unit)
       assert(ctx.log.hasWarnings == hasWarnings)
 
       // Not excepted result

@@ -37,33 +37,37 @@ object ComponentManager extends Logging {
    * @param node the component to add in the graph (as node)
    */
   def addComponent(node: Component): Boolean = {
-    cpGraph.add(node) // Add the component as a node to the graph
-  }
-
-  /**
-   * Remove a component by its ID with all edges from/to it.
-   * @param cpId component id to remove
-   * @throws ComponentNotFound component not found in the graph
-   * @return `true` if successfully removed
-   */
-  @throws(classOf[ComponentNotFound])
-  def removeComponent(cpId: Int): Boolean = {
-    val node = getNode(cpId)
-    removeComponent(node)
+    cpGraph.add(node) // Add the component as a node to the graph. Ports must be connected manually.
   }
 
   /**
    * Remove the component of the graph.
-   * All edges of the node (from/to the node) are removed automatically.
+   * All edges of the node (from/to the node) are removed automatically. Connected ports with the component are
+   * disconnected.
    *
-   * @param node the component to remove
-   * @return `true` if successfully removed
+   * @param cpId the ID of the component to remove
+   * @return `true` if successfully removed, `false` otherwise
    */
-  def removeComponent(node: Component): Boolean = {
+  def removeComponent(cpId: Int): Boolean = {
+    // Before removing the component, ports must be disconnected manually
+    val nOpt = cpGraph.nodes.find(n => n.value.asInstanceOf[Component].getId == cpId)
+
+    if(nOpt.isEmpty)
+      return false // Node not found
+
+    // Disconnected all ports connected with the component to remove
+    val node = nOpt.get
+    for(e <- node.edges) {
+      val label: Wire = e.label.asInstanceOf[Wire]
+      label.from.disconnect() // Disconnect the output "from"
+      label.to.disconnect() // Also disconnect the input "to" (this component)
+    }
+
+    // Finally remove the component and its edges
     cpGraph.remove(node)
   }
 
-  def numberOfNodes = cpGraph.nodes.size
+  def numberOfNodes = cpGraph.order // order of a graph is the number of nodes
 
   def numberOfEdges = cpGraph.edges.size
 
@@ -142,6 +146,8 @@ object ComponentManager extends Logging {
 
 
 
+
+  // FIXME: remove unused methods
 
 
 
