@@ -5,33 +5,40 @@ import hevs.especial.dsl.components._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 
+/**
+ * The constant component can be used to generate a fixed value.
+ * The component has a single output. Once the component is initialized, the value of the constant cannot be changed
+ * anymore. No input available.
+ * @param value teh value of the constant to generate. Cannot be modified.
+ * @tparam T the type of the constant
+ */
 case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 with HwImplemented {
 
   override val description = s"constant generator\\n(${value.v})"
-
-  private val valName: String = valName("cst") // unique variable name
 
   /* I/O management */
 
   val out = new OutputPort[T](this) {
     override val name = s"out"
     override val description = "the constant value"
-    override def getValue: String = valName
+
+    // Print the value as a String (hardcoded because it cannot change)
+    override def getValue: String = String.valueOf(value.v)
   }
 
   override def getOutputs= Some(Seq(out))
 
+  // No input. The constant value cannot be modified.
   override def getInputs = None
 
   /* Code generation */
 
-  override def getGlobalCode = Some(s"const ${value.getType} $valName = ${value.v}; // $out")
-
   override def getInitCode = {
+    // TODO: must be done here ?
     val in = ComponentManager.findConnections(out)
     val results: ListBuffer[String] = ListBuffer()
-    for (inPort ← in)
-      results += inPort.setInputValue(valName) + "; // " + inPort
+    for (inPort <- in)
+      results += inPort.setInputValue(out.getValue) + "; // " + inPort
     Some(results.mkString("\n"))
   }
 }
