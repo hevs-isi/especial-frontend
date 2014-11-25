@@ -14,8 +14,6 @@ import scala.collection.mutable.ListBuffer
 abstract class AbstractLogic(nbrIn: Int, operator: String) extends GenericCmp[bool, bool](nbrIn,
   1) with HwImplemented with Out1 {
 
-  private val tpe = bool().getType
-
   /* I/O management */
 
   protected def setInputValue(index: Int, s: String) = s"${inValName(index)} = $s"
@@ -32,6 +30,9 @@ abstract class AbstractLogic(nbrIn: Int, operator: String) extends GenericCmp[bo
 
   /* Code generation */
 
+  private val tpe = bool().getType
+
+  // FIXME: Output connection must not be checked here.
   override def getGlobalCode = out(0).isConnected match {
     // Input variables declarations for the gate
     // Example: bool_t in1_comp3, in2_comp3, in3_comp3;
@@ -41,6 +42,7 @@ abstract class AbstractLogic(nbrIn: Int, operator: String) extends GenericCmp[bo
     case _ => None
   }
 
+  // FIXME: Output connection must not be checked here.
   override def getLoopableCode = out(0).isConnected match {
     case true =>
       val result: ListBuffer[String] = ListBuffer()

@@ -36,6 +36,14 @@ class PortTests extends FunSuite with Matchers {
   }
 
   class PortCode3 extends PortCode {
+    // This is also a short circuit.
+    // The input is already connected, event if this is exactly the same connection. See issue #4
+    cst1.out --> led1.in
+    cst1.out --> led1.in
+  }
+
+
+  class PortCode4 extends PortCode {
     // Types mismatch: uint8 --> bool
     // Thrown an exception at runtime
     cst2.out --> led1.in
@@ -43,29 +51,40 @@ class PortTests extends FunSuite with Matchers {
 
   test("Input to output") {
     ComponentManager.reset()
-    new PortCode1() // Connections are ok
+    new PortCode1()
     info("Connections are ok.")
   }
 
   test("Input short circuit") {
     ComponentManager.reset()
 
-    val e = intercept[PortInputShortCircuit] {
-      new PortCode2() // Short circuit detected
+    // Short circuits detection
+    val e1 = intercept[PortInputShortCircuit] {
+      new PortCode2()
+    }
+    // Short circuit !
+    // The input 'in' of Cmp[3] 'DigitalOutput' is already connected.
+    info(e1.getMessage)
+
+    val e2 = intercept[PortInputShortCircuit] {
+      new PortCode3()
     }
 
     // Short circuit !
-    // The input 'in' of Cmp[2] 'DigitalOutput' is already connected.
-    info(e.getMessage) // Print exception message
+    // The input 'in' of Cmp[7] 'DigitalOutput' is already connected.
+    info(e2.getMessage)
   }
 
   test("Ports type mismatch") {
     ComponentManager.reset()
 
     val e = intercept[PortTypeMismatch] {
-      new PortCode3() // Short circuit detected
+      new PortCode4() // Short circuit detected
     }
 
-    info(e.getMessage) // Print exception message
+    // Ports types mismatch. Connection error !
+    // Cannot connect the output `out` (type `uint8`) of Cmp[1] 'Constant'
+    // to the input `in` (type `bool`) of Cmp[3] 'DigitalOutput'.
+    info(e.getMessage)
   }
 }

@@ -33,7 +33,13 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
   def isNotConnected = !isConnected
 
-  def isConnected = connections > 0 // Has at least one connection
+  /**
+   * A port is connected when it has at least one connection with another `Port`.
+   * An `OutputPort`can have 1 or more connections, an `InputPort` one only.
+   *
+   * @return `true` if the port is connected, `false` otherwise.
+   */
+  def isConnected = connections > 0
 
   override def equals(other: Any) = other match {
     // A port ID must be unique. The type of the Port is not checked here.
@@ -41,23 +47,41 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
     case _ => false
   }
 
-  def getId = id
+  /**
+   * Get the unique ID of the `Port`.
+   * Use by the graph library to make edges between ports.
+   *
+   * @return the unique id of the port
+   */
+  def getId: Int = id
 
-  override def hashCode = id.##
+  override def hashCode = id.## // Use by the graph library
 
   override def toString = s"Port[$id] '$name' of Cmp[$getOwnerId] '${getOwner.name}'"
 
+  /**
+   * Return the value type of the port as a `String`.
+   *
+   * @see getType
+   * @return the value type of the port (ex: `bool`)
+   */
   def getTypeAsString: String = {
-    // Something like "hevs.especial.dsl.components.fundamentals.uint1"
+    // Something like "hevs.especial.dsl.components.fundamentals.bool"
     val t: Type = this.getType
-    t.baseClasses.head.asClass.name.toString // Return the child class (ex: uint1) as String
+    t.baseClasses.head.asClass.name.toString // Return the child class (ex: bool) as String
   }
 
   /**
-   * @return Return the type of the Port.
+   * Return the value type of the port as a `Type`.
+   *
+   * @see getTypeAsString
+   * @return the value type of the port
    */
-  protected[components] def getType = tpe
+  protected[components] def getType: Type = tpe
 
+  /**
+   * @return optional description of the port. Empty by default.
+   */
   protected[components] def getDescription = description
 
   @throws(classOf[PortInputShortCircuit])
@@ -113,6 +137,8 @@ abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T
 
   override def toString = "Input" + super.toString
 
+  // FIXME: pass the type of the port with the variable as argument, not a String ?
+
   /**
    * Function used to set the input value of the port.
    * @param s the name of the variable or C code to set as input
@@ -133,19 +159,30 @@ abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[
   override def toString = "Output" + super.toString
 
   /**
-   * Connect and `OutputPort` to an `InputPort`. The `InputPort` must be unconnected or an exception is thrown.
+   * Connect and `OutputPort` to an `InputPort`.
+   * The `InputPort` must be unconnected or an exception is thrown. If port types are not the same,
+   * a `PortTypeMismatch` exception will be thrown.
+   *
    * @param that the input to connect with this output
+   * @tparam A the type of the `InputPort` to connect with
+   * @throws hevs.especial.utils.PortTypeMismatch ports types mismatch
+   * @throws hevs.especial.utils.PortInputShortCircuit `InputPort` already connected
+   * @return `true` if the connection is valid, otherwise an exception is thrown.
    */
+  @throws(classOf[PortTypeMismatch])
+  @throws(classOf[PortInputShortCircuit])
   def -->[A <: CType : TypeTag](that: InputPort[A]): Boolean = {
     // Connection types check. `PortTypeMismatch` is thrown if not valid.
     checkType(that)
+
     that.connect() // Thrown an exception if not valid
     this.connect()
-
     ComponentManager.addWire(this, that) // Add the directed edge in the graph
 
     true // Valid if no exception have been thrown
   }
+
+  // FIXME: return the type of the port, not a String ?
 
   /**
    * generate the C code to read the value of this output port.

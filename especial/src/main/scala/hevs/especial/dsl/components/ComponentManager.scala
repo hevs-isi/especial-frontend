@@ -15,7 +15,7 @@ import scalax.collection.mutable.Graph
 object ComponentManager extends Logging {
 
   /** Mutable graph representation of all the components of the program. */
-  val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
+  protected val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
 
   // Used to generate a unique ID for each component
   private val cmpIdGen: IdGenerator = {
@@ -31,13 +31,43 @@ object ComponentManager extends Logging {
   def nextComponentId() = cmpIdGen.nextId
 
   /**
-   * Insert a component in the graph. Each component has a unique ID. It cannot appears more than once in the graph.
-   * If it is already in the graph,  it will not be added.
-   * @param c the component to add as node in the graph
+   * Insert a component in the graph.
+   * Each component has a unique ID. Can be only once in the graph. Do nothing if already in the graph.
+   *
+   * @param node the component to add in the graph (as node)
    */
-  def registerComponent(c: Component): Unit = {
-    cpGraph += c // Add the component as a node to the graph
+  def addComponent(node: Component): Boolean = {
+    cpGraph.add(node) // Add the component as a node to the graph
   }
+
+  /**
+   * Remove a component by its ID with all edges from/to it.
+   * @param cpId component id to remove
+   * @throws ComponentNotFound component not found in the graph
+   * @return `true` if successfully removed
+   */
+  @throws(classOf[ComponentNotFound])
+  def removeComponent(cpId: Int): Boolean = {
+    val node = getNode(cpId)
+    removeComponent(node)
+  }
+
+  /**
+   * Remove the component of the graph.
+   * All edges of the node (from/to the node) are removed automatically.
+   *
+   * @param node the component to remove
+   * @return `true` if successfully removed
+   */
+  def removeComponent(node: Component): Boolean = {
+    cpGraph.remove(node)
+  }
+
+  def numberOfNodes = cpGraph.nodes.size
+
+  def numberOfEdges = cpGraph.edges.size
+
+  def getDotGraph = cpGraph
 
   /**
    * Remove all components from the graph and clear all previous IDs.
@@ -73,21 +103,15 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Get a Component from a node graph by its id.
-   * @see cp
+   * Search a node in the graph by ID.
+   * Return the node in the graph with the corresponding ID. An exception is thrown in the component was not found.
+   * All nodes of the graph have a unique id. Only one unique component can be returned.
+   *
    * @param cpId the component id to search for
-   * @return the component node or an exception if not found
+   * @throws hevs.especial.utils.ComponentNotFound if the component was not found in the graph
+   * @return the component as a graph node (`Component` as value, with edges)
    */
-  private def cp(cpId: Int): Component = {
-    getNode(cpId).value.asInstanceOf[Component]
-  }
-
-  /**
-   * Search for a node in the graph by a component ID. If the component is not
-   * found, an exception is thrown. The component id is unique. At most one component can be found.
-   * @param cpId the component id to search for
-   * @return the graph node (with the Component as value)
-   */
+  @throws(classOf[ComponentNotFound])
   def getNode(cpId: Int): cpGraph.NodeT = {
     cpGraph.nodes find (c => c.value.asInstanceOf[Component].getId == cpId) match {
       case Some(c) => c
@@ -98,17 +122,29 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Return unconnected ports of all components of the graph.
-   * @return all unconnected ports of all components
+   * Get a Component from a node graph by its id.
+   * @see getNode
+   * @param cpId the component id to search for
+   * @return the component node or an exception if not found
    */
-  def findUnconnectedPorts: Seq[Port[CType]] = {
-    val ncPorts = mutable.ListBuffer.empty[Port[CType]]
-    for (n <- cpGraph.nodes) {
-      val cp = n.value.asInstanceOf[Component]
-      ncPorts ++= cp.getUnconnectedPorts
-    }
-    ncPorts.toSeq
+  private def cp(cpId: Int): Component = {
+    getNode(cpId).value.asInstanceOf[Component]
   }
+
+  /**
+   * Return all nodes of the graph as components.
+   * @return all nodes as components
+   */
+  def getComponents: Set[Component] = {
+    cpGraph.nodes.map(node => node.value.asInstanceOf[Component]).toSet
+  }
+
+
+
+
+
+
+
 
   def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()
 
@@ -121,7 +157,7 @@ object ComponentManager extends Logging {
    * Return all unconnected nodes of the graph.
    * A component is considered as unconnected if it has at least one input or output and no connections to other
    * components.
-   * A component without input and output is considered as connected.
+   * A component without input and output (total of 0 I/O) is considered as connected and its code will be generated.
    *
    * @see findConnectedInputHardware
    * @return all unconnected nodes (with at least one input or output)
@@ -129,7 +165,7 @@ object ComponentManager extends Logging {
   def findUnconnectedComponents: Set[Component] = {
     val nc = cpGraph.nodes filter { c =>
       val cp = c.value.asInstanceOf[Component]
-      // If no I/O, not considered has unconnected
+      // If no I/O, NOT considered has unconnected
       val io = cp.getInputs.getOrElse(Nil) ++ cp.getOutputs.getOrElse(Nil)
       c.degree == 0 && io.length != 0
     }
@@ -187,6 +223,7 @@ object ComponentManager extends Logging {
     tos
   }
 
+
   // This a basically a Tuple2, but they cannot be override
   // Also used by the DotGenerator
   class Wire(val from: OutputPort[CType], val to: InputPort[CType]) {
@@ -207,15 +244,23 @@ object ComponentManager extends Logging {
    * Each component stored in the graph has a unique ID. This is necessary to equals nodes in the graph.
    * Each port of a component has also a unique ID. Used to equal ports and find connections (wires).
    */
-  class IdGenerator {
+  private[components] class IdGenerator {
     private var id: Int = 0
 
+    /**
+     * Generate a new unique ID for component and ports.
+     * @return a new unique id
+     */
     def nextId = {
       val currId = id
       id += 1
       currId
     }
 
+    /**
+     * Reset the generator. Next id will be '0'.
+     */
     def reset(): Unit = id = 0
   }
+
 }

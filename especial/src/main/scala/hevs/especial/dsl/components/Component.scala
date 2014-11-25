@@ -30,7 +30,7 @@ abstract class Component {
 
   // Once the component is instantiated, a unique ID is generated
   // and it is registered automatically to the graph.
-  ComponentManager.registerComponent(this)
+  ComponentManager.addComponent(this)
 
   /**
    * Generate a unique ID for a component port.
@@ -74,19 +74,21 @@ abstract class Component {
   private[components] def valName(prefix: String) = s"${prefix}_cmp$id"
 
   /**
-   * Check if at least one port of this component is not connected.
+   * Check if at least one port of the component is not connected.
+   * Used by the `DotGenerator` to draw unconnected components with a different color.
+   *
    * @return true if one or more ports are not connected
    */
   def isConnected: Boolean = getUnconnectedPorts.isEmpty
 
   /**
-   * Get the list of all unconnected ports of this component.
+   * Get the list of all unconnected I/O ports of this component.
    * @return all unconnected ports (input or output)
    */
-  private[components] def getUnconnectedPorts: Seq[Port[CType]] = {
+  def getUnconnectedPorts: Seq[Port[CType]] = {
     val ins = getInputs.getOrElse(Nil)
     val outs = getOutputs.getOrElse(Nil)
-    (ins ++ outs).filter(c => c.isNotConnected)
+    (ins ++ outs).filter(port => port.isNotConnected)
   }
 
   /**
