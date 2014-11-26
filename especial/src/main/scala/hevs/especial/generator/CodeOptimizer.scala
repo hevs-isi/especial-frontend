@@ -1,122 +1,46 @@
 package hevs.especial.generator
 
-import hevs.especial.dsl.components.{Component, CType, Port, ComponentManager}
-import hevs.especial.utils.{Logger, Context, Pipeline, Settings}
-
-import scala.collection.mutable
+import hevs.especial.dsl.components.{Component, ComponentManager}
+import hevs.especial.utils.{Context, Logger, Pipeline, Settings}
 
 /**
- * Helper object used to check if a code has warnings or not.
- */
-object CodeOptimizer {
-  /**
-   * A program without warning.
-   * @return true if no warnings found, false otherwise
-   */
-  def hasNoWarning = !hasWarnings
-
-  /**
-   * A program with warnings.
-   * @return true if warnings found, false otherwise
-   */
-  def hasWarnings: Boolean = new CodeOptimizer().checkWarnings().isDefined
-}
-
-/**
- * Check the DSL program and print some warnings.
- *
- * For now, it check only if components or inputs are not connected. This check can be disabled in the settings.
+ * Optimize the program graph.
+ * Remove unused and unconnected components. If all inputs or outputs of a component are disconnected,
+ * it is considered as useless and can be removed from the graph, with all its edges. Before removing the component,
+ * all connected ports are disconnected.
+ * Several passes are necessary to remove all unconnected components. The optimizer directly update the component graph.
  */
 class CodeOptimizer extends Pipeline[Unit, Boolean] {
 
-  // Count the number of passes to optimize the code
-  private var nbrOfPasses = 0
-
   /**
-   * Analyse the `ComponentManager` and print some warnings if any.
+   * Optimize the component graph of the current program.
    *
    * @param ctx the context of the program with the logger
    * @param input nothing (not used)
-   * @return true if warnings found, false otherwise
+   * @return `true` if the optimizer is enabled, `false` otherwise
    */
   def run(ctx: Context)(input: Unit): Boolean = {
     if (!Settings.PIPELINE_RUN_CODE_OPTIMIZER) {
       ctx.log.info(s"$currentName is disabled.")
       return false
     }
-
-    var warns = checkWarnings()
-    printWarningsOutput(ctx, warns)
-
-    optimize(ctx)
-
-    warns = checkWarnings()
-    printWarningsOutput(ctx, warns)
-    assert(warns.isEmpty) // All warnings should be removed
-
-    warns.isDefined // Warnings detected or not
-  }
-
-  private def printWarningsOutput(ctx: Context, warns: Option[String]): Unit = {
-    // Print all warnings found
-    if (warns.isDefined)
-      ctx.log.warn(s"Warnings found in program '${ctx.progName}':\n" + warns.get)
-    else
-      ctx.log.info(s"No warning found in program '${ctx.progName}'.")
+    optimize(ctx) // Run the optimizer
+    true
   }
 
   /**
-   * Run some checks to detect warnings in the program.
-   * Check if components are completely isolated.
-   * Check if ports are not connected.
+   * The optimizer function.
+   * @param ctx the context used to report information
    */
-  private def checkWarnings(): Option[String] = {
+  private def optimize(ctx: Context): Unit = {
+    var nbrOfPasses = 0 // Count the number of passes to optimize the code
+    var nbrCpToRemove = 0 // Components removed in the current pass
+    var totalCpRemoved = 0 // Total of removed components
 
-    val out = new StringBuilder
-
-    // Isolated components
-    val c = ComponentManager.findUnconnectedComponents
-    if (c.nonEmpty) {
-      out ++= s"[WARN] ${c.size} "
-      out ++= (if (c.size < 2) "component" else "components")
-      out ++= " declared but not connected at all:\n"
-      out ++= "\t- " + c.mkString("\n\t- ") + "\n\n"
-    }
-
-    // Unconnected ports
-    val p = findUnconnectedPorts
-    if (p.nonEmpty) {
-      out ++= s"[WARN] ${p.size} unconnected "
-      out ++= (if (p.size < 2) "port" else "ports")
-      out ++= " found:\n"
-      out ++= "\t- " + p.mkString("\n\t- ")
-    }
-
-    if (out.isEmpty)
-      None // No warning
-    else
-      Some(out.toString())
-  }
-
-  /**
-   * Return unconnected ports of all components of the graph.
-   * @return all unconnected ports of all components
-   */
-  private def findUnconnectedPorts: Seq[Port[CType]] = {
-    val ncPorts = mutable.ListBuffer.empty[Port[CType]]
-    for (cp <- ComponentManager.getComponents) {
-      ncPorts ++= cp.getUnconnectedPorts
-    }
-    ncPorts.toSeq
-  }
-
-  def optimize(ctx: Context): Unit = {
-
-    var nbrCpToRemove = 0
-    var totalCpRemoved = 0
     ctx.log.info(s"Optimizer started for '${ctx.progName}'.")
     do {
-      startPass(ctx.log)
+      // Debug only. Print the next pass number
+      ctx.log.trace("Pass [%03d]".format(nbrOfPasses + 1))
 
       // Count the number of components to remove
       nbrCpToRemove = ComponentManager.getComponents.foldLeft(0) {
@@ -133,26 +57,16 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
       // Run the next pass if components have been removed
       if (nbrCpToRemove > 0) {
         totalCpRemoved += nbrCpToRemove
-        endPass()
+        nbrOfPasses += 1 // Count the number of passes
       }
     }
     while (nbrCpToRemove != 0)
 
+    // Success. Print useful information
     ctx.log.info(s"Optimizer ended successfully after $nbrOfPasses passes. " +
       s"$totalCpRemoved component(s) have been removed.")
     ctx.log.info(s"The final graph has ${ComponentManager.numberOfNodes} nodes " +
       s"and ${ComponentManager.numberOfEdges} edges.")
-  }
-
-
-  // Debug only. Print the nex phase number
-  private def startPass(l: Logger): Unit = {
-    l.trace("Pass [%03d]".format(nbrOfPasses + 1))
-  }
-
-  // Count the number of phase
-  private def endPass(): Unit = {
-    nbrOfPasses += 1
   }
 
   /**
@@ -184,7 +98,6 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
       log.trace(s"Remove $c: all inputs are unconnected.")
       canBeRemoved = true
     }
-
-    canBeRemoved // Component can be removed or not
+    canBeRemoved
   }
 }

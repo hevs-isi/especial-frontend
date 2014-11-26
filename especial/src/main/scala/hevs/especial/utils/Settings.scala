@@ -11,18 +11,20 @@ object Settings {
   /** Generate the DOT diagram or PDF file corresponding to the program. */
   val PIPELINE_RUN_DOT: Boolean = true
 
+  /** Convert the dot source to PDF. */
   val PIPELINE_EXPORT_PDF: Boolean = true // PIPELINE_RUN_DOT must be enabled and DOT installed
 
+
+  /* CHECKER */
+
+  /** Print warnings before generating the code from the DSL program. */
+  val PIPELINE_RUN_CODE_CHECKER: Boolean = true
 
 
   /* OPTIMIZER */
 
-  /**
-   * Print warnings before generating the code from the DSL program.
-   * Optimize the code and remove all unused components.
-   */
+  /** Optimize the code and remove all unused components. */
   val PIPELINE_RUN_CODE_OPTIMIZER: Boolean = true
-
 
 
   /* RESOLVER */
