@@ -71,7 +71,7 @@ class ResolverTest extends ResolverTestSpec {
     val res = testResolver()
 
     assert(res.isEmpty) // No connected components
-    assert(r.getNumberOfPasses == 0)
+    assert(r.numberOfPasses == 0)
   }
 
   test("1 unconnected component") {
@@ -82,7 +82,7 @@ class ResolverTest extends ResolverTestSpec {
     assert(CodeChecker.hasWarnings)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 0)
-    assert(r.getNumberOfPasses == 0) // Optimized. No connected components
+    assert(r.numberOfPasses == 0) // Optimized. No connected components
     assert(res.isEmpty) // Nothing to resolve
   }
 
@@ -94,7 +94,7 @@ class ResolverTest extends ResolverTestSpec {
     assert(CodeChecker.hasWarnings)
     assert(ComponentManager.numberOfUnconnectedHardware() == 1)
     assert(ComponentManager.numberOfConnectedHardware() == 2)
-    assert(r.getNumberOfPasses == 2)
+    assert(r.numberOfPasses == 2)
     assert(res.size == 2)
     assert(res(0) === Set(c.cst1))
     assert(res(1) === Set(c.led1))
@@ -108,7 +108,7 @@ class ResolverTest extends ResolverTestSpec {
     assert(CodeChecker.hasNoWarning)
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
-    assert(r.getNumberOfPasses == 3)
+    assert(r.numberOfPasses == 3)
     assert(res.size == 3)
     assert(res(0) === Set(c.btn1, c.cst1))
     assert(res(1) === Set(c.and1))
@@ -123,7 +123,7 @@ class ResolverTest extends ResolverTestSpec {
     assert(CodeChecker.hasNoWarning)
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 4)
-    assert(r.getNumberOfPasses == 3)
+    assert(r.numberOfPasses == 3)
     assert(res.size == 3)
     assert(res(0) === Set(c.btn1, c.cst1))
     assert(res(1) === Set(c.and1))
@@ -138,7 +138,7 @@ class ResolverTest extends ResolverTestSpec {
     assert(CodeChecker.hasWarnings) // Some input are not connected
     assert(ComponentManager.numberOfUnconnectedHardware() == 0)
     assert(ComponentManager.numberOfConnectedHardware() == 6)
-    assert(r.getNumberOfPasses == 5)
+    assert(r.numberOfPasses == 5)
     assert(res.size == 5)
     assert(res(0) === Set(c.cst2, c.cst1))
     assert(res(1) === Set(c.and1))

@@ -9,8 +9,9 @@ import org.scalatest.{FunSuite, Matchers}
 /**
  * Test input and output port connections.
  *
- * Connection types must be the same. An output can be connected to different inputs,
- * but an input can only have one connection, or a `PortInputShortCircuit` exception is thrown.
+ * Connection types must be the same, or a `PortTypeMismatch` exception is thrown.
+ * An output can be connected to different inputs, but an input can only have one connection,
+ * or a `PortInputShortCircuit` exception is thrown.
  */
 class PortTests extends FunSuite with Matchers {
 

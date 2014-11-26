@@ -32,7 +32,7 @@ class RichFile(file: File) {
       true
     }
     catch {
-      case e: Exception => false
+      case e: IOException => false
     }
   }
 

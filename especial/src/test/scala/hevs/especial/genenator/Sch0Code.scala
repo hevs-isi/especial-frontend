@@ -21,7 +21,11 @@ class Sch0Code extends STM32TestSuite {
 
   runDotGeneratorTest()
 
-  runCodeCheckerTest(hasWarnings = false)
+  runCodeCheckerTest()
+
+  runCodeOptimizer()
+
+  runDotGeneratorTest(optimizedVersion = true)
 
   runCodeGenTest()
 }

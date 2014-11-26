@@ -1,42 +1,37 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.core.logic.{And2, And4}
-import hevs.especial.dsl.components.core.{Mux3, Constant, Mux2}
+import hevs.especial.dsl.components.core.{Constant, Mux2}
 import hevs.especial.dsl.components.target.stm32stk.{Stm32stk, DigitalOutput}
-import hevs.especial.dsl.components.{Pin, bool, uint8}
+import hevs.especial.dsl.components.{uint8, Pin, bool}
 
-class Sch4Code extends STM32TestSuite {
+class Sch5Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
   def runDslCode(): Unit = {
     // Inputs
     val cst1 = Constant(bool(v = false))
-    val cst2 = Constant(bool(v = false))
+    val cst2 = Constant(bool(v = true))
 
     // Logic
-    val and1 = And4()
-    val and2 = And2()
-    val and3 = And2()
+    val and1 = And2()
     val mux1 = Mux2[bool]()
 
     // Output
     val led1 = DigitalOutput(Stm32stk.pin_led)
 
     // Connecting stuff
-    cst2.out --> mux1.in1
-    cst1.out --> and1.in1
-    and3.out --> and1.in4
-    and1.out --> and2.in2
-    and2.out --> mux1.in2
-    mux1.out --> led1.in
+    cst1.out --> led1.in
+    cst2.out --> and1.in1
+    and1.out --> mux1.in2
   }
 
   runDotGeneratorTest()
 
   runCodeCheckerTest(hasWarnings = true)
 
-  runCodeOptimizer(hasWarnings = true) // Still some unconnected pins
+  runCodeOptimizer()
 
   runDotGeneratorTest(optimizedVersion = true)
 
