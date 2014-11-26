@@ -5,12 +5,20 @@ import hevs.especial.utils.{Context, Logger, Pipeline, Settings}
 
 /**
  * Optimize the program graph.
+ *
  * Remove unused and unconnected components. If all inputs or outputs of a component are disconnected,
  * it is considered as useless and can be removed from the graph, with all its edges. Before removing the component,
  * all connected ports are disconnected.
+ *
  * Several passes are necessary to remove all unconnected components. The optimizer directly update the component graph.
  */
 class CodeOptimizer extends Pipeline[Unit, Boolean] {
+
+  // Count the number of passes to optimize the code
+  private var nbrOfPasses = -1
+
+  // Total of removed components from the original graph
+  private var totalCpRemoved = -1
 
   /**
    * Optimize the component graph of the current program.
@@ -33,9 +41,11 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
    * @param ctx the context used to report information
    */
   private def optimize(ctx: Context): Unit = {
-    var nbrOfPasses = 0 // Count the number of passes to optimize the code
     var nbrCpToRemove = 0 // Components removed in the current pass
-    var totalCpRemoved = 0 // Total of removed components
+
+    // Reset
+    nbrOfPasses = 0
+    totalCpRemoved = 0
 
     ctx.log.info(s"Optimizer started for '${ctx.progName}'.")
     do {
@@ -52,7 +62,7 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
           }
           else acc
       }
-      ctx.log.trace(s"$nbrCpToRemove component(s) have been removed in pass ${nbrOfPasses + 1}.")
+      ctx.log.trace(s" > $nbrCpToRemove component(s) removed in pass ${nbrOfPasses + 1}.")
 
       // Run the next pass if components have been removed
       if (nbrCpToRemove > 0) {
@@ -63,10 +73,10 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
     while (nbrCpToRemove != 0)
 
     // Success. Print useful information
-    ctx.log.info(s"Optimizer ended successfully after $nbrOfPasses passes. " +
-      s"$totalCpRemoved component(s) have been removed.")
-    ctx.log.info(s"The final graph has ${ComponentManager.numberOfNodes} nodes " +
-      s"and ${ComponentManager.numberOfEdges} edges.")
+    ctx.log.info(s"Optimizer ended successfully after $numberOfPasses passes. " +
+      s"$numberOfRemovedCmp component(s) removed.")
+    ctx.log.info(s"The final graph has ${ComponentManager.numberOfNodes} node(s) " +
+      s"and ${ComponentManager.numberOfEdges} edge(s).")
   }
 
   /**
@@ -87,7 +97,7 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
     val outs = c.getOutputs.getOrElse(Nil)
     val nbrOutNc = outs.count(out => out.isNotConnected)
     if (nbrOutNc == outs.size && outs.size > 0) {
-      log.trace(s"Remove $c: all outputs are unconnected.")
+      log.trace(s" > Remove $c: all outputs are unconnected.")
       canBeRemoved = true
     }
 
@@ -95,9 +105,23 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
     val ins = c.getInputs.getOrElse(Nil)
     val nbrInNc = ins.count(in => in.isNotConnected)
     if (nbrInNc == ins.size && ins.size > 0) {
-      log.trace(s"Remove $c: all inputs are unconnected.")
+      log.trace(s" > Remove $c: all inputs are unconnected.")
       canBeRemoved = true
     }
     canBeRemoved
   }
+
+  /**
+   * Return the number of passes necessary to optimize the graph.
+   *
+   * @return the number of passes executed to optimize the graph
+   */
+  def numberOfPasses = nbrOfPasses
+
+  /**
+   * Return the number of removed components.
+   *
+   * @return the number of removed component from the original graph
+   */
+  def numberOfRemovedCmp = totalCpRemoved
 }

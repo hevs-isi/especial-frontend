@@ -25,7 +25,7 @@ class Resolver extends Pipeline[Unit, O] {
   private val nextPassCpId = mutable.Set.empty[Int]
 
   // Count the number of passes to generate the code
-  private var nbrOfPasses = 0
+  private var nbrOfPasses = -1
 
   // The result of the solver. The index is the pass number.
   private val mapSolve = mutable.Map.empty[Int, Set[Component]]
@@ -50,6 +50,7 @@ class Resolver extends Pipeline[Unit, O] {
    */
   private def resolve(log: Logger): O = {
 
+    nbrOfPasses = 0 // Reset
     val connectedNbr = ComponentManager.numberOfConnectedHardware()
     val unconnectedNbr = ComponentManager.numberOfUnconnectedHardware()
 
@@ -75,23 +76,24 @@ class Resolver extends Pipeline[Unit, O] {
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < Settings.RESOLVER_MAX_PASSES)
 
     if (generatedCpId.size == connectedNbr) {
-      log.trace(s"Resolver ended successfully after $getNumberOfPasses passes for ${generatedCpId.size} connected " +
-        s"components")
+      log.trace(s"Resolver ended successfully after $numberOfPasses passes for ${generatedCpId.size} connected " +
+        s"component(s).")
       log.info(printResult())
       return mapSolve.toMap // Return all components in the right order (immutable Map)
     }
 
     // Error: infinite loop. Report an error.
-    log.error(s"Error resolving the graph. Stopped after $getNumberOfPasses passes.")
+    log.error(s"Error resolving the graph. Stopped after $numberOfPasses passes.")
     Map.empty
   }
 
   /**
-   * Return the number of passes necessary to resolve the graph. If it was not possible to resolve it,
-   * `MaxPasses` is returned.
-   * @return number of passes to resolve thr graph
+   * Return the number of passes necessary to resolve the graph.
+   * If it was not possible to resolve it, [[Settings.RESOLVER_MAX_PASSES]] is returned.
+   *
+   * @return the number of passes executed to resolve the graph
    */
-  def getNumberOfPasses = nbrOfPasses
+  def numberOfPasses = nbrOfPasses
 
   /**
    * Compute one pass of resolving the graph.
