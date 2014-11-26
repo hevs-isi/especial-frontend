@@ -14,10 +14,6 @@ import scala.reflect.runtime.universe._
  */
 abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn, 1) with HwImplemented with Out1 {
 
-  // FIXME: Available for bool and all unit types
-  assert(typeOf[T] == typeOf[bool] || typeOf[T] == typeOf[uint8] || typeOf[T] == typeOf[uint16] ||
-    typeOf[T] == typeOf[uint32])
-
   /* I/O management */
 
   private val selValName = valName("sel") // Global variable used to store the selection pin value
@@ -44,22 +40,23 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
   override def getOutputValue(index: Int) = {
     assert(index == 0) // Only one output
 
-    // Simple if/else with 2 boolean values
+    // Simple if/else if they are only two inputs. The else is the "default" branch.
     if(nbrIn == 2) {
        s"""
           |// ${Mux.this}
           |if($selValName == 0)
-          |  ${outValName(0)} = ${inValName(0)};
+          |  ${outValName()} = ${inValName(0)};
           |else
-          |  ${outValName(0)} = ${inValName(1)};""".stripMargin
+          |  ${outValName()} = ${inValName(1)};""".stripMargin
     }
     else {
       // Create all cases statements in the switch/case
       val cases = for(i <- 0 until nbrIn) yield addCaseStatement(i)
-      // Store the result in a temporary variable
+
+      // Store the Mux result in a temporary variable
       s"""
         |// ${Mux.this}
-        |${bool().getType} ${outValName(0)};
+        |${bool().getType} ${outValName()};
         |switch($selValName) {
         |${cases.mkString("\n")}
         |}""".stripMargin
@@ -68,7 +65,7 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
 
   private def addCaseStatement(index: Int) = {
     s"""case $index:
-        |  ${outValName(0)} = ${inValName(index)};
+        |  ${outValName()} = ${inValName(index)};
         |  break;"""
   }
 
@@ -77,26 +74,23 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
   override def getGlobalCode = {
       // Define inputs, output and sel as global variables
       val varIn = for(i <- 0 until nbrIn) yield inValName(i)
-      val vars = List(selValName, outValName(0)) ++ varIn
+      val vars = List(selValName, outValName()) ++ varIn
 
       // Print all boolean variables to declare from the list
       Some(s"${bool().getType} ${vars.mkString(", ")}; // $this")
   }
 
-  // FIXME: Output connection must not be checked here.
-  override def getLoopableCode = out.isConnected match {
-    case true =>
-      val result: ListBuffer[String] = ListBuffer()
+  override def getLoopableCode = {
+    val result: ListBuffer[String] = ListBuffer()
 
-      // Mux code
-      result += s"${out.getValue}"
+    // Mux code
+    result += s"${out.getValue}"
 
-      // Set the output value to connected components
-      for (inPort ← ComponentManager.findConnections(out))
-        result += inPort.setInputValue(s"${outValName(0)}") + "; // " + inPort
+    // Set the output value to connected components
+    for (inPort ← ComponentManager.findConnections(out))
+      result += inPort.setInputValue(s"${outValName()}") + "; // " + inPort
 
-      Some(result.mkString("\n"))
-    case _ => None
+    Some(result.mkString("\n"))
   }
 }
 

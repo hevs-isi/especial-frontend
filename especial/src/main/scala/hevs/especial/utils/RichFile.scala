@@ -38,16 +38,27 @@ class RichFile(file: File) {
 
   /**
    * Check if the folder exist and if not create it. If it already exist, delete all files.
-   * @return false if the folder cannot be created, true otherwise
+   * @return `false` if the folder cannot be created, `true `otherwise
    */
   def createEmptyFolder(): Boolean = {
-    if (!file.exists()) {
-      if (!file.mkdirs())
-        return false
+    if (createFolder()) {
+      return false
     }
     else {
       // Delete all files in this existing directory
       deleteFilesRecursively()
+    }
+    true
+  }
+
+  /**
+   * Create a folder if it does not exit. Do nothing if already exist.
+   * @return `false` if the folder cannot be created, `true `otherwise
+   */
+  def createFolder(): Boolean = {
+    if (!file.exists()) {
+      if (!file.mkdirs())
+        return false
     }
     true
   }

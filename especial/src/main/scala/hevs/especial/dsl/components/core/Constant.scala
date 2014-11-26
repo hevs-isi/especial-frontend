@@ -9,6 +9,7 @@ import scala.reflect.runtime.universe._
  * The constant component can be used to generate a fixed value.
  * The component has a single output. Once the component is initialized, the value of the constant cannot be changed
  * anymore. No input available.
+ *
  * @param value teh value of the constant to generate. Cannot be modified.
  * @tparam T the type of the constant
  */

@@ -10,8 +10,8 @@ import hevs.especial.dsl.components._
  * @param pin the GPIO pin
  * @param initValue the default value of the output when initialized
  */
-case class DigitalOutput(pin: Pin, initValue: Boolean = false) extends DigitalIO(pin) with In1 with
-HwImplemented {
+case class DigitalOutput(pin: Pin, initValue: Boolean = false) extends
+  DigitalIO(pin) with In1 with HwImplemented {
 
   override val description = s"digital output\\non $pin"
 
@@ -21,7 +21,7 @@ HwImplemented {
   /* I/O management */
 
   /**
-   * The `uint1` value to write to this digital output.
+   * The `bool` value to write to this digital output.
    */
   override val in = new InputPort[bool](this) {
     override val name = s"in"

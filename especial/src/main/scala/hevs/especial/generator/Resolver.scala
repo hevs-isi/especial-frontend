@@ -150,14 +150,13 @@ class Resolver extends Pipeline[Unit, O] {
     }
   }
 
-  // Debug only. Print the nex phase number
   private def startPass(l: Logger) = {
+    // Debug only. Print the next pass number
     l.trace("Pass [%03d]".format(nbrOfPasses + 1))
   }
 
-  // Count the number of phase
   private def endPass() = {
-    nbrOfPasses += 1
+    nbrOfPasses += 1 // Count the number of passes
   }
 
   // Components code generated. Save it to do it once only.

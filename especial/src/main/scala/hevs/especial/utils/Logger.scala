@@ -8,6 +8,9 @@ import grizzled.slf4j.{Logger => Log}
  * This is basically a wrapper of the existing `Logging` class. The method `terminateIfErrors` can be used to
  * automatically terminate the program if any error has occurred.
  * The logger can be configured using the file `src/main/resources/simplelogger.properties`.
+ *
+ * Code adapter from:
+ * @see https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Reporter.scala
  */
 class Logger {
 
