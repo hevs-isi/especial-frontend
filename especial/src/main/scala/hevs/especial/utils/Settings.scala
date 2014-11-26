@@ -1,8 +1,9 @@
 package hevs.especial.utils
 
 /**
- * Various settings for the project, especially to modify the pipeline behaviour.
- * Enable or disable options for the compiler path. Set paths for external tools.
+ * Global settings for the project, especially to modify the [[Pipeline]] behaviour.
+ *
+ * Enable or disable [[Pipeline]] blocks, set external tools paths, etc.
  */
 object Settings {
 

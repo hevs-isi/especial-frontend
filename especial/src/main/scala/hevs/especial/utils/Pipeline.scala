@@ -3,14 +3,14 @@ package hevs.especial.utils
 /**
  * Base pipeline class used to chain different operations together.
  *
- * A pipeline block `run` a function from an input type `I` that return an output type `O`. Pipelines can be
- * chains together (similar to the `andThen` method of Scala). A logger is used to report any info or error. If an
- * error is reported, the pipeline just stop.
+ * A pipeline block run a function from an input type `I` that return an output type `O`.
+ * Pipelines can be chains together (similar to the `andThen` method of Scala). A logger is used to report
+ * information or error. If an error is reported, the pipeline just stop.
  *
  * Code adapted from:
- * @see http://stackoverflow.com/a/9606174/938081
- * @see https://gist.github.com/richdougherty/730e03fc865870c46724
- * @see https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Pipeline.scala
+ *  - [[http://stackoverflow.com/a/9606174/938081]]
+ *  - [[https://gist.github.com/richdougherty/730e03fc865870c46724]]
+ *  - [[https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Pipeline.scala]]
  *
  * @tparam I input type of the run method
  * @tparam O output type of the run method

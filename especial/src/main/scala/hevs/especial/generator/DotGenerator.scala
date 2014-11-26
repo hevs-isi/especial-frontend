@@ -13,21 +13,28 @@ import scalax.collection.edge.LDiEdge
 import scalax.collection.io.dot._
 
 /**
- * Depending on the Settings, export the DOT and the PDF file.
- * The DOT diagram and the PDF are exported to the "output/<progName>/dot" folder.
- * No input is necessary. The program name is available in the context.
+ * Generate a diagram of the current program. Export a `dot` and a `pdf` file.
+ *
+ * Export the component graph to a `dot` file using the Dot extension of the ScalaGraph library. Can be disabled
+ * using the general [[hevs.especial.utils.Settings]].
+ *
+ * The DOT diagram and the PDF are exported to the `output/<progName>/dot` folder.
+ * The name of the generated file is the program name (available in the context). The user can add a suffix to the
+ * generated file name so different diagrams of the same program can be exported..
+ *
+ * @version 2.0
  */
-class DotPipe extends Pipeline[Unit, Unit] {
+class DotGenerator extends Pipeline[Option[String], Unit] {
 
   /**
    * Create the DOT and the PDF file that correspond to a DSL program.
    * Files written directly in the output folder (pipeline output not used).
    *
    * @param ctx the context of the program with the logger
-   * @param input nothing (not used)
-   * @return nothing (not used)
+   * @param fileNameSuffix the suffix to append to the file name, if necessary
+   * @return nothing (not used). Update the program graph directly.
    */
-  def run(ctx: Context)(input: Unit): Unit = {
+  def run(ctx: Context)(fileNameSuffix: Option[String]): Unit = {
     // First block of the pipeline. Force to clean the output folder.
     // FIXME. clear the output folder before starting the test task
     // val folder: RichFile = new File("output/")
@@ -38,12 +45,18 @@ class DotPipe extends Pipeline[Unit, Unit] {
       return
     }
 
+    // Append the suffix to the filename, is defined
+    val suffix = fileNameSuffix match {
+      case Some(s) => s"_$s"
+      case None => ""
+    }
+
     // Generate the DOT file
-    val res = DotGenerator.generateDotFile(ctx.progName)
+    val res = DotGenerator.generateDotFile(ctx, suffix)
     if (!res)
       ctx.log.error("Unable to generate the DOT file !")
     else
-      ctx.log.info("DOT file generated.")
+      ctx.log.info("DOT file generated and saved.")
 
     // Generate the PDF file if necessary
     if (Settings.PIPELINE_EXPORT_PDF) {
@@ -56,7 +69,7 @@ class DotPipe extends Pipeline[Unit, Unit] {
         return
       }
 
-      val res = DotGenerator.convertDotToPdf(ctx.progName)
+      val res = DotGenerator.convertDotToPdf(ctx.progName, suffix)
       if (res._1 == 0)
         ctx.log.info("PDF file generated.")
       else
@@ -90,30 +103,34 @@ object DotGenerator {
 
   /**
    * Generate the dot file and save it.
-   * @param progName the name of the program
-   * @return true if file generated correctly
+   * @param ctx the program context
+   * @return `true` if the dot file has been saved, `false` if an error occurred
    */
-  def generateDotFile(progName: String): Boolean = {
-    val dot = generateDot(progName)
+  def generateDotFile(ctx: Context, suffix: String): Boolean = {
+    // Generate the dot source
+    val fileName = s"${ctx.progName}$suffix.dot"
+    val dot = generateDot(ctx.progName, fileName)
 
     // Create the folder if it not exist
-    val folder: RichFile = new File(String.format(OUTPUT_PATH, progName))
-    if (!folder.createEmptyFolder())
+    val folder: RichFile = new File(String.format(OUTPUT_PATH, ctx.progName))
+    if (!folder.createFolder())
       return false // Error: unable to create the folder
 
-    // Generate the DOT file to the created folder
-    val path = String.format(OUTPUT_PATH, progName) + progName + ".dot"
+    // Save the dot file to the disk
+    val path = String.format(OUTPUT_PATH, ctx.progName) + fileName
     val f: RichFile = new File(path)
     f.write(dot) // Write succeed or not
   }
 
   /**
    * Generate the dot file and return it as a String.
+   *
    * @param graphName the title to display on the graph
+   * @param fileName the name of the generated file
    * @return the dot file as a String
    */
-  def generateDot(graphName: String): String = {
-    val dot = new DotGenerator(graphName).generateDot()
+  def generateDot(graphName: String, fileName: String): String = {
+    val dot = new GraphDot(graphName, fileName).generateDot()
     // Add static settings by hand after the first line
     val dotLines = dot.split("\\r?\\n\\t", 2)
     dotLines(0) += dotSettings
@@ -122,40 +139,52 @@ object DotGenerator {
     header + "\n" + dotLines.mkString
   }
 
-  def convertDotToPdf(progName: String): (Int, String) = {
-    // Convert the dot file to PDF with the same file name
+  /**
+   * Convert the generated dot file to a PDF file (with the same name).
+   * @param progName the program name
+   * @param suffix the suffix to append to the file name
+   * @return the conversion command result
+   */
+  def convertDotToPdf(progName: String, suffix: String): (Int, String) = {
     val path = String.format(OUTPUT_PATH, progName)
-    val dotFile = path + progName + ".dot"
-    val pdfFile = path + progName + ".pdf"
+    val fileName = s"${progName}$suffix"
+    val dotFile = path + fileName + ".dot"
+    val pdfFile = path + fileName + ".pdf"
     OSUtils.runWithCodeResult(s"dot $dotFile -Tpdf -o $pdfFile")
   }
 }
 
 /**
- * Display the graph of the `ComponentManager` on a DOT diagram.
+ * Display the graph generated by the [[ComponentManager]] in a `dot` diagram.
+ *
  * Components are the nodes, connected together with ports. The label on the edge describe the type
- * of the connection - from an OutputPort to an InputPort of two components. Unconnected ports are display as "NC".
- * Unconnected components (nodes) are in orange.
- * @param graphName the title to display on the graph
+ * of the connection - from an [[OutputPort]] to an [[InputPort]] of two components. Unconnected ports are labeled
+ * as "NC". Components (nodes) with unconnected nodes are drawn in orange.
+ * All components available in the graph are in the diagram.
+ *
+ * @param graphName the title of the program as graph legend
+ * @param fileName the name of the file to display as graph legend
  */
-class DotGenerator(val graphName: String) {
+private class GraphDot(graphName: String, fileName: String) {
 
-  // Basic diagram settings and title
-  private final val name = "\"\\n\\nVisualisation of the '" + graphName + "' program.\""
-  private final val root = DotRootGraph(directed = true, id = Some("G"), kvList = Seq(DotAttr("label", name)))
+  // General diagram settings
+  private val name = "\"\\n\\nVisualisation of the '" + graphName + "' program.\\n" + fileName + "\""
+  private val root = DotRootGraph(directed = true, id = Some("G"), kvList = Seq(DotAttr("label", name)))
 
   /**
    * Generate the DOT diagram of the `ComponentManager` graph.
    * @return the dot file as a String
    */
-  private def generateDot(): String = {
+  def generateDot(): String = {
     // Generate the dot diagram and return it as String
-    val g = ComponentManager.cpGraph
+    val g = ComponentManager.getDotGraph
     g.toDot(root, edgeTransformer,
-      hEdgeTransformer = Option(edgeTransformer),
-      iNodeTransformer = Option(nodeTrans),
-      cNodeTransformer = Option(nodeTrans))
+      hEdgeTransformer = Option(edgeTransformer), /* hypergraph to the DOT language */
+      iNodeTransformer = Option(nodeTrans), /* transform isolated nodes */
+      cNodeTransformer = Option(nodeTrans)) /* transform connected nodes */
   }
+
+  /* Helper methods to transform nodes and edges to dot. */
 
   /**
    * Transform all connected nodes.
@@ -174,7 +203,7 @@ class DotGenerator(val graphName: String) {
     var shape = s"{{$in}|${nodeName(n)}|{$out}}" // Double '{' are necessary with rankdir=LR !
     val attrs = mutable.ArrayBuffer.empty[DotAttr]
 
-    // Different shape if o input and no output
+    // Different shape if no input and no output. Draw a rectangle.
     if (in.isEmpty && out.isEmpty) {
       shape = s"${nodeName(n)}"
       attrs += DotAttr("color", "dimgrey")
@@ -196,8 +225,7 @@ class DotGenerator(val graphName: String) {
   private def nodeName(c: Component): String = {
     // Display the component id and description on two lines
     val title = c.name + s" [${c.getId}]"
-    val connected = if (c.isConnected) "" else "\\n(NC)"
-    s"$title\\n${c.description}$connected"
+    s"$title\\n${c.description}"
   }
 
   /**
@@ -205,7 +233,7 @@ class DotGenerator(val graphName: String) {
    * @param c the Component
    * @return the ID as String
    */
-  private def nodeId(c: Component): String = c.getId.toString
+  private def nodeId(c: Component): String = c.getId.toString // String ID to create a `DotNodeStmt`
 
   /**
    * Format a list of input or output of a component. Check if it is connected or not and display it.
@@ -233,8 +261,10 @@ class DotGenerator(val graphName: String) {
    */
   private def edgeTransformer(innerEdge: Graph[Component, LDiEdge]#EdgeT): Option[(DotGraph, DotEdgeStmt)] = {
     val edge = innerEdge.edge
-    val label = edge.label.asInstanceOf[Wire]
+    val label: Wire = edge.label.asInstanceOf[Wire]
 
+    // Create the connection between two nodes. Example: "1:0 -> 2:0 [label = bool]"
+    // Nodes are the components and identified by a unique ID, like ports.
     val nodeFrom = edge.from.value.asInstanceOf[Component].getId
     val nodeTo = edge.to.value.asInstanceOf[Component].getId
     val attrs = Seq(DotAttr("label", labelName(label)))
@@ -244,7 +274,11 @@ class DotGenerator(val graphName: String) {
   /**
    * Display the type of the connection.
    * @param w the wire to display as a edge label
-   * @return the type of the connection as a label value
+   * @return connections types as a String, displayed as edge label
    */
-  private def labelName(w: Wire): String = w.from.getTypeAsString
+  private def labelName(w: Wire): String = {
+    // Display the type of the output port (from) -> the input port (to)
+    // Example: "bool -> bool"
+    s"${w.from.getTypeAsString}->${w.to.getTypeAsString}"
+  }
 }
