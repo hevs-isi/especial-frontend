@@ -7,9 +7,19 @@ import hevs.especial.dsl.components.{Component, Pin}
  *
  * @param pin the pin of the GPIO (port and pin number)
  */
-abstract class DigitalIO(pin: Pin) extends Component {
+abstract class DigitalIO(private val pin: Pin) extends Component {
   /** Value of the pin structure formatted for the generated code. */
   protected val pinName: String = s"'${pin.port}', ${pin.pinNumber}"
+
+  /* Unique component */
+
+  override def equals(other: Any) = other match {
+    // The pin number must be unique for each DigitalIO
+    case that: DigitalIO => that.pin == this.pin
+    case _ => false
+  }
+  
+  override def hashCode = pin.##
 }
 
 

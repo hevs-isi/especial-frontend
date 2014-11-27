@@ -2,8 +2,8 @@ package hevs.especial.ports
 
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, Stm32stk}
-import hevs.especial.dsl.components.{uint8, ComponentManager, bool}
-import hevs.especial.utils.{PortTypeMismatch, PortInputShortCircuit}
+import hevs.especial.dsl.components.{Pin, ComponentManager, bool, uint8}
+import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch}
 import org.scalatest.{FunSuite, Matchers}
 
 /**
@@ -43,12 +43,30 @@ class PortTests extends FunSuite with Matchers {
     cst1.out --> led1.in
   }
 
-
   class PortCode4 extends PortCode {
+    // This is also a short circuit.
+    // Use anonymous components
+    btn1.out --> DigitalOutput(Pin('A', 5)).in
+    btn1.out --> DigitalOutput(Pin('A', 5)).in
+  }
+
+  class PortCode5 extends PortCode {
     // Types mismatch: uint8 --> bool
     // Thrown an exception at runtime
     cst2.out --> led1.in
   }
+
+  class PortCode6 {
+    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led2 = DigitalOutput(Pin('B', 6))
+
+    // Should have exactly 3 components, not 4 !
+    // Also work if used with a variable, see issue #8
+    DigitalInput(Pin('A', 1)).out --> led1.in
+    DigitalInput(Pin('A', 1)).out --> led2.in
+  }
+
+
 
   test("Input to output") {
     ComponentManager.reset()
@@ -72,7 +90,7 @@ class PortTests extends FunSuite with Matchers {
     }
 
     // Short circuit !
-    // The input 'in' of Cmp[7] 'DigitalOutput' is already connected.
+    // The input 'in' of Cmp[3] 'DigitalOutput' is already connected.
     info(e2.getMessage)
   }
 
@@ -80,7 +98,7 @@ class PortTests extends FunSuite with Matchers {
     ComponentManager.reset()
 
     val e = intercept[PortTypeMismatch] {
-      new PortCode4() // Short circuit detected
+      new PortCode5() // Short circuit detected
     }
 
     // Ports types mismatch. Connection error !
@@ -88,4 +106,24 @@ class PortTests extends FunSuite with Matchers {
     // to the input `in` (type `bool`) of Cmp[3] 'DigitalOutput'.
     info(e.getMessage)
   }
+
+  test("Anonymous short circuit") {
+    ComponentManager.reset()
+
+    val e = intercept[PortInputShortCircuit] {
+      new PortCode4() // Short circuit detected
+    }
+
+    // Short circuit !
+    // The input 'in' of Cmp[4] 'DigitalOutput' is already connected.
+    info(e.getMessage)
+  }
+
+  test("Anonymous input") {
+    ComponentManager.reset()
+    new PortCode6()
+    assert(ComponentManager.numberOfNodes == 3)
+  }
+
+
 }
