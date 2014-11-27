@@ -33,4 +33,19 @@ case class Pin(port: Char, pinNumber: Int) {
   def getIdentifier = s"$port$pinNumber"
 
   override def toString = s"pin $port#$pinNumber"
+
+  /**
+   * Equals two pin.
+   *
+   * @param other the pin to compare
+   * @return `true` if the pin has the same pin and port number, `false` otherwise
+   */
+  override def equals(other: Any) = other match {
+    // Used to identify in a DigitalIO already exist. Pin must be used once only.
+    case that: Pin =>
+      that.pinNumber == this.pinNumber && that.port == this.port
+    case _ => false
+  }
+
+  override def hashCode = 41 * port.hashCode() + pinNumber.hashCode()
 }

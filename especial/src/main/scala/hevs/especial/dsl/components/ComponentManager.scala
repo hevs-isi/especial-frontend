@@ -32,12 +32,24 @@ object ComponentManager extends Logging {
 
   /**
    * Insert a component in the graph.
-   * Each component has a unique ID. Can be only once in the graph. Do nothing if already in the graph.
+   *
+   * Each component has a unique ID and can be only once in the graph.
+   * If the component cannot be added because it already exist in the graph, then the existing component is returned.
+   * The new instance is not used (not added to the graph). This works only if `equals` and `hashcode` functions of
+   * the components are implemented.
    *
    * @param node the component to add in the graph (as node)
+   * @return `None` if the component has been added successfully, or the existing instance if already in the graph
    */
-  def addComponent(node: Component): Boolean = {
-    cpGraph.add(node) // Add the component as a node to the graph. Ports must be connected manually.
+  def addComponent(node: Component): Option[node.type] = {
+    // Try to add the component as a node to the graph. Not added if it exist already.
+    // Components ports must be connected manually.
+    cpGraph.add(node) match {
+      case true => None // Component added successfully
+      case false =>
+        // Return the existing component, directly with the correct type
+        Some(cpGraph.get(node).value.asInstanceOf[node.type])
+    }
   }
 
   /**
@@ -52,12 +64,12 @@ object ComponentManager extends Logging {
     // Before removing the component, ports must be disconnected manually
     val nOpt = cpGraph.nodes.find(n => n.value.asInstanceOf[Component].getId == cpId)
 
-    if(nOpt.isEmpty)
+    if (nOpt.isEmpty)
       return false // Node not found
 
     // Disconnected all ports connected with the component to remove
     val node = nOpt.get
-    for(e <- node.edges) {
+    for (e <- node.edges) {
       val label: Wire = e.label.asInstanceOf[Wire]
       label.from.disconnect() // Disconnect the output "from"
       label.to.disconnect() // Also disconnect the input "to" (this component)
@@ -71,6 +83,7 @@ object ComponentManager extends Logging {
 
   def numberOfEdges = cpGraph.edges.size
 
+  // FIXME: should not have access to the graph "as is"
   def getDotGraph = cpGraph
 
   /**
@@ -90,7 +103,7 @@ object ComponentManager extends Logging {
    * @param to port to
    * @return
    */
-  def addWire(from: OutputPort[CType], to: InputPort[CType]): Unit = {
+  def addWire[T <: CType](from: OutputPort[T], to: InputPort[T]): Unit = {
     // Get components "from" and "to". These components must be in the graph, or an exception is thrown.
     val (cpFrom, cpTo) = (cp(from.getOwnerId), cp(to.getOwnerId))
 
@@ -104,6 +117,16 @@ object ComponentManager extends Logging {
     // inputs. It must be possible to add multiple wire from an to the same nodes, with different labels.
     val outer = (cpFrom ~+#> cpTo)(w)
     cpGraph += outer
+  }
+
+  /**
+   * Get a Component from a node graph by its id.
+   * @see getNode
+   * @param cpId the component id to search for
+   * @return the component node or an exception if not found
+   */
+  private def cp(cpId: Int): Component = {
+    getNode(cpId).value.asInstanceOf[Component]
   }
 
   /**
@@ -121,18 +144,8 @@ object ComponentManager extends Logging {
       case Some(c) => c
       case None =>
         // Fatal exception: must be in the graph
-        throw new ComponentNotFound(s"Component id $cpId not found !")
+        throw ComponentNotFound.create(cpId)
     }
-  }
-
-  /**
-   * Get a Component from a node graph by its id.
-   * @see getNode
-   * @param cpId the component id to search for
-   * @return the component node or an exception if not found
-   */
-  private def cp(cpId: Int): Component = {
-    getNode(cpId).value.asInstanceOf[Component]
   }
 
   /**
@@ -144,12 +157,7 @@ object ComponentManager extends Logging {
   }
 
 
-
-
-
   // FIXME: remove unused methods
-
-
 
 
   def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()

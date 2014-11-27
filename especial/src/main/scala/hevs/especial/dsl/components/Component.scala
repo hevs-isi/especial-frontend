@@ -8,7 +8,7 @@ import hevs.especial.dsl.components.ComponentManager.IdGenerator
  * component has a unique `ìd` and each port of it has also a unique ID (`newUniquePortId` function) inside the
  * component. When a component is created, it is automatically added to the graph,
  * which is managed by the `ComponentManager`.
- * By default, a components has no input and no output. `getOutputs` and `getInputs` methods must be overriding.
+ * By default, a components has no input and no output.
  */
 abstract class Component {
 
@@ -28,8 +28,8 @@ abstract class Component {
     g
   }
 
-  // Once the component is instantiated, a unique ID is generated
-  // and it is registered automatically to the graph.
+  // A component is create with a unique ID.
+  // All components are automatically added to the graph once instantiated.
   ComponentManager.addComponent(this)
 
   /**
