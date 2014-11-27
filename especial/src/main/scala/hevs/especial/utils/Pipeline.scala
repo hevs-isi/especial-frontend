@@ -30,7 +30,7 @@ abstract class Pipeline[-I, +O] {
   def currentName = name.last
 
   /**
-   * Execute the pipeline block.
+   * Execute the pipeline code of the block.
    * An exception is thrown when blocks are chained if an error occurs.
    *
    * @param ctx the context of the program with the logger
@@ -53,11 +53,14 @@ abstract class Pipeline[-I, +O] {
     override val name = Pipeline.this.name ++ next.name
 
     def run(ctx: Context)(v: I): F = {
-      val first: O = Pipeline.this.run(ctx)(v) // Run the first one
+      // Run the first block of the chain
+      val first: O = Pipeline.this.run(ctx)(v)
       ctx.log.terminateIfErrors(Pipeline.this)
-      val second = next.run(ctx)(first) // Run second with the result of the first one
+
+      // Run second block of the chain with the result of the first one
+      val second = next.run(ctx)(first)
       ctx.log.terminateIfErrors(this)
-      second
+      second // Return the final result
     }
   }
 

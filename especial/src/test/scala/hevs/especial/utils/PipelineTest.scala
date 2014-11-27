@@ -11,23 +11,33 @@ class PipelineTest extends FunSuite with Matchers {
   val ctx = new Context(this.getClass.getSimpleName)
 
   class PipeA extends Pipeline[Int, Int] {
-    override def run(ctx: Context)(i: Int) = i + 10
+    override def run(ctx: Context)(i: Int) = {
+      ctx.log.info(s"Hello from $currentName.")
+      i + 10
+    }
   }
 
   class PipeB extends Pipeline[Int, Float] {
-    override def run(ctx: Context)(i: Int) = i / 2.0f
+    override def run(ctx: Context)(i: Int) = {
+      ctx.log.info(s"Hello from $currentName.")
+      i / 2.0f
+    }
   }
 
   class PipeC extends Pipeline[Float, String] {
-    override def run(ctx: Context)(f: Float) = String.valueOf(f)
+    override def run(ctx: Context)(f: Float) = {
+      ctx.log.info(s"Hello from $currentName.")
+      String.valueOf(f)
+    }
   }
 
-  // Pipeline under tests
-  val pA = new PipeA
-  val pB = new PipeB
-  val pC = new PipeC
 
   test("run each block individually") {
+    // Pipeline under test
+    val pA = new PipeA()
+    val pB = new PipeB()
+    val pC = new PipeC()
+
     val resA = pA.run(ctx)(10)
     val resB = pB.run(ctx)(10)
     val resC = pC.run(ctx)(10)
@@ -41,6 +51,10 @@ class PipelineTest extends FunSuite with Matchers {
   }
 
   test("chain 2 blocks") {
+    // Pipeline under test
+    val pA = new PipeA()
+    val pB = new PipeB()
+
     val d = pA -> pB
     ctx.log.info(s"Run '$d'.")
 
@@ -50,6 +64,11 @@ class PipelineTest extends FunSuite with Matchers {
   }
 
   test("chain 3 blocks") {
+    // Pipeline under test
+    val pA = new PipeA()
+    val pB = new PipeB()
+    val pC = new PipeC()
+
     val d = pA -> pB -> pC
     ctx.log.info(s"Run '$d'.")
 
@@ -59,6 +78,9 @@ class PipelineTest extends FunSuite with Matchers {
   }
 
   test("chain the same block") {
+    // Pipeline under test
+    val pA = new PipeA()
+
     val d = pA -> pA -> pA
     ctx.log.info(s"Run '$d'.")
 

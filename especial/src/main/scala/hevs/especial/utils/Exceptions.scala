@@ -3,9 +3,8 @@ package hevs.especial.utils
 import hevs.especial.dsl.components.{CType, Port}
 
 object PortTypeMismatch {
-
   /** Format the exception message. */
-  def create[A <: CType](from: Port[A], to: Port[A]) = {
+  def create(from: Port[_], to: Port[_]) = {
     // Construct the error message
     val res = new StringBuilder
     res ++= "Ports types mismatch. Connection error !\n"
@@ -22,9 +21,8 @@ object PortTypeMismatch {
 class PortTypeMismatch(msg: String) extends RuntimeException(msg)
 
 object PortInputShortCircuit {
-
   /** Format the exception message. */
-  def create[A <: CType](in: Port[A]) = {
+  def create(in: Port[_]) = {
     val error = s"Short circuit !\nThe input '${in.name}' of ${in.getOwner} is already connected."
     new PortInputShortCircuit(error)
   }
@@ -41,6 +39,13 @@ class PortInputShortCircuit(msg: String) extends RuntimeException(msg)
  * @param msg exception details
  */
 class ComponentNotFound(msg: String) extends RuntimeException(msg)
+
+object ComponentNotFound {
+  /** Format the exception message. */
+  def create(cpId: Int) = {
+    new ComponentNotFound(s"Component id $cpId not found !")
+  }
+}
 
 /**
  * Try to run a third party executable or library, which is not supported by the host OS.
