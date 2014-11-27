@@ -21,3 +21,7 @@ To run tests (`sbt` must be installed):
 	$ sbt test
 	[...]
 	[info] All tests passed.
+
+## Requirements & dependencies
+
+Please look at the [`third_party`](https://github.com/metc/ScalaTest/tree/master/especial/third_party) folder for details.
