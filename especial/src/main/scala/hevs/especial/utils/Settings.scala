@@ -48,6 +48,9 @@ object Settings {
 
   /* CODE COMPILER */
 
+  /** Copy and compile the generated C code. */
+  val PIPELINE_RUN_COMPILER: Boolean = true
+
   /** Path of the source file in the C project */
   val PROJECT_SRC_FILE = "csrc/src/main.cpp"
 

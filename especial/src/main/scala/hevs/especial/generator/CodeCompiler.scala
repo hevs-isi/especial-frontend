@@ -20,10 +20,10 @@ class CodeCompiler extends Pipeline[String, String] {
    * @return the path of the compiled binary (elf) file
    */
   def run(ctx: Context)(input: String): String = {
-    // Must be on Linux for now...
-    if (!OSUtils.isLinux) {
-      ctx.log.error("Must be on Linux do compile the generated code !")
-      return "" // Fatal error
+    if (!Settings.PIPELINE_RUN_COMPILER) {
+      // Fatal error. If the compiler is not enabled, there is nothing to do after...
+      ctx.log.error(s"$currentName is disabled.")
+      return ""
     }
 
     // Copy the generated file to the C project to compile it along its Makefile
@@ -39,8 +39,14 @@ class CodeCompiler extends Pipeline[String, String] {
         return "" // Fatal error
     }
 
+    // FIXME: Must be on Linux for now...
+    if (!OSUtils.isLinux) {
+      ctx.log.error("Must be on Linux do compile the generated code !")
+      return "" // Fatal error
+    }
+
     // Ready to make
-    // TODO: clean the project first ?
+    // FIXME: clean the project first ? Add a script for each platform.
     ctx.log.info("Start compiling for QEMU...")
     val makeRes = OSUtils.runWithCodeResult("/usr/bin/make -r -j4 -C csrc/target-qemu/ all")
     if (makeRes._1 != 0) {
