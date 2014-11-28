@@ -20,9 +20,11 @@ class Sch5Code extends STM32TestSuite {
 
     // Output
     val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led2 = DigitalOutput(Pin('C', 0xD))
 
     // Connecting stuff
     cst1.out --> led1.in
+    cst1.out --> led2.in
     cst2.out --> and1.in1
     and1.out --> mux1.in2
   }
