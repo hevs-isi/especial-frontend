@@ -65,10 +65,10 @@ class CodeOptimizer extends Pipeline[Unit, Boolean] {
       ctx.log.trace(s" > $nbrCpToRemove component(s) removed in pass ${nbrOfPasses + 1}.")
 
       // Run the next pass if components have been removed
-      if (nbrCpToRemove > 0) {
+      if (nbrCpToRemove > 0)
         totalCpRemoved += nbrCpToRemove
-        nbrOfPasses += 1 // Count the number of passes
-      }
+
+      nbrOfPasses += 1 // Count the number of passes
     }
     while (nbrCpToRemove != 0)
 
