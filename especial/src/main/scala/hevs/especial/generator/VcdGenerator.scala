@@ -17,23 +17,25 @@ import scala.collection.mutable
  * - http://en.wikipedia.org/wiki/Value_change_dump
  * - ftp://ece.buap.mx/pub/Secretaria_Academica/SDC/Active_HDL_4.2_Student_Version_Installer/Doc/avhdl/avh00229.htm
  */
-class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Unit] {
+class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Boolean] {
 
   /** Output path of the generated code. */
   private final val OUTPUT_PATH = "output/%s/"
 
-  def run(ctx: Context)(input: Map[Pin, Seq[Int]]): Unit = {
+  def run(ctx: Context)(input: Map[Pin, Seq[Int]]): Boolean = {
 
     if (!Settings.PIPELINE_RUN_VCDGEN) {
       ctx.log.info(s"$currentName is disabled.")
-      return
+      return false
     }
 
     // Create the folder if it not exist
     val path = String.format(OUTPUT_PATH, ctx.progName)
     val folder: RichFile = new File(path)
-    if (!folder.createEmptyFolder())
-      ctx.log.error(s"Unable to create the VCD file to '$path'.")
+    if (!folder.createFolder()) {
+      ctx.log.error(s"Unable to create the folder '$path'.")
+      return false
+    }
 
     // Create the VCD file
     val fileName = path + ctx.progName + ".vcd"
@@ -48,10 +50,12 @@ class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Unit] {
     str ++= setDumpVars(input.keySet)
     str ++= setValueChange(input)
 
-    f.write(str.result()) match {
-      case true => ctx.log.info(s"VCD file generated to '$fileName'.")
-      case _ => ctx.log.error(s"Unable to generate the VCD file to '$fileName'.")
-    }
+    val res = f.write(str.result())
+    if(res)
+      ctx.log.info(s"VCD file generated to '$fileName'.")
+    else
+      ctx.log.error(s"Unable to generate the VCD file to '$fileName'.")
+    res
   }
 
   private def startHeader(ctx: Context): String = {
@@ -111,8 +115,7 @@ class VcdGenerator extends Pipeline[Map[Pin, Seq[Int]], Unit] {
     // Set values from time #0.
     val dump = mutable.Map.empty[Int, Seq[String]]
 
-    // FIXME: optimization ?
-    // FIXME: do not write the pin value is it has not changed
+    // TODO: Optimization: do not write the pin value is it has not changed.
     for ((pin, values) <- values) {
       for ((v, time) <- values.zipWithIndex) {
         // Value of the pin (or old new, no optimizations)

@@ -45,7 +45,7 @@ case class TickToggle(initValue: Boolean = false) extends Component with Out1 wi
     for (inPort <- in)
       results += inPort.setInputValue(out.getValue) + "; // " + inPort
 
-    // Final invert the state of the generator output
+    // Finally invert the generator output
     val invert = s"\n$valName = !$valName; // Invert $out"
     Some(results.mkString("\n") + invert)
   }

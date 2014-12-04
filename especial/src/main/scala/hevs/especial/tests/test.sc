@@ -1,5 +1,6 @@
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.{bool, Pin, uint8}
+import hevs.especial.dsl.components.{Pin, bool, uint8}
+
 object f {
   val a: Byte = 12
   val b: Int = 3
