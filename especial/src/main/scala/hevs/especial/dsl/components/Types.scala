@@ -1,5 +1,16 @@
 package hevs.especial.dsl.components
 
+object CType {
+
+  /**
+   * Map the [[CType]] class with the corresponding C type (according to `<stdint.h>`).
+   */
+  val t = Map[Class[_], String](bool().getClass -> "bool", uint8().getClass -> "uint8_t",
+    uint16().getClass -> "uint16_t", uint32().getClass -> "uint32_t", int8().getClass -> "int8_t",
+    int16().getClass -> "int16_t", int32().getClass -> "int32_t", float().getClass -> "float",
+    double().getClass -> "double")
+}
+
 /**
  * Abstract type that can be used in the native C code.
  *
@@ -36,13 +47,13 @@ sealed abstract class CType(val v: Any) {
    */
   def asDouble: Double = sys.error("Conversion not available.")
 
+  override def toString = s"$getType:$v"
+
   /**
    * The string name of the type (according to `<stdint.h>`)
    * @return the C type as a `String` to add in the generated code
    */
-  def getType: String
-
-  override def toString = s"$getType:$v"
+  final def getType: String = CType.t.get(this.getClass).get
 }
 
 /**
@@ -52,7 +63,7 @@ sealed abstract class CType(val v: Any) {
  * @param v the value
  */
 case class bool(override val v: Boolean = false) extends CType(v) {
-  override def getType = "bool"
+  //override def getType = "bool"
 
   override def asBool = v
 
@@ -70,7 +81,7 @@ case class uint8(override val v: Short = 0) extends CType(v) {
   require(v >= 0x00, "Unsigned number, must be positive.")
   require(v <= 0xFF, "8-bit number max.")
 
-  override def getType = "uint8_t"
+  //override def getType = "uint8_t"
 
   override def asLong = v.toLong
 }
@@ -85,7 +96,7 @@ case class uint16(override val v: Int = 0) extends CType(v) {
   require(v >= 0x0000, "Unsigned number, must be positive.")
   require(v <= 0xFFFF, "16-bit number max.")
 
-  override def getType = "uint16_t"
+  //override def getType = "uint16_t"
 
   override def asLong = v.toLong
 }
@@ -98,9 +109,8 @@ case class uint16(override val v: Int = 0) extends CType(v) {
  */
 case class uint32(override val v: Long = 0) extends CType(v) {
   require(v >= 0x00000000, "Unsigned number, must be positive.")
-  require(v <= 0xFFFFFFFF, "32-bit number max.")
 
-  override def getType = "uint32_t"
+  //override def getType = "uint32_t"
 
   override def asLong = v.toLong
 }
@@ -112,7 +122,7 @@ case class uint32(override val v: Long = 0) extends CType(v) {
  * @param v the value
  */
 case class int8(override val v: Byte = 0) extends CType(v) {
-  override def getType = "int8_t"
+  //override def getType = "int8_t"
 
   override def asLong = v.toLong
 }
@@ -124,7 +134,7 @@ case class int8(override val v: Byte = 0) extends CType(v) {
  * @param v the value
  */
 case class int16(override val v: Short = 0) extends CType(v) {
-  override def getType = "int16_t"
+  //override def getType = "int16_t"
 
   override def asLong = v.toLong
 }
@@ -136,7 +146,7 @@ case class int16(override val v: Short = 0) extends CType(v) {
  * @param v the value
  */
 case class int32(override val v: Int = 0) extends CType(v) {
-  override def getType = "int32_t"
+  //override def getType = "int32_t"
 
   override def asLong = v.toLong
 }
@@ -148,7 +158,7 @@ case class int32(override val v: Int = 0) extends CType(v) {
  * @param v the value
  */
 case class float(override val v: Float = 0) extends CType(v) {
-  override def getType = "float"
+  //override def getType = "float"
 
   override def asFloat = v
 
@@ -164,7 +174,7 @@ case class float(override val v: Float = 0) extends CType(v) {
  * @param v the value
  */
 case class double(override val v: Double = 0) extends CType(v) {
-  override def getType = "double"
+  //override def getType = "double"
 
   override def asDouble = v
 

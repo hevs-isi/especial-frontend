@@ -1,6 +1,7 @@
 package hevs.especial.dsl.components
 
 import hevs.especial.dsl.components.ComponentManager.IdGenerator
+import scala.reflect.runtime.universe._
 
 /**
  * Base class for all components (blocks) used in a program. These components, with there connections,
@@ -44,6 +45,19 @@ abstract class Component {
    */
   def getId = id
 
+
+  // Helper method to get the type of the template class.
+  // Used to declare the global C variable with the correct type.
+  protected def getTypeString[T <: CType : TypeTag]: String = {
+    val clazz: Class[_] = getTypeClass
+    CType.t.get(clazz).get // Must exist in the map
+  }
+
+  protected def getTypeClass[T <: CType : TypeTag]: Class[_] = {
+    val mirror = runtimeMirror(getClass.getClassLoader)
+     mirror.runtimeClass(typeOf[T].typeSymbol.asClass)
+    // clazz.newInstance().asInstanceOf[T] // If instance is necessary
+  }
 
   /* Component variables names */
 
