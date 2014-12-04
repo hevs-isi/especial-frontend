@@ -1,6 +1,6 @@
 package hevs.especial.genenator
 
-import hevs.especial.dsl.components.Pin
+import hevs.especial.dsl.components.{bool, Pin}
 import hevs.especial.dsl.components.core.TickToggle
 import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, Stm32stk}
 
@@ -13,7 +13,7 @@ class Sch1bCode extends STM32TestSuite {
     val btn1 = DigitalInput(Stm32stk.pin_btn)
 
     // Generator
-    val gen1 = TickToggle(initValue = false)
+    val gen1 = TickToggle(bool(false))
 
     // Outputs
     val led1 = DigitalOutput(Stm32stk.pin_led)

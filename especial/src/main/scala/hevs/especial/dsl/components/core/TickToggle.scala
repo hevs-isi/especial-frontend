@@ -5,14 +5,23 @@ import hevs.especial.dsl.components._
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 
-case class TickToggle(initValue: Boolean = false) extends Component with Out1 with HwImplemented {
+/**
+ * Toggle the output value on each while loop.
+ * Used for test purposes only. Useful to generate different values for each loop.
+ *
+ * Boolean value are inverted (true/false). All other value are 1 or 0.
+ *
+ * @param initValue the first value available as output
+ * @tparam T the output type
+ */
+case class TickToggle[T <: CType : TypeTag] (initValue: T) extends Component with Out1 with HwImplemented {
 
-  override val description = s"tick toggle generator"
+  override val description = s"tick toggle generator\\n(${initValue.v})"
   private val valName: String = outValName()
 
   /* I/O management */
 
-  val out = new OutputPort[bool](this) {
+  val out = new OutputPort[T](this) {
     override val name = s"out"
     override val description = "toggle value"
 
@@ -29,8 +38,8 @@ case class TickToggle(initValue: Boolean = false) extends Component with Out1 wi
   override def getGlobalCode = {
     // State of the toggle generator. Init with the default state.
     // Not necessary to call the init function...
-    val sInitVal = if(initValue) "true" else "false"
-    Some(s"${bool().getType} $valName = $sInitVal; // $out")
+    val sVal = String.valueOf(initValue.v)
+    Some(s"${initValue.getType} $valName = $sVal; // $out")
   }
 
   override def getInitCode = {
@@ -46,7 +55,12 @@ case class TickToggle(initValue: Boolean = false) extends Component with Out1 wi
       results += inPort.setInputValue(out.getValue) + "; // " + inPort
 
     // Finally invert the generator output
-    val invert = s"\n$valName = !$valName; // Invert $out"
+    val sInvert = initValue match {
+      case v: bool => s"!$valName"
+      case _ => s"""($valName == 0) ? 1 : 0"""
+    }
+
+    val invert = s"\n$valName = $sInvert; // Invert $out"
     Some(results.mkString("\n") + invert)
   }
 }
