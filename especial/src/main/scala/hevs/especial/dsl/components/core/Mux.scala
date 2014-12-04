@@ -12,7 +12,8 @@ import scala.reflect.runtime.universe._
  * @param nbrIn number of generic inputs for the component (without the selection pin)
  * @tparam T I/O type of the component
  */
-abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn, 1) with HwImplemented with Out1 {
+abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn,
+  1) with HwImplemented with Out1 {
 
   /* I/O management */
 
@@ -33,7 +34,6 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
 
   // Single output connected here
   override val out: OutputPort[T] = out(0)
-
 
   override def setInputValue(index: Int, s: String) = s"${inValName(index)} = $s"
 
@@ -56,7 +56,7 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
       // Store the Mux result in a temporary variable
       s"""
         |// ${Mux.this}
-        |${bool().getType} ${outValName()};
+        |${getTypeString[T]} ${outValName()};
         |switch($selValName) {
         |${cases.mkString("\n")}
         |}""".stripMargin
@@ -77,7 +77,7 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
       val vars = List(selValName, outValName()) ++ varIn
 
       // Print all boolean variables to declare from the list
-      Some(s"${bool().getType} ${vars.mkString(", ")}; // $this")
+      Some(s"${getTypeString[T]} ${vars.mkString(", ")}; // $this")
   }
 
   override def getLoopableCode = {
