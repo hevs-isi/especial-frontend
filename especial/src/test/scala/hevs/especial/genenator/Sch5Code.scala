@@ -16,17 +16,21 @@ class Sch5Code extends STM32TestSuite {
 
     // Logic
     val and1 = And2()
+    val and2 = And2()
     val mux1 = Mux2[bool]()
+    val mux2 = Mux2[bool]()
 
     // Output
     val led1 = DigitalOutput(Stm32stk.pin_led)
     val led2 = DigitalOutput(Pin('C', 0xD))
 
     // Connecting stuff
+    cst1.out --> mux1.in1
+    and2.out --> mux1.in2
+    mux1.out --> led2.in
     cst1.out --> led1.in
-    cst1.out --> led2.in
     cst2.out --> and1.in1
-    and1.out --> mux1.in2
+    and1.out --> mux2.in2
   }
 
   runDotGeneratorTest()
