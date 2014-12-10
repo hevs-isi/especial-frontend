@@ -18,7 +18,7 @@ class Sch3Code extends STM32TestSuite {
     val mux2 = Mux2[bool]()
 
     // Output
-    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led1 = DigitalOutput(Stm32stk.led0_pin)
     val led2 = DigitalOutput(Pin('C', 13))
 
     // Connecting stuff

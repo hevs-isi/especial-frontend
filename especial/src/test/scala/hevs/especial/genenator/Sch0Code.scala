@@ -13,7 +13,7 @@ class Sch0Code extends STM32TestSuite {
     val cst1 = Constant(bool(v = true))
 
     // Output
-    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led1 = DigitalOutput(Stm32stk.led0_pin)
 
     // Connecting stuff
     cst1.out --> led1.in

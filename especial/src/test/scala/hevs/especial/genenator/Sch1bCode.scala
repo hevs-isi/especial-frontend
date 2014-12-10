@@ -10,13 +10,13 @@ class Sch1bCode extends STM32TestSuite {
 
   def runDslCode(): Unit = {
     // Input
-    val btn1 = DigitalInput(Stm32stk.pin_btn)
+    val btn1 = DigitalInput(Stm32stk.btn0_pin)
 
     // Generator
     val gen1 = TickToggle(bool(false))
 
     // Outputs
-    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led1 = DigitalOutput(Stm32stk.led0_pin)
     val led2 = DigitalOutput(Pin('C', 0xD))
 
     // Connecting stuff

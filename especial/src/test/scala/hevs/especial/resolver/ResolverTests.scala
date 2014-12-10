@@ -8,14 +8,14 @@ import hevs.especial.generator.CodeChecker
 
 class ResolverCode1 {
   // Nothing to do, no inputs
-  val btn1 = DigitalInput(Stm32stk.pin_btn)
+  val btn1 = DigitalInput(Stm32stk.btn0_pin)
 }
 
 // 1 pass, 1 unconnected
 class ResolverCode2 {
   val cst1 = Constant(bool(v = false))
-  val btn1 = DigitalInput(Stm32stk.pin_btn)
-  val led1 = DigitalOutput(Stm32stk.pin_led)
+  val btn1 = DigitalInput(Stm32stk.btn0_pin)
+  val led1 = DigitalOutput(Stm32stk.led0_pin)
 
   cst1.out --> led1.in
 }
@@ -23,8 +23,8 @@ class ResolverCode2 {
 // 3 passes without warning
 class ResolverCode3 {
   val cst1 = Constant(bool(v = false))
-  val btn1 = DigitalInput(Stm32stk.pin_btn)
-  val led1 = DigitalOutput(Stm32stk.pin_led)
+  val btn1 = DigitalInput(Stm32stk.btn0_pin)
+  val led1 = DigitalOutput(Stm32stk.led0_pin)
   val and1 = And2()
 
   cst1.out --> and1.in1
@@ -35,10 +35,10 @@ class ResolverCode3 {
 // 3 passes without warning
 class ResolverCode4 {
   // Same as ResolverCode3 in a different order
-  val led1 = DigitalOutput(Stm32stk.pin_led)
+  val led1 = DigitalOutput(Stm32stk.led0_pin)
   val cst1 = Constant(bool(v = false))
   val and1 = And2()
-  val btn1 = DigitalInput(Stm32stk.pin_btn)
+  val btn1 = DigitalInput(Stm32stk.btn0_pin)
 
   and1.out --> led1.in
   btn1.out --> and1.in2
@@ -51,7 +51,7 @@ class ResolverCode5 {
   val and2 = And2()
   val and3 = And2()
   val cst2 = Constant(bool(v = false))
-  val led1 = DigitalOutput(Stm32stk.pin_led)
+  val led1 = DigitalOutput(Stm32stk.led0_pin)
 
   cst1.out --> and1.in1
   and1.out --> and2.in2

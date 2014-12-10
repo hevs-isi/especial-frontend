@@ -21,7 +21,7 @@ class Sch4Code extends STM32TestSuite {
     val mux1 = Mux2[bool]()
 
     // Output
-    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led1 = DigitalOutput(Stm32stk.led0_pin)
 
     // Connecting stuff
     cst2.out --> mux1.in1

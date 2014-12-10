@@ -19,10 +19,10 @@ class PortTests extends FunSuite with Matchers {
     // Inputs
     val cst1 = Constant(bool(v = true))
     val cst2 = Constant(uint8(128))
-    val btn1 = DigitalInput(Stm32stk.pin_btn)
+    val btn1 = DigitalInput(Stm32stk.btn0_pin)
 
     // Output
-    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led1 = DigitalOutput(Stm32stk.led0_pin)
   }
 
   class PortCode1 extends PortCode {
@@ -57,7 +57,7 @@ class PortTests extends FunSuite with Matchers {
   }
 
   class PortCode6 {
-    val led1 = DigitalOutput(Stm32stk.pin_led)
+    val led1 = DigitalOutput(Stm32stk.led0_pin)
     val led2 = DigitalOutput(Pin('B', 6))
 
     // Should have exactly 3 components, not 4 !

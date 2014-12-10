@@ -19,7 +19,7 @@ class Sch2Code extends STM32TestSuite {
 
     // Outputs
     val led1 = DigitalOutput(Pin('C', 11))
-    val led2 = DigitalOutput(Stm32stk.pin_led)
+    val led2 = DigitalOutput(Stm32stk.led0_pin)
 
     // Connecting stuff
     and1.out --> led1.in

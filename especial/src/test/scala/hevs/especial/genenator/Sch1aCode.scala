@@ -19,11 +19,11 @@ class Sch1aCode extends STM32TestSuite {
     //btn1.out --> DigitalOutput(Pin('A', 5)).in
 
     // Same button to 2 LEDs
-    val led1 = DigitalOutput(Pin('B', 5)).in
+    val led1 = DigitalOutput(Stm32stk.led0_pin).in
     val led2 = DigitalOutput(Pin('B', 6)).in
 
-    DigitalInput(Pin('A', 1)).out --> led1
-    DigitalInput(Pin('A', 1)).out --> led2
+    DigitalInput(Stm32stk.btn0_pin).out --> led1
+    DigitalInput(Stm32stk.btn0_pin).out --> led2
   }
 
   runDotGeneratorTest()
