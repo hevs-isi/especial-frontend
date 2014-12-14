@@ -1,6 +1,6 @@
 package hevs.especial.apps
 
-import hevs.especial.dsl.components.bool
+import hevs.especial.dsl.components.{uint16, bool}
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.target.stm32stk.{Stm32stk, Stm32stkIO}
 import hevs.especial.genenator.STM32TestSuite
@@ -8,20 +8,22 @@ import hevs.especial.genenator.STM32TestSuite
 /**
  * Sample application used to test the I/O extension board.
  *
- * The main red LED is `ON`. Each button one the I/O extension board control its corresponding LED.
+ * Led0 and Led1 are `ON`. The button 2 control its corresponding led. The potentiometer control the led number 3. A
+ * constant value is set to the led3 using a PWM.
  */
-class IOBoard1 extends STM32TestSuite {
+class IOBoard2 extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
   def runDslCode(): Unit = {
-    // Main LED is ON
-    Constant(bool(v = true)).out --> Stm32stk.led0.in
 
-    // Control extensions LEDs using the corresponding button
+    Constant(bool(v = true)).out --> Stm32stk.led0.in
+    Constant(bool(v = true)).out --> Stm32stkIO.led1.in
+
     Stm32stkIO.btn2.out --> Stm32stkIO.led2.in
-    Stm32stkIO.btn3.out --> Stm32stkIO.led3.in
-    Stm32stkIO.btn4.out --> Stm32stkIO.led4.in
+
+    Stm32stkIO.adc1.out --> Stm32stkIO.pwm3.in
+    Constant(uint16(1024)).out --> Stm32stkIO.pwm4.in
   }
 
   runDotGeneratorTest()
