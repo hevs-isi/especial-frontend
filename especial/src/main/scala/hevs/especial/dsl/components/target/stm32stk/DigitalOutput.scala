@@ -12,7 +12,7 @@ import hevs.especial.dsl.components._
  * @param initValue the default value of the output when initialized
  */
 class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) extends
-  DigitalIO(pin) with In1 with HwImplemented {
+  Gpio(pin) with In1 with HwImplemented {
 
   override val description = s"digital output\\non $pin"
 
@@ -72,7 +72,7 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) ex
 object DigitalOutput {
 
   /**
-   * Create a digital input for a specific pin.
+   * Create a digital output for a specific pin.
    *
    * @param pin the pin of the GPIO (port and pin number)
    * @param initValue the default value of the output when initialized

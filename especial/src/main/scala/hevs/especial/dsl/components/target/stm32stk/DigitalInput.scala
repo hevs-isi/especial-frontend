@@ -11,9 +11,10 @@ import hevs.especial.dsl.components._
  *
  * @param pin the pin of the GPIO (port and pin number)
  */
-class DigitalInput private(private val pin: Pin) extends DigitalIO(pin) with Out1 with HwImplemented {
+class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 with HwImplemented {
 
   override val description = s"digital input\\non $pin"
+
   /**
    * The `uint1` value of this digital input.
    */
@@ -38,8 +39,9 @@ class DigitalInput private(private val pin: Pin) extends DigitalIO(pin) with Out
 
   override def getInitCode = {
     val res = new StringBuilder
-    res ++= s"$valName.initialize(); // Init of $this\n"
-    res ++= s"$valName.registerInterrupt(); // Use interrupts"
+    res ++= s"$valName.initialize(); // Init of $this"
+    // Enabled by default
+    // res ++= s"$valName.registerInterrupt(); // Use interrupts"
     Some(res.result())
   }
 

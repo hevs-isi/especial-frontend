@@ -59,7 +59,8 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
   override def toString = {
     val sConn = if(isConnected) "" else " (NC)"
-    s"Port[$id] '$name' of Cmp[$getOwnerId] '${getOwner.name}'$sConn"
+    val cmpId = f"$getOwnerId%02d"
+    s"Port[$id] '$name' of Cmp[$cmpId] '${getOwner.name}'$sConn"
   }
 
   /**
