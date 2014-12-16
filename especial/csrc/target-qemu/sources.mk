@@ -29,10 +29,12 @@ CPP_DEPS :=
 SUBDIRS := \
 stm32f10x_lib/src/stm32f1 \
 stm32f10x_lib/src/newlib \
+stm32f10x_lib/src/hal/utils \
 stm32f10x_lib/src/hal \
 stm32f10x_lib/src/hal/controller \
 stm32f10x_lib/src/freertos \
 stm32f10x_lib/src/diag \
+stm32f10x_lib/src/demo \
 stm32f10x_lib/src/cortexm \
 stm32f10x_lib/src/cmsis \
 stm32f10x_lib/include/freertos \
