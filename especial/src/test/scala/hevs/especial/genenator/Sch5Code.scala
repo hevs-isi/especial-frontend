@@ -37,7 +37,7 @@ class Sch5Code extends STM32TestSuite {
 
   runCodeCheckerTest(hasWarnings = true)
 
-  runCodeOptimizer()
+  runCodeOptimizer(hasWarnings = true)
 
   runDotGeneratorTest(optimizedVersion = true)
 

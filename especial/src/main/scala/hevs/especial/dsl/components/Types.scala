@@ -54,6 +54,11 @@ sealed abstract class CType(val v: Any) {
    * @return the C type as a `String` to add in the generated code
    */
   final def getType: String = CType.t.get(this.getClass).get
+
+  /**
+   * @return the raw value displayed as a String
+   */
+  final def getValue: String = String.valueOf(v)
 }
 
 /**

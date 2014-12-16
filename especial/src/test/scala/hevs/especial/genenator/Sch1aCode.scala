@@ -1,8 +1,7 @@
 package hevs.especial.genenator
 
 import hevs.especial.dsl.components.Pin
-import hevs.especial.dsl.components.core.TickToggle
-import hevs.especial.dsl.components.target.stm32stk.{DigitalIO, DigitalInput, DigitalOutput, Stm32stk}
+import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, Stm32stk}
 
 /**
  * Create anonymous digital I/O.

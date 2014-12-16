@@ -35,9 +35,9 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 
   /* Code generation */
 
   override def getInitCode = {
-    // TODO: must be done here ?
+    // Each component has to propagate its output value to all connected components
     val in = ComponentManager.findConnections(out)
-    val results: ListBuffer[String] = ListBuffer()
+    val results = ListBuffer.empty[String]
     for (inPort <- in)
       results += inPort.setInputValue(out.getValue) + "; // " + inPort
     Some(results.mkString("\n"))

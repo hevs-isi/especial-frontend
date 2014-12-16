@@ -86,12 +86,14 @@ abstract class STM32TestSuite extends FunSuite {
 
   /**
    * Run the DOT pipeline block and check if any errors occurs.
+   *
+   * @param optimizedVersion true if the current program is optimized, false otherwise
    */
   def runDotGeneratorTest(optimizedVersion: Boolean = false): Unit = {
     if (!Settings.PIPELINE_RUN_DOT)
       return // Test disabled
 
-    val suffix = if(optimizedVersion) Some("opt") else None
+    val suffix = if (optimizedVersion) Some("opt") else None
     test("Dot generator " + suffix.getOrElse("")) {
       ctx.log.info(s"Dot generator test for '$progName' started.")
 

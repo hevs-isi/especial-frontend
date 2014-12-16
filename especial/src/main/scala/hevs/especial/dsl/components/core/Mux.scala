@@ -81,7 +81,7 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
   }
 
   override def getLoopableCode = {
-    val result: ListBuffer[String] = ListBuffer()
+    val result = ListBuffer.empty[String]
 
     // Mux code
     result += s"${out.getValue}"

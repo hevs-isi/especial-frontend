@@ -50,7 +50,7 @@ case class TickToggle[T <: CType : TypeTag] (initValue: T) extends Component wit
   override def getLoopableCode = {
     // Propagate the output value to connected inputs
     val in = ComponentManager.findConnections(out)
-    val results: ListBuffer[String] = ListBuffer()
+    val results = ListBuffer.empty[String]
     for (inPort <- in)
       results += inPort.setInputValue(out.getValue) + "; // " + inPort
 
