@@ -73,7 +73,7 @@ with In1 with Out1 with HwImplemented {
   override final def getLoopableCode = {
 
     // The custom component code to paste in the loop
-    val customLoopCode = loopCode
+    val customLoopCode = "// -- User input code " + loopCode + "// --"
 
     // Each component has to propagate its output value to all connected components
     val in = ComponentManager.findConnections(out)

@@ -9,6 +9,7 @@ import hevs.especial.utils._
 import scala.collection.mutable
 import scala.language.existentials
 import scalax.collection.Graph
+import scalax.collection.edge.Implicits.%
 import scalax.collection.edge.LDiEdge
 import scalax.collection.io.dot._
 
@@ -207,14 +208,15 @@ private class GraphDot(graphName: String, fileName: String) {
     if (in.isEmpty && out.isEmpty) {
       shape = s"${nodeName(n)}"
       attrs += DotAttr("color", "dimgrey")
-      attrs += DotAttr("shape", "Record")
+      attrs += DotAttr("shape", "record")
     }
 
     // Change the border color for unconnected nodes
     else if (!n.isConnected)
       attrs += DotAttr("color", "orange")
 
-    Some(root, DotNodeStmt(nodeId(n), Seq(DotAttr("label", shape)) ++ attrs))
+    val node = "\"" + nodeId(n) + "\""
+    Some(root, DotNodeStmt(node, Seq(DotAttr("label", shape)) ++ attrs))
   }
 
   /**
@@ -229,11 +231,22 @@ private class GraphDot(graphName: String, fileName: String) {
   }
 
   /**
-   * Return the component ID as String.
+   * Return the component ID as a String.
    * @param c the Component
-   * @return the ID as String
+   * @return the ID formatted as a String
    */
-  private def nodeId(c: Component): String = c.getId.toString // String ID to create a `DotNodeStmt`
+  private def nodeId(c: Component): String = {
+    // String ID to create a `DotNodeStmt`.
+    // According to the DOT grammar "http://www.graphviz.org/content/dot-language",
+    f"cmp${c.getId}%03d"
+  }
+
+  /**
+   * Return the port ID as a String.
+   * @param p the Port
+   * @return the ID formatted as a String
+   */
+  private def portId(p: Port[_]): String = f"p${p.getId}%02d"
 
   /**
    * Format a list of input or output of a component. Check if it is connected or not and display it.
@@ -244,11 +257,10 @@ private class GraphDot(graphName: String, fileName: String) {
     // Return the ID of the port with a label
     l.map(
       x => {
-        val id = x.getId
         val nc = if (x.isNotConnected) " (NC)" else ""
         x match {
-          case _: InputPort[_] => s"<$id>${x.name}\\n$nc" // In[$id]
-          case _: OutputPort[_] => s"<$id>${x.name}\\n$nc" // In[$id]
+          case _: InputPort[_] => s"<${portId(x)}> ${x.name}\\n$nc"
+          case _: OutputPort[_] => s"<${portId(x)}> ${x.name}\\n$nc"
         }
       }
     ).mkString("|")
@@ -263,12 +275,15 @@ private class GraphDot(graphName: String, fileName: String) {
     val edge = innerEdge.edge
     val label: Wire = edge.label.asInstanceOf[Wire]
 
-    // Create the connection between two nodes. Example: "1:0 -> 2:0 [label = bool]"
+    // Create the connection between two nodes. Example: "001:0 -> 002:0 [label = bool]"
     // Nodes are the components and identified by a unique ID, like ports.
-    val nodeFrom = edge.from.value.asInstanceOf[Component].getId
-    val nodeTo = edge.to.value.asInstanceOf[Component].getId
+    val from = edge.from.value.asInstanceOf[Component]
+    val sFrom = nodeId(from) + ":" + portId(label.from)
+    val to = edge.to.value.asInstanceOf[Component]
+    val sTo = nodeId(to) + ":" + portId(label.to)
+
     val attrs = Seq(DotAttr("label", labelName(label)))
-    Some(root, DotEdgeStmt(nodeFrom + ":" + label.from.getId, nodeTo + ":" + label.to.getId, attrs))
+    Some(root, DotEdgeStmt(sFrom, sTo, attrs))
   }
 
   /**
