@@ -2,12 +2,12 @@ name := "especial"
 
 version := "1.0"
 
-scalaVersion := "2.11.1" // Required by scala-graph-*
+scalaVersion := "2.11.4" // Required by scala-graph-*
 
 // Graph for Scala
 // http://www.scala-graph.org/
 libraryDependencies ++= Seq(
-  "com.assembla.scala-incubator" %% "graph-core" % "1.9.0",
+  "com.assembla.scala-incubator" %% "graph-core" % "1.9.1",
   "com.assembla.scala-incubator" %% "graph-dot" % "1.9.0"
 )
 
