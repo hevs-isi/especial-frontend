@@ -105,7 +105,7 @@ with In1 with Out1 with HwImplemented {
    *
    * @return list of global variables to declare and initialize
    */
-  def globalVars: Map[String, CType]
+  val globalVars: Map[String, CType] = Map.empty
 
   /**
    * Custom component code to execute on each loop ticks.

@@ -2,7 +2,6 @@ package hevs.especial.dsl.components.core.logic
 
 import hevs.especial.dsl.components._
 
-import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 /**
@@ -12,14 +11,16 @@ import scala.collection.mutable.ListBuffer
  * @param nbrIn The number of generic input of the component
  * @param operator Boolean operator to compute
  */
-abstract class AbstractLogic(nbrIn: Int, operator: String) extends
+abstract class AbstractLogic(val nbrIn: Int, operator: String) extends
   GenericCmp[bool, bool](nbrIn, 1) with HwImplemented with Out1 {
 
   /* I/O management */
 
   protected def setInputValue(index: Int, s: String) = s"${inValName(index)} = $s"
 
-  protected def getOutputValue(index: Int) = {
+  protected def getOutputValue(index: Int) = getOutputValue // Only one output, index not used
+
+  protected def getOutputValue: String = {
     // Print the boolean operation with all inputs
     // Example: in1_comp2 & in2_comp2 & ...
     val inputs = for (i <- 0 until nbrIn) yield inValName(i)
@@ -46,9 +47,8 @@ abstract class AbstractLogic(nbrIn: Int, operator: String) extends
     val result: ListBuffer[String] = ListBuffer()
 
     // Compute the result from the global variables
-    result += s"$tpe ${outValName()} = ${out(0).getValue}; // ${out(0)}"
+    result += s"const $tpe ${outValName()} = ${out(0).getValue}; // ${out(0)}"
 
-    // FIXME: must be done here ? Inside each components ?
     // Set the output value to connected components
     for (inPort ← ComponentManager.findConnections(out(0)))
       result += inPort.setInputValue(s"${outValName()}") + "; // " + inPort

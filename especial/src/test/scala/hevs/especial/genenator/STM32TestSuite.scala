@@ -67,7 +67,7 @@ abstract class STM32TestSuite extends FunSuite {
   private def checkErrors(): Boolean = {
     if (ctx.log.hasErrors) {
       fail("Errors reported to the Logger.") // Test failed
-      true
+      return true
     }
     false
   }

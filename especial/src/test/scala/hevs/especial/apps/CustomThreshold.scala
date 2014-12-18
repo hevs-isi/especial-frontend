@@ -25,18 +25,16 @@ class CustomThreshold extends STM32TestSuite {
    * Custom threshold component.
    *
    * Logic implemented in C. The output is `false` when the input value is above the threshold value,
-   * and `true` otherwise.
+   * and `true` otherwise (this is not a Schmitt trigger).
    *
-   * @param threshold the threshold of the component
+   * @param threshold the threshold of the component (between 0x0 and 0xFFFF)
    */
   case class Threshold(threshold: Int = 512) extends CFct[uint16, bool]() {
 
     /* I/O management */
 
-    def globalVars = {
-      // Example: "uint16_t threshold_in = 0;"
-      Map("threshold_in" -> uint16(0))
-    }
+    // Example: "uint16_t threshold_in = 0;"
+    override val globalVars = Map("threshold_in" -> uint16(0))
 
     def setInputValue(s: String): String = s"threshold_in = $s"
 
