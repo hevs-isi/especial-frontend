@@ -2,14 +2,14 @@ package hevs.especial.dsl.components.core.logic
 
 import hevs.especial.dsl.components._
 
-case class And2() extends AbstractLogic(2, "&") with In2 {
+case class And2(inputs: OutputPort[bool]*) extends AbstractLogic(2, "&", inputs:_*) with In2 {
   override val description = s"And$nbrIn gate"
 
   override val in1 = in(0)
   override val in2 = in(1)
 }
 
-case class And3() extends AbstractLogic(3, "&") with In3 {
+case class And3(inputs: OutputPort[bool]*) extends AbstractLogic(3, "&", inputs:_*) with In3 {
   override val description = s"And$nbrIn gate"
 
   override val in1 = in(0)
@@ -17,7 +17,7 @@ case class And3() extends AbstractLogic(3, "&") with In3 {
   override val in3 = in(2)
 }
 
-case class And4() extends AbstractLogic(4, "&") with In4 {
+case class And4(inputs: OutputPort[bool]*) extends AbstractLogic(4, "&", inputs:_*) with In4 {
   override val description = s"And$nbrIn gate"
 
   override val in1 = in(0)
@@ -28,14 +28,14 @@ case class And4() extends AbstractLogic(4, "&") with In4 {
 
 
 
-case class Or2() extends AbstractLogic(2, "|") with In2 {
+case class Or2(inputs: OutputPort[bool]*) extends AbstractLogic(2, "|", inputs:_*) with In2 {
   override val description = s"Or$nbrIn gate"
 
   override val in1 = in(0)
   override val in2 = in(1)
 }
 
-case class Or3() extends AbstractLogic(3, "|") with In3 {
+case class Or3(inputs: OutputPort[bool]*) extends AbstractLogic(3, "|", inputs:_*) with In3 {
   override val description = s"Or$nbrIn gate"
 
   override val in1 = in(0)
@@ -43,7 +43,7 @@ case class Or3() extends AbstractLogic(3, "|") with In3 {
   override val in3 = in(2)
 }
 
-case class Or4() extends AbstractLogic(4, "|") with In4 {
+case class Or4(inputs: OutputPort[bool]*) extends AbstractLogic(4, "|", inputs:_*) with In4 {
   override val description = s"Or$nbrIn gate"
 
   override val in1 = in(0)

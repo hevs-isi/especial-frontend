@@ -12,7 +12,18 @@ import scala.collection.mutable.ListBuffer
  * @param operator Boolean operator to compute
  */
 abstract class AbstractLogic(val nbrIn: Int, operator: String) extends
-  GenericCmp[bool, bool](nbrIn, 1) with HwImplemented with Out1 {
+GenericCmp[bool, bool](nbrIn, 1) with HwImplemented with Out1 {
+
+  def this(nbrIn: Int, operator: String, inputs: OutputPort[bool]*) = {
+    this(nbrIn, operator)
+
+    // Automatically connect component inputs.
+    // Ignore if too much or too less parameters are given.
+    for (i <- 0 until nbrIn) {
+      if (inputs.indices.contains(i))
+        inputs(i) --> in(i) // FIXME: check this !!
+    }
+  }
 
   /* I/O management */
 

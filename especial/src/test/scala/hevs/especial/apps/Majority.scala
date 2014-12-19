@@ -40,9 +40,9 @@ class Majority extends STM32TestSuite {
     val OB = Stm32stkIO.led2.in // Method 2
 
     // OA = AB + BC + AC
-    val andA1 = And2()
-    A --> andA1.in1
-    B --> andA1.in2
+    val andA1 = And2(A, B) // And2()
+    // A --> andA1.in1
+    // B --> andA1.in2
 
     val andA2 = And2()
     B --> andA2.in1
@@ -52,10 +52,10 @@ class Majority extends STM32TestSuite {
     A --> andA3.in1
     C --> andA3.in2
 
-    val orA1 = Or3()
-    andA1.out --> orA1.in1
+    val orA1 = Or3(andA1.out, andA2.out, andA3.out)
+    /*andA1.out --> orA1.in1
     andA2.out --> orA1.in2
-    andA3.out --> orA1.in3
+    andA3.out --> orA1.in3*/
     orA1.out --> OA
 
 
