@@ -20,7 +20,7 @@ object ImplicitTypes {
 
   // Create `CTypes` from `Scala`
 
-  implicit def BooleanToBool(v: Boolean): bool = new bool(v)
+  implicit def BooleanToBool(v: Boolean): bool = bool(v)
 
   implicit def ByteToInt8(v: Byte): int8 = int8(v)
 

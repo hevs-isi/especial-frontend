@@ -17,6 +17,7 @@ trait HwImplemented {
   // Code inserted to init the component (executed once)
   def getInitCode: Option[String] = None
 
+  // Code executed once before the while loop
   def getBeginOfMainAfterInit: Option[String] = None
 
   // Code inserted in the main loop
