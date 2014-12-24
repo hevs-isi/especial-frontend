@@ -19,9 +19,9 @@ class IOBoard1 extends STM32TestSuite {
     Constant(bool(v = true)).out --> Stm32stk.led0.in
 
     // Control extensions LEDs using the corresponding button
-    Stm32stkIO.btn2.out --> Stm32stkIO.led2.in
     Stm32stkIO.btn3.out --> Stm32stkIO.led3.in
-    Stm32stkIO.btn4.out --> Stm32stkIO.led4.in
+    Stm32stkIO.btn2.out --> Stm32stkIO.led2.in
+    Stm32stkIO.btn1.out --> Stm32stkIO.led1.in
   }
 
   runDotGeneratorTest()

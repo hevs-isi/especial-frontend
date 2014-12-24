@@ -63,9 +63,14 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
    * @return the C code as a String (not formatted)
    */
   private def generateCode(ctx: Context)(resolve: Resolver.O): String = {
-    // Order the result of the resolver by pass number (sort by key value)
+    // Order the result of the resolver by pass number (sort by key value).
+    // Each pass number as a sequence of components to generate.
     val ordered = resolve.toSeq.sortBy(_._1)
-    val cps = ordered flatMap (x => x._2) // List of components
+
+    // List with components only, ordered for the code generation
+    val cps = ordered flatMap (x => x._2)
+    val nbrOfInputs = ordered(0)._2.size // Count the number of input component (passe '0')
+    val nbrOfOutputs = ordered.last._2.size // Number of output // FIXME: invalid
 
     // Generate each code phase for each components
     ctx.log.info(s"Generate the code for ${cps.size} components with ${codeSections.size} sections.")
@@ -86,14 +91,14 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       idx match {
         case 4 =>
           result ++= beginMain
-          if(ctx.isQemuLoggerEnabled)
+          if (ctx.isQemuLoggerEnabled)
             result ++= QemuLogger.addStartEvent + "\n"
 
           result ++= beginMainInit
-          if(ctx.isQemuLoggerEnabled)
+          if (ctx.isQemuLoggerEnabled)
             result ++= QemuLogger.addEndInitEvent + "\n"
         case 5 =>
-          if(ctx.isQemuLoggerEnabled)
+          if (ctx.isQemuLoggerEnabled)
             result ++= QemuLogger.addLoopStartEvent + "\n"
         case _ =>
       }
@@ -114,19 +119,31 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
         case _ =>
       }
 
+      val tst = cps.zipWithIndex
+
       // Apply the current section function on all components
-      cps map { cp => sec._1(cp.asInstanceOf[HwImplemented]) match {
-        // Add the code only if defined
-        case Some(code) => result ++= code + "\n"
-        case None =>
-      }
+      cps.zipWithIndex map { c =>
+
+        val cpNbr = c._2 // Iteration number
+        val cp = c._1 // Component to generate
+
+        if (idx == 5 && cpNbr == 0)
+          result ++= "// 1) Read inputs\n" // While loop code section for the first component
+        else if (idx == 5 && cpNbr == nbrOfInputs)
+          result ++= "\n// 2) Loop logic\n"
+
+        sec._1(cp.asInstanceOf[HwImplemented]) match {
+          case Some(code) =>
+            result ++= code + "\n" // Add the component code for the section (if defined)
+          case None =>
+        }
       }
 
       // Add static code when sections end
       idx match {
-        case 3 =>result ++= endInit
+        case 3 => result ++= endInit
         case 5 =>
-          if(ctx.isQemuLoggerEnabled)
+          if (ctx.isQemuLoggerEnabled)
             result ++= "\n" + QemuLogger.addLoopTickEvent
           result ++= endMainLoop
         case _ =>
@@ -135,7 +152,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       result ++= endSection() // Print the end of the section
     }
 
-    if(ctx.isQemuLoggerEnabled)
+    if (ctx.isQemuLoggerEnabled)
       result ++= QemuLogger.addLoopExitEvent
 
     // End of the file
@@ -147,10 +164,10 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   // Include all necessary files and remove duplicates if necessary
   private def includeFiles(cps: Seq[Component]): String = {
     // List of list of all files to include
-    val incs = for(c <- cps) yield c.asInstanceOf[HwImplemented].getIncludeCode
+    val incs = for (c <- cps) yield c.asInstanceOf[HwImplemented].getIncludeCode
 
     // Remove duplicates files contains in the flatten list using `distinct`
-    val files = for(f <- incs.flatten.distinct) yield String.format("#include \"%s\"", f)
+    val files = for (f <- incs.flatten.distinct) yield String.format("#include \"%s\"", f)
     files.mkString("\n") + "\n"
   }
 

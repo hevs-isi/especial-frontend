@@ -51,8 +51,11 @@ class MathPWM extends STM32TestSuite {
     tmp3.out --> tmp5.in1
     cst5.out --> tmp5.in2
 
-    tmp5.out --> pwm4 // PWM period = 4096 (100.0% duty)
-    tmp4.out --> pwm3 // PWM period = 1536 (037.5% duty)
+    //tmp5.out --> pwm4 // PWM period = 4096 (100.0% duty)
+    //tmp4.out --> pwm3 // PWM period = 1536 (037.5% duty)
+
+    Constant[uint16](2048).out --> pwm4
+    Constant[uint16](1024).out --> pwm3
 
     Constant[bool](true).out --> Stm32stkIO.led2.in
     Constant[bool](true).out --> Stm32stkIO.led1.in

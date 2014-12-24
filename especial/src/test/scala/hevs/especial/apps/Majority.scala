@@ -30,14 +30,16 @@ class Majority extends STM32TestSuite {
   def isQemuLoggerEnabled = false
 
   // TODO: add variadic constructors to all logic components
+  // TODO: add boolean operators as syntactic sugar
 
   def runDslCode(): Unit = {
 
-    val A = Stm32stkIO.btn2.out
-    val B = Stm32stkIO.btn3.out
-    val C = Stm32stkIO.btn4.out
-    val OA = Stm32stkIO.led1.in // Method 1
-    val OB = Stm32stkIO.led2.in // Method 2
+    val A = Stm32stkIO.btn1.out
+    val B = Stm32stkIO.btn2.out
+    val C = Stm32stkIO.btn3.out
+
+    val OA = Stm32stkIO.led1.in // Output for method 1
+    val OB = Stm32stkIO.led2.in // Output for method 2
 
     // OA = AB + BC + AC
     val andA1 = And2(A, B) // And2()

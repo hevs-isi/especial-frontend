@@ -9,7 +9,6 @@ import hevs.especial.utils._
 import scala.collection.mutable
 import scala.language.existentials
 import scalax.collection.Graph
-import scalax.collection.edge.Implicits.%
 import scalax.collection.edge.LDiEdge
 import scalax.collection.io.dot._
 
@@ -148,7 +147,7 @@ object DotGenerator {
    */
   def convertDotToPdf(progName: String, suffix: String): (Int, String) = {
     val path = String.format(OUTPUT_PATH, progName)
-    val fileName = s"${progName}$suffix"
+    val fileName = s"$progName$suffix"
     val dotFile = path + fileName + ".dot"
     val pdfFile = path + fileName + ".pdf"
     OSUtils.runWithCodeResult(s"dot $dotFile -Tpdf -o $pdfFile")
@@ -257,10 +256,10 @@ private class GraphDot(graphName: String, fileName: String) {
     // Return the ID of the port with a label
     l.map(
       x => {
-        val nc = if (x.isNotConnected) " (NC)" else ""
+        val nc = if (x.isNotConnected) "\\n (NC)" else ""
         x match {
-          case _: InputPort[_] => s"<${portId(x)}> ${x.name}\\n$nc"
-          case _: OutputPort[_] => s"<${portId(x)}> ${x.name}\\n$nc"
+          case _: InputPort[_] => s"<${portId(x)}> ${x.name}$nc"
+          case _: OutputPort[_] => s"<${portId(x)}> ${x.name}$nc"
         }
       }
     ).mkString("|")
