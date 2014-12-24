@@ -69,8 +69,10 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
     // List with components only, ordered for the code generation
     val cps = ordered flatMap (x => x._2)
-    val nbrOfInputs = ordered(0)._2.size // Count the number of input component (passe '0')
-    val nbrOfOutputs = ordered.last._2.size // Number of output // FIXME: invalid
+    val firstLogicIdx = ordered.head._2.size // Count the number of input component (first pass)
+
+    val nbrOfOutputs = ordered.last._2.size // Number of output (last pass)
+    val firstOutputIndex = cps.size - nbrOfOutputs
 
     // Generate each code phase for each components
     ctx.log.info(s"Generate the code for ${cps.size} components with ${codeSections.size} sections.")
@@ -119,22 +121,27 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
         case _ =>
       }
 
-      val tst = cps.zipWithIndex
-
       // Apply the current section function on all components
       cps.zipWithIndex map { c =>
 
         val cpNbr = c._2 // Iteration number
         val cp = c._1 // Component to generate
 
+        // While loop code section for the first component
         if (idx == 5 && cpNbr == 0)
-          result ++= "// 1) Read inputs\n" // While loop code section for the first component
-        else if (idx == 5 && cpNbr == nbrOfInputs)
+          result ++= "// 1) Read inputs\n"
+
+        if (idx == 5 && cpNbr == firstLogicIdx)
           result ++= "\n// 2) Loop logic\n"
 
+        if(idx == 5 && cpNbr == firstOutputIndex)
+          result ++= "\n// 3) Update outputs\n"
+
+
+        // Add the component code for the section (if defined)
         sec._1(cp.asInstanceOf[HwImplemented]) match {
           case Some(code) =>
-            result ++= code + "\n" // Add the component code for the section (if defined)
+            result ++= code + "\n"
           case None =>
         }
       }

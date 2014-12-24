@@ -8,13 +8,17 @@ import scala.collection.mutable
 
 object Resolver {
   // Output type of the resolver and the input of code generator.
-  type O = Map[Int, Set[Component]]
+  type O = Map[Int, Set[Component]] // Shared by different blocks
 }
 
 /**
- * The `Resolver` object can be used to resolve a graph of components to get the right order on which component's
- * code must be generated when.
+ * The `Resolver` object is be used to resolve the component graph.
+ *
+ * The code of each component must be generated in the good order. First, the code of all input is generated. Then
+ * its components successors, and finally all outputs together at the end.
  * Unconnected components are ignored.
+ *
+ * @version 2.0
  */
 class Resolver extends Pipeline[Unit, O] {
 
@@ -45,6 +49,10 @@ class Resolver extends Pipeline[Unit, O] {
    * the `Resolver` stops automatically. An empty `Map` is returned if the resolver failed. The index of the returned
    * Map is the pass number.
    *
+   * At pass '0', all inputs codes are generated.
+   * Then, all components and successors in the right order.
+   * The final pass are all output components.
+   *
    * @param log the reporter logger
    * @return ordered Map of hardware to resolve, with the pass number as index
    */
@@ -71,9 +79,14 @@ class Resolver extends Pipeline[Unit, O] {
 
     // Normal case
     log.trace(s"Resolver started for $connectedNbr components ($unconnectedNbr unconnected)")
+
     do {
       mapSolve += (nbrOfPasses -> nextPass(log)) // Resolve each pass for the current component graph
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < Settings.RESOLVER_MAX_PASSES)
+
+    // Last pass. Generate code for all outputs.
+    val out = genConnectedOutput(log)
+    mapSolve += (nbrOfPasses -> genConnectedOutput(log))
 
     if (generatedCpId.size == connectedNbr) {
       log.trace(s"Resolver ended successfully after $numberOfPasses passes for ${generatedCpId.size} connected " +
@@ -95,6 +108,17 @@ class Resolver extends Pipeline[Unit, O] {
    */
   def numberOfPasses = nbrOfPasses
 
+  private def genConnectedOutput(l: Logger): Set[Component] = {
+    val out = ComponentManager.findConnectedOutputHardware
+    for (c <- out if !generatedCpId.contains(c.getId)) {
+      l.trace(s" > Generate code for output: $c")
+      val cp = c.asInstanceOf[Component]
+      codeGeneratedFor(cp.getId)
+    }
+    endPass()
+    out // HW component to generate
+  }
+
   /**
    * Compute one pass of resolving the graph.
    * @return component to generate for this pass
@@ -104,6 +128,7 @@ class Resolver extends Pipeline[Unit, O] {
     startPass(l)
 
     nbrOfPasses match {
+
       // First passe. Generate code for all inputs.
       case 0 =>
         val in = ComponentManager.findConnectedInputHardware
@@ -112,8 +137,17 @@ class Resolver extends Pipeline[Unit, O] {
           val cp = c.asInstanceOf[Component]
           codeGeneratedFor(cp.getId)
         }
+
+        // All output are added manually at the end
+        val out = ComponentManager.findConnectedOutputHardware
+        for (c <- out) {
+          val cp = c.asInstanceOf[Component]
+          generatedCpId += cp.getId
+        }
+
         endPass()
         in // HW component to generate
+
 
       // From the second passe, the code of all direct successors of the components is generated.
       case _ =>
@@ -181,7 +215,7 @@ class Resolver extends Pipeline[Unit, O] {
     ret ++= "Resolver result:"
 
     // Print components IDs for all passes and order the result
-    for(p <- mapSolve.toSeq.sortBy(_._1)) {
+    for (p <- mapSolve.toSeq.sortBy(_._1)) {
       ret ++= "\n\tPass %03d: %s".format(p._1 + 1, p._2.mkString(", "))
     }
     ret.result()

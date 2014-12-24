@@ -157,9 +157,6 @@ object ComponentManager extends Logging {
   }
 
 
-  // FIXME: remove unused methods
-
-
   def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()
 
   /**
@@ -212,16 +209,17 @@ object ComponentManager extends Logging {
       val cp = c.value.asInstanceOf[Component]
       val io = cp.getInputs.getOrElse(Nil) ++ cp.getOutputs.getOrElse(Nil)
 
-      if (input) // Input = no direct predecessors
+      if (input) // Input = no direct predecessors or '0' I/O
         c.diPredecessors.isEmpty && c.edges.size > 0 || io.size == 0
       else // Output = no direct successors
-        c.diSuccessors.isEmpty && c.edges.size > 0 || io.size == 0
+        c.diSuccessors.isEmpty && c.edges.size > 0
     }
     // Return the node value as a Component
     ret.map(x => x.value.asInstanceOf[Component]).toSet
   }
 
   // Return a list of `InputPort`s that are connected
+  // FIXME: remove this ??
   def findConnections(port: OutputPort[CType]): Seq[InputPort[CType]] = {
     val cpFrom = cpGraph.nodes find (c => c.value.asInstanceOf[Component].equals(port.getOwner))
     val edges = cpFrom.get.edges // all connections of this component (from and to components)
@@ -235,6 +233,25 @@ object ComponentManager extends Logging {
     // Return only the InputPort of the connected component, extracted from the label of the edge
     val tos = connections.toSeq.map(x => x.label.asInstanceOf[Wire].to)
     tos
+  }
+
+  /**
+   * Get the [[OutputPort]] connected with the specified [[InputPort]].
+   *
+   * @version 2.0
+   * @param port the port to search is input
+   * @return the [[OutputPort]] connected with the input port
+   */
+  def findPredecessorOutputPort(port: InputPort[CType]): OutputPort[CType] = {
+    val cp = cpGraph.nodes find (c => c.value.asInstanceOf[Component].equals(port.getOwner))
+    val edges = cp.get.edges // all connections of this component (from and to components)
+
+    // Search the corresponding wire. Should be only one.
+    val connections = edges filter {
+      w => w.label.asInstanceOf[Wire].to == port &&
+        w.label.asInstanceOf[Wire].from.getOwnerId != port.getOwnerId
+    }
+    connections.head.label.asInstanceOf[Wire].from
   }
 
 

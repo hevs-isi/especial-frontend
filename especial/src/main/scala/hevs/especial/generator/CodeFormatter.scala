@@ -33,7 +33,7 @@ class CodeFormatter extends Pipeline[String, String] {
     val valid = OSUtils.runWithCodeResult(path + " -V")
     if (valid._1 == 0) {
       ctx.log.info(s"Running '${valid._2}'.")
-      OSUtils.runWithResult(path + s" --style=kr -Y $input")
+      OSUtils.runWithResult(path + s" --style=java -Y $input")
     }
     else {
       ctx.log.error(s"Unable to run AStyle !\n > ${valid._2}")
