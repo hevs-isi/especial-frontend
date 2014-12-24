@@ -8,6 +8,9 @@ import hevs.especial.dsl.components._
  * Initialize the pin with a default value. The initialization of the output is done once only,
  * in the `initOutputs` function (nothing to do in the `init` function), because all outputs must be initialized first.
  *
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ *
  * @param pin the pin of the GPIO (port and pin number)
  * @param initValue the default value of the output when initialized
  */
@@ -16,8 +19,6 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) ex
 
   override val description = s"digital output\\non $pin"
 
-  private val valName = outValName()
-  private var initialized: Boolean = false
 
   /* I/O management */
 
@@ -28,14 +29,22 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) ex
     override val name = s"in"
     override val description = "digital output value"
 
-    override def setInputValue(s: String): String = s"$valName.set($s)"
+    override def setInputValue(s: String) = {
+      "" // FIXME: remove this
+    }
   }
 
   override def getOutputs = None
 
   override def getInputs = Some(Seq(in))
 
+
   /* Code generation */
+
+  private val valName = outValName()
+  private var initialized: Boolean = false
+
+  override def getIncludeCode = Seq("digitaloutput.h")
 
   override def getGlobalCode = Some(s"DigitalOutput $valName($pinName); // $in")
 
@@ -59,7 +68,10 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) ex
     }
   }
 
-  override def getIncludeCode = Seq("digitaloutput.h")
+  override def getLoopableCode = {
+    val inValue = ComponentManager.findPredecessorOutputPort(in).getValue
+    Some(s"$valName.set($inValue);")
+  }
 }
 
 /**

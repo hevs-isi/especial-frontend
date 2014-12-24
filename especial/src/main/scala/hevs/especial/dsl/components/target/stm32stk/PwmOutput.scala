@@ -4,8 +4,10 @@ import hevs.especial.dsl.components._
 
 /**
  * Create a Pulse-width modulation (PWM) output for a specific pin.
+ * Initialize the output and set it to `OFF` (duty cycle 0%) by default.
  *
- * Initialize the output and set it to `OFF` by default.
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  *
  * @param pin the pin of the GPIO (port and pin number)
  */
@@ -25,7 +27,9 @@ class PwmOutput private(private val pin: Pin) extends Gpio(pin) with In1 with Hw
     override val name = s"in"
     override val description = "PWM output value"
 
-    override def setInputValue(s: String): String = s"$valName.setPeriod($s)"
+    override def setInputValue(s: String) = {
+      "" // FIXME: not used
+    }
   }
 
   override def getOutputs = None
@@ -34,6 +38,8 @@ class PwmOutput private(private val pin: Pin) extends Gpio(pin) with In1 with Hw
 
 
   /* Code generation */
+
+  override def getIncludeCode = Seq("pwmoutput.h")
 
   override def getGlobalCode = Some(s"PwmOutput $valName($pinName); // $in")
 
@@ -50,7 +56,10 @@ class PwmOutput private(private val pin: Pin) extends Gpio(pin) with In1 with Hw
     }
   }
 
-  override def getIncludeCode = Seq("pwmoutput.h")
+  override def getLoopableCode = {
+    val inValue = ComponentManager.findPredecessorOutputPort(in).getValue
+    Some(s"$valName.setPeriod($inValue);")
+  }
 }
 
 /**

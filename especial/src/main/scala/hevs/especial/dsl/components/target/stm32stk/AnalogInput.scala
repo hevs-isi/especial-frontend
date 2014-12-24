@@ -6,7 +6,10 @@ import hevs.especial.dsl.components._
  * Create an analog for a specific pin.
  *
  * Use an A/D converter to read an analog input value. The channel used for the conversion must be specified.
- * The converted value is saved in a global variable in [[uint16]]] format.
+ * The converted value is saved in [[uint16]]] format.
+ *
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  *
  * @param pin the pin of the GPIO (port and pin number)
  * @param channel the A/D channel used for the conversion
@@ -16,6 +19,8 @@ class AnalogInput private(private val pin: Pin, private val channel: Int) extend
 
   override val description = s"analog input\\non $pin"
 
+  /* I/O management */
+
   /**
    * The analog value converted to a `uint16` digital value.
    */
@@ -23,44 +28,41 @@ class AnalogInput private(private val pin: Pin, private val channel: Int) extend
     override val name = s"out"
     override val description = "analog input value"
 
-    override def getValue: String = s"$fctName();"
+    // varName contains the output value
+    override def getValue: String = s"$varName"
   }
-  private val valName = inValName()
-
-  /* I/O management */
-  private val fctName = s"getlAnalogInput${pin.port}${pin.pinNumber}"
 
   override def getOutputs = Some(Seq(out))
 
   override def getInputs = None
 
+
   /* Code generation */
+
+  private val fctName = s"getlAnalogInput${pin.port}${pin.pinNumber}"
+  private val valName = inValName()
+  private val varName = s"in_${pin.port}${pin.pinNumber}"
+
+  override def getIncludeCode = Seq("analoginput.h")
 
   override def getGlobalCode = Some(s"AnalogInput $valName($pinName, $channel); // $out")
 
   override def getInitCode = Some(s"$valName.initialize(); // Init of $this")
 
-  override def getLoopableCode = Some(s"$fctName();")
-
   override def getFunctionsDefinitions = {
     // Add a function to get the cached value of this input.
     val res = new StringBuilder
-
-    // 1) Store the input value in a local variable
-    res ++= s"void $fctName() {\n"
+    res ++= s"${uint16().getType} $fctName() {\n"
     res ++= "// Start an A/D conversion and wait for the result\n"
-    res ++= s"${uint16().getType} val = $valName.read();\n"
-
-    // 2) Propagate this value to all connected components
-    val in = ComponentManager.findConnections(out)
-    for (inPort ← in)
-      res ++= inPort.setInputValue("val") + s"; //$inPort\n"
-
+    res ++= s"return $valName.read();\n"
     res ++= "}"
     Some(res.result())
   }
 
-  override def getIncludeCode = Seq("analoginput.h")
+  override def getLoopableCode = {
+    // Store the input value in a local variable
+    Some(s"${uint16().getType} $varName = $fctName();")
+  }
 }
 
 /**

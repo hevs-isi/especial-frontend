@@ -9,11 +9,17 @@ import hevs.especial.dsl.components._
  * Interrupts are used by default with this implementation.
  * The input is initialized in the `ìnit` function when needed (once only).
  *
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ *
  * @param pin the pin of the GPIO (port and pin number)
  */
 class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 with HwImplemented {
 
   override val description = s"digital input\\non $pin"
+
+
+  /* I/O management */
 
   /**
    * The `uint1` value of this digital input.
@@ -22,18 +28,19 @@ class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 wit
     override val name = s"out"
     override val description = "digital input value"
 
-    override def getValue: String = s"$fctName();"
+    // varName contains the output value
+    override def getValue: String = s"$varName"
   }
-  private val valName = inValName()
-
-  /* I/O management */
-  private val fctName = s"getlDigitalInput${pin.port}${pin.pinNumber}"
 
   override def getOutputs = Some(Seq(out))
 
   override def getInputs = None
 
+
   /* Code generation */
+
+  private val valName = inValName()
+  private val varName = s"in_${pin.port}${pin.pinNumber}"
 
   override def getGlobalCode = Some(s"DigitalInput $valName($pinName); // $out")
 
@@ -45,24 +52,9 @@ class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 wit
     Some(res.result())
   }
 
-  override def getLoopableCode = Some(s"$fctName();")
-
-  override def getFunctionsDefinitions = {
-    // Add a function to get the cached value of this input.
-    val res = new StringBuilder
-
-    // 1) Store the input value in a local variable
-    res ++= s"void $fctName() {\n"
-    res ++= "// Get the cached value (read from interrupt)\n"
-    res ++= s"${bool().getType} val = $valName.get();\n"
-
-    // 2) Propagate this value to all connected components
-    val in = ComponentManager.findConnections(out)
-    for (inPort ← in)
-      res ++= inPort.setInputValue("val") + s"; //$inPort\n"
-
-    res ++= "}"
-    Some(res.result())
+  override def getLoopableCode = {
+    // Store the input value in a local variable
+    Some(s"${bool().getType} $varName = $valName.get();")
   }
 
   override def getIncludeCode = Seq("digitalinput.h")
