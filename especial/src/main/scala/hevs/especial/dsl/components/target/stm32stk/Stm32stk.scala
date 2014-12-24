@@ -4,8 +4,9 @@ import hevs.especial.dsl.components.core.logic.Not
 import hevs.especial.dsl.components._
 
 /**
- * STM32-103STK board.
+ * STM32-103STK main board.
  *
+ * Olimex development kit.
  * https://www.olimex.com/Products/ARM/ST/STM32-103STK/
  */
 class Stm32stk extends Component with HwImplemented with NoIO {
@@ -14,7 +15,7 @@ class Stm32stk extends Component with HwImplemented with NoIO {
 }
 
 /**
- * I/O definitions for the STM32-103STK board.
+ * I/O definitions for the STM32-103STK main board.
  *
  * One joystick with 4 directions, a center button an one red LED.
  * The LED is active low, so an inverter is used.
@@ -52,12 +53,18 @@ object Stm32stk {
 /**
  * Custom I/O extension board for the [[Stm32stk]] board.
  *
- * Has 4 buttons, 4 LEDs (2 red, 2 yellow) and a potentiometer.
+ * Has 3 buttons, 4 LEDs (2 red, 2 yellow), 1 potentiometer and an external analog input.
  * The 2 red LEDs can be used as [[DigitalOutput]] or [[PwmOutput]].
+ * The potentiometer is an [[AnalogInput]]. Another external [[AnalogInput]] is also available.
+ * The led4 can be disconnected to use the [[PwmOutput]] as external output.
  */
 object Stm32stkIO {
 
-  /** Analog input */
+  /** Analog inputs */
+
+  // External analog input on `PB.1` (ADC channel 9)
+  val adc2_pin = Pin('B', 1)
+  lazy val adc2 = AnalogInput(adc2_pin, 9)
 
   // Potentiometer on `PB.0` (ADC channel 8)
   val adc1_pin = Pin('B', 0)
@@ -66,21 +73,17 @@ object Stm32stkIO {
 
   /** Digital inputs */
 
-  // Button 4 on `PC.2` (top)
-  val btn4_pin = Pin('C', 2)
-  lazy val btn4 = DigitalInput(btn4_pin)
-
-  // Button 3 on `PC.1`
-  val btn3_pin = Pin('C', 1)
+  // Button 3 on `PC.2` (top)
+  val btn3_pin = Pin('C', 2)
   lazy val btn3 = DigitalInput(btn3_pin)
 
-  // Button 2 on `PC.0`
-  val btn2_pin = Pin('C', 0)
-  lazy val btn2 = DigitalInput(btn2_pin)
+  // Button 2 on `PC.1`
+  val btn2_pin = Pin('C', 1)
+  lazy val btn2 = DigitalInput(btn3_pin)
 
-  // Button 1 on `PB.1` (bottom)
-  // val btn1_pin = Pin('B', 1)
-  // lazy val btn1 = DigitalInput(btn1_pin)
+  // Button 1 on `PC.0`
+  val btn1_pin = Pin('C', 0)
+  lazy val btn1 = DigitalInput(btn1_pin)
 
 
   /** Digital outputs */
@@ -104,11 +107,11 @@ object Stm32stkIO {
 
   /** PWM outputs */
 
-  // PWM for led4 on `PB.9`
+  // PWM for led4 on `PB.9` (Timer4 channel 4)
   val pwm4_pin = led4_pin
   lazy val pwm4 = PwmOutput(pwm4_pin)
 
-  // PWM for led3 on `PB.8`
+  // PWM for led3 on `PB.8` (Timer4 channel 3)
   val pwm3_pin = led3_pin
   lazy val pwm3 = PwmOutput(pwm3_pin)
 }
