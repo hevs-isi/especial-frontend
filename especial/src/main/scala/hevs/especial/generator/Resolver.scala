@@ -102,7 +102,7 @@ class Resolver extends Pipeline[Unit, O] {
 
   /**
    * Return the number of passes necessary to resolve the graph.
-   * If it was not possible to resolve it, [[Settings.RESOLVER_MAX_PASSES]] is returned.
+   * If it was not possible to resolve it, `RESOLVER_MAX_PASSES` is returned.
    *
    * @return the number of passes executed to resolve the graph
    */

@@ -44,4 +44,8 @@ clean ~= { x => println("Remove output files...")}
 cleanFiles <++= baseDirectory { base => {
   // Add files to the path
   (base / "output/" * "*").get
-}}
+}
+}
+
+// Generate ScalaDoc diagrams using dot
+scalacOptions in(Compile, doc) ++= Seq("-diagrams")
