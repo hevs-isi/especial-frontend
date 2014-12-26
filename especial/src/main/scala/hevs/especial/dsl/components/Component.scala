@@ -85,7 +85,7 @@ abstract class Component {
    * @param prefix name of the variable (used as prefix)
    * @return variable name with the component number
    */
-  private[components] def valName(prefix: String) = {
+  def valName(prefix: String) = {
     val cmpId = f"$id%02d"
     s"${prefix}_cmp$cmpId" // Example: prefix_cmp02
   }

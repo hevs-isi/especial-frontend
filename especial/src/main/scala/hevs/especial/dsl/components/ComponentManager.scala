@@ -1,6 +1,7 @@
 package hevs.especial.dsl.components
 
 import grizzled.slf4j.Logging
+import hevs.especial.dsl.components.core.Constant
 import hevs.especial.utils.ComponentNotFound
 
 import scala.collection.mutable
@@ -238,6 +239,8 @@ object ComponentManager extends Logging {
   /**
    * Get the [[OutputPort]] connected with the specified [[InputPort]].
    *
+   * If the input is not connected, the constant value '0' is returned as dummy value.
+   *
    * @version 2.0
    * @param port the port to search is input
    * @return the [[OutputPort]] connected with the input port
@@ -251,7 +254,14 @@ object ComponentManager extends Logging {
       w => w.label.asInstanceOf[Wire].to == port &&
         w.label.asInstanceOf[Wire].from.getOwnerId != port.getOwnerId
     }
-    connections.head.label.asInstanceOf[Wire].from
+
+    if (connections.size == 0) {
+      // Port not found. The input is NOT connected...
+      val cst = Constant[uint8](uint8(0))
+      cst.out // Return the constant value '0' as dummy value.
+    }
+    else
+      connections.head.label.asInstanceOf[Wire].from // Return the connected port
   }
 
 

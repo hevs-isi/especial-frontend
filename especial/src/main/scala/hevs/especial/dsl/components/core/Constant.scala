@@ -6,8 +6,9 @@ import scala.reflect.runtime.universe._
 
 /**
  * Generate a constant value.
+ *
  * The component has a single output. Once the component is initialized, the value of the constant cannot be changed
- * anymore. No input available.
+ * anymore. No input available. The constant value is simply paste in the generated code when needed.
  *
  * @version 2.0
  * @author Christopher Metrailler (mei@hevs.ch)
@@ -18,7 +19,6 @@ import scala.reflect.runtime.universe._
 case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 with HwImplemented {
 
   override val description = s"constant generator\\n(${value.v})"
-
 
   /* I/O management */
 

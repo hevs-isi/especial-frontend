@@ -2,95 +2,97 @@ package hevs.especial.dsl.components.core
 
 import hevs.especial.dsl.components._
 
+import scala.Boolean
 import scala.collection.mutable.ListBuffer
 import scala.reflect.runtime.universe._
 
 /**
  * Helper class used to create a `Mux` with a generic number of inputs.
- * All I/O have the same type. Output and selection pin are added manually.
+ *
+ * Inputs and outputs have the same type. The selection pin is always an [[uint8]] port.
+ *
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  *
  * @param nbrIn number of generic inputs for the component (without the selection pin)
  * @tparam T I/O type of the component
  */
-abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn,
-  1) with HwImplemented with Out1 {
+abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nbrIn, 1) with HwImplemented with Out1 {
+
+  override val description = s"Mux$nbrIn"
 
   /* I/O management */
 
   private val selValName = valName("sel") // Global variable used to store the selection pin value
 
-  // Input n°3 is the selection pin.
+  // The last input is the selection pin.
   // Always a `uint8` input
   val sel = new InputPort[uint8](this) {
     override val name = "sel"
     override val description = "the selection input"
 
-    // Connection an output to the sel input
-    // Will print "sel_cmp6 = 2;"
-    // FIXME: check if the index exist ? Add default case ?
-    override def setInputValue(s: String) = s"$selValName = $s"
+    override def setInputValue(s: String) = {
+      "" // FIXME: remove this ??
+    }
   }
   addCustomIn(sel)
 
   // Single output connected here
   override val out: OutputPort[T] = out(0)
 
-  override def setInputValue(index: Int, s: String) = s"${inValName(index)} = $s"
-
+  /**
+   * Result of the if/switch case of the Mux.
+   */
   override def getOutputValue(index: Int) = {
-    assert(index == 0) // Only one output
-
-    // Simple if/else if they are only two inputs. The else is the "default" branch.
-    if(nbrIn == 2) {
-       s"""
-          |// ${Mux.this}
-          |if($selValName == 0)
-          |  ${outValName()} = ${inValName(0)};
-          |else
-          |  ${outValName()} = ${inValName(1)};""".stripMargin
-    }
-    else {
-      // Create all cases statements in the switch/case
-      val cases = for(i <- 0 until nbrIn) yield addCaseStatement(i)
-
-      // Store the Mux result in a temporary variable
-      s"""
-        |// ${Mux.this}
-        |${getTypeString[T]} ${outValName()};
-        |switch($selValName) {
-        |${cases.mkString("\n")}
-        |}""".stripMargin
-    }
+    assert(index == 0) // Index not used, only one output
+    s"${outValName()}"
   }
 
-  private def addCaseStatement(index: Int) = {
-    s"""case $index:
-        |  ${outValName()} = ${inValName(index)};
-        |  break;"""
-  }
 
   /* Code generation */
-
-  override def getGlobalCode = {
-      // Define inputs, output and sel as global variables
-      val varIn = for(i <- 0 until nbrIn) yield inValName(i)
-      val vars = List(selValName, outValName()) ++ varIn
-
-      // Print all boolean variables to declare from the list
-      Some(s"${getTypeString[T]} ${vars.mkString(", ")}; // $this")
-  }
 
   override def getLoopableCode = {
     val result = ListBuffer.empty[String]
 
-    // Mux code
-    result += s"${out.getValue}"
+    // Local variable to store the selection and output values
+    val selValue = ComponentManager.findPredecessorOutputPort(sel).getValue
+    result += s"${getTypeString[uint8]} $selValName = $selValue;"
 
-    // Set the output value to connected components
-    for (inPort ← ComponentManager.findConnections(out))
-      result += inPort.setInputValue(s"${outValName()}") + "; // " + inPort
+    // Simple if/else if they are only two inputs. The else is the "default" branch.
+    if (nbrIn == 2) {
+      result += s"${getTypeString[T]} ${outValName()};"
+      result += s"""
+          |if($selValName == 0)
+          |  ${outValName()} = ${readInput(0)};
+          |else
+          |  ${outValName()} = ${readInput(1)};""".stripMargin
+      Some(result.mkString("\n"))
+    }
+
+    // Switch/case used if more than two inputs
+    else {
+      // Create all cases statements
+      val cases = for (i <- 0 until nbrIn) yield addCaseStatement(i)
+
+      // Store the Mux result in a temporary variable
+      result += s"${getTypeString[T]} ${outValName()} = 0;"
+      result += s"""
+        |switch($selValName) {
+        |  ${cases.mkString("\n")}
+        |}""".stripMargin
+    }
 
     Some(result.mkString("\n"))
+  }
+
+  private def addCaseStatement(index: Int) = {
+    s"""case $index:
+        |  ${outValName()} = ${readInput(index)};
+        |  break;"""
+  }
+
+  private def readInput(index: Int = 0) = {
+    ComponentManager.findPredecessorOutputPort(in(index)).getValue
   }
 }
 

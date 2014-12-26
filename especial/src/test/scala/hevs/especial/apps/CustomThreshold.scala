@@ -32,22 +32,17 @@ class CustomThreshold extends STM32TestSuite {
   case class Threshold(threshold: Int = 512) extends CFct[uint16, bool]() {
 
     /* I/O management */
-
-    // Example: "uint16_t threshold_in = 0;"
-    override val globalVars = Map("threshold_in" -> uint16(0))
-
-    def setInputValue(s: String): String = s"threshold_in = $s"
-
-    def getOutputValue: String = "threshold_out"
+    private val outVal = valName("threshold")
+    override def getOutputValue: String = s"$outVal"
 
     /* Code generation */
-
     override def loopCode = {
       val outType = getTypeString[bool]
+      val in = getInputValue
       s"""
-         |$outType threshold_out = false;
-         |if(threshold_in > $threshold)
-         |  threshold_out = true;
+         |$outType $outVal = false;
+         |if($in > $threshold)
+         |  $outVal = true;
       """.stripMargin
     }
   }

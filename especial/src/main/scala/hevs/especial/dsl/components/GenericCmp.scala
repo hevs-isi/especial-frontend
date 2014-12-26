@@ -6,6 +6,12 @@ import scala.reflect.runtime.universe._
 /**
  * Helper class used to build generic components more easily.
  *
+ * Create more easily components with multiple inputs and outputs. All inputs and all outputs have the same type.
+ * Custom inputs or outputs can also be added manually.
+ *
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ *
  * @param nbrIn number of input to generate
  * @param nbrOut number of output to generate
  * @tparam S input type
@@ -25,12 +31,14 @@ abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int
   override def getOutputs = if (outputs.size == 0) None else Some(outputs.toSeq)
   protected def addCustomOut[A <: CType](out: OutputPort[A]) = outputs += out
 
-  /* Abstract functions */
+  /* Abstract function */
 
-  // Return null if not used (if nbrIn = 0)
-  protected def setInputValue(index: Int, s: String): String
-
-  // Return null if not used (if nbrIn = 0)
+  /**
+   * Return the value of the corresponding output.
+   *
+   * @param index the index of the output (from 0 to nbrOut - 1)
+   * @return the value of the output (C code as a String)
+   */
   protected def getOutputValue(index: Int): String
 
 
@@ -56,7 +64,9 @@ abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int
     override val name = if (nbrIn > 1) s"in${index + 1}" else "in"
     override val description = if (nbrIn > 1) s"input ${index + 1}" else "input"
 
-    override def setInputValue(s: String) = GenericCmp.this.setInputValue(index, s)
+    override def setInputValue(s: String) = {
+      "" // FIXME: remove this ?
+    }
   }
 
   private def createOutput(index: Int) = new OutputPort[T](this) {
@@ -83,5 +93,5 @@ abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int
       outputs += out
   }
 
-  createIO()
+  createIO() // Create generic inputs and outputs
 }

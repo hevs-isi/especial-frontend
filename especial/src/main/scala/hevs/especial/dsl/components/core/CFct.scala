@@ -18,6 +18,9 @@ import scala.reflect.runtime.universe._
  *
  * Typical application are simple logic circuit.
  *
+ * @version 2.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ *
  * @tparam I input type
  * @tparam O output type
  */
@@ -39,7 +42,9 @@ with In1 with Out1 with HwImplemented {
     override val name = "in"
     override val description = "custom input"
 
-    override def setInputValue(s: String) = CFct.this.setInputValue(s)
+    override def setInputValue(s: String) = {
+      "" // FIXME: not used...
+    }
   }
 
   override def getOutputs = Some(Seq(out))
@@ -53,12 +58,12 @@ with In1 with Out1 with HwImplemented {
   override final def getIncludeCode = Nil
 
   override final def getGlobalCode = {
+    // Global variables declaration
     val out = ListBuffer.empty[String]
     for (v <- globalVars) {
       val sType = v._2.getType
       out += s"$sType ${v._1} = ${v._2.v};"
     }
-
     Some(out.mkString("\n"))
   }
 
@@ -71,33 +76,26 @@ with In1 with Out1 with HwImplemented {
   override final def getExitCode = None
 
   override final def getLoopableCode = {
-
     // The custom component code to paste in the loop
-    val customLoopCode = "// -- User input code " + loopCode + "// --"
-
-    // Each component has to propagate its output value to all connected components
-    val in = ComponentManager.findConnections(out)
-    val results = ListBuffer.empty[String]
-    for (inPort <- in)
-      results += inPort.setInputValue(out.getValue) + "; // " + inPort
-    Some(customLoopCode + "\n" + results.mkString("\n"))
-
+    val customLoopCode = s"\n// -- User input code of $name $loopCode // --\n"
+    Some(customLoopCode)
   }
 
   /* Custom implementation */
 
   /**
-   * generate the C code to read the value of the output port.
+   * Generate the C code to read the value of the output port.
    * @return the C code to read the output value
    */
   def getOutputValue: String
 
   /**
-   * Function used to set the input value of the input port.
-   * @param s the name of the variable or C code to set as input
-   * @return the C code generated to update the input of the port
+   * Read the value of the input port of the component.
+   * @return the value of the input (C code as a String)
    */
-  def setInputValue(s: String): String
+  def getInputValue: String = {
+    ComponentManager.findPredecessorOutputPort(in).getValue
+  }
 
   /**
    * Declare and initialize some global variables if necessary.
@@ -109,7 +107,7 @@ with In1 with Out1 with HwImplemented {
 
   /**
    * Custom component code to execute on each loop ticks.
-   * @return the code to execute on each loop
+   * @return the C code to execute on each loop, as String
    */
   def loopCode: String
 }

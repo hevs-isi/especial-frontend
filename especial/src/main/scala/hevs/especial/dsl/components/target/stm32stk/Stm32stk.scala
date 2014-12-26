@@ -8,6 +8,9 @@ import hevs.especial.dsl.components._
  *
  * Olimex development kit.
  * https://www.olimex.com/Products/ARM/ST/STM32-103STK/
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class Stm32stk extends Component with HwImplemented with NoIO {
   override val name = "Stm32stk"
@@ -79,7 +82,7 @@ object Stm32stkIO {
 
   // Button 2 on `PC.1`
   val btn2_pin = Pin('C', 1)
-  lazy val btn2 = DigitalInput(btn3_pin)
+  lazy val btn2 = DigitalInput(btn2_pin)
 
   // Button 1 on `PC.0`
   val btn1_pin = Pin('C', 0)

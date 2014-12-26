@@ -181,7 +181,6 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   // Init all outputs before the general init
   private def initOutputs(): String = {
     val ret = new StringBuilder
-    ret ++= "// Initialize all connected outputs automatically\n"
     val outputs = ComponentManager.findConnectedOutputHardware
     outputs map { cp => cp.asInstanceOf[HwImplemented].getInitCode match {
       // Add the code only if defined
