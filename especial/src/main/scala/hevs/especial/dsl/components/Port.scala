@@ -58,7 +58,7 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
   override def hashCode = id.## // Use by the graph library
 
   override def toString = {
-    val sConn = if(isConnected) "" else " (NC)"
+    val sConn = if (isConnected) "" else " (NC)"
     val cmpId = f"$getOwnerId%02d"
     s"Port[$id] '$name' of Cmp[$cmpId] '${getOwner.name}'$sConn"
   }
@@ -113,11 +113,10 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
   protected def checkType[A <: CType : TypeTag](that: InputPort[A]): Boolean = {
     val tpB = typeOf[A]
     // The output type must be the same type as the input type
-    if (tpe != tpB) {
+    if (tpe != tpB)
       throw PortTypeMismatch.create(this, that)
-      false
-    }
-    true // Type are correct. Connection is valid !
+    else
+      true // Type are correct. Connection is valid !
   }
 }
 
@@ -140,21 +139,12 @@ abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T
    */
   @throws(classOf[PortInputShortCircuit])
   final override def connect(): Unit = {
-      // Cannot connect an input with more than one output
-      if (connections > 0)
-        throw PortInputShortCircuit.create(this)
-      else
-        connections = 1
+    // Cannot connect an input with more than one output
+    if (connections > 0)
+      throw PortInputShortCircuit.create(this)
+    else
+      connections = 1
   }
-
-  // FIXME: pass the type of the port with the variable as argument, not a String ?
-
-  /**
-   * Function used to set the input value of the port.
-   * @param s the name of the variable or C code to set as input
-   * @return the C code generated to update the input of the port
-   */
-  protected[components] def setInputValue(s: String): String
 }
 
 /**
@@ -173,8 +163,8 @@ abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[
    * An output can be connected many times.
    */
   final override def connect(): Unit = {
-      // Connect this output port with one more input
-      connections += 1
+    // Connect this output port with one more input
+    connections += 1
   }
 
   /**
@@ -201,10 +191,13 @@ abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[
     true // Valid if no exception have been thrown
   }
 
-  // FIXME: return the type of the port, not a String ?
-
   /**
-   * generate the C code to read the value of this output port.
+   * Read the value of an [[OutputPort]].
+   *
+   * Usually, the output value of a component (for a specific port) is computed in the while loop. The result of the
+   * computation is stored in a local variable. To read the port value, the name of the local variable must be
+   * simply returned as a String.
+   *
    * @return the C code to read the output value
    */
   protected[components] def getValue: String

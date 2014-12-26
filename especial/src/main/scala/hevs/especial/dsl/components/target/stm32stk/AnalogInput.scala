@@ -45,16 +45,15 @@ class AnalogInput private(private val pin: Pin, private val channel: Int) extend
 
   override def getIncludeCode = Seq("analoginput.h")
 
-  override def getGlobalCode = Some(s"AnalogInput $valName($pinName, $channel); // $out")
+  override def getGlobalCode = Some(s"AnalogInput $valName($pinName, $channel);\t// $out")
 
-  override def getInitCode = Some(s"$valName.initialize(); // Init of $this")
+  override def getInitCode = Some(s"$valName.initialize();")
 
   override def getFunctionsDefinitions = {
     // Add a function to get the cached value of this input.
     val res = new StringBuilder
     res ++= s"${uint16().getType} $fctName() {\n"
-    res ++= "// Start an A/D conversion and wait for the result\n"
-    res ++= s"return $valName.read();\n"
+    res ++= s"return $valName.read(); // Start an A/D conversion and wait for the result\n"
     res ++= "}"
     Some(res.result())
   }

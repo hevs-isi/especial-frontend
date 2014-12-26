@@ -42,11 +42,11 @@ class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 wit
   private val valName = inValName()
   private val varName = s"in_${pin.port}${pin.pinNumber}"
 
-  override def getGlobalCode = Some(s"DigitalInput $valName($pinName); // $out")
+  override def getGlobalCode = Some(s"DigitalInput $valName($pinName);\t\t// $out")
 
   override def getInitCode = {
     val res = new StringBuilder
-    res ++= s"$valName.initialize(); // Init of $this"
+    res ++= s"$valName.initialize();"
     // Enabled by default
     // res ++= s"$valName.registerInterrupt(); // Use interrupts"
     Some(res.result())

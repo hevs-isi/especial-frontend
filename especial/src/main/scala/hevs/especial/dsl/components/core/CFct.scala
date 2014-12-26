@@ -41,10 +41,6 @@ with In1 with Out1 with HwImplemented {
   val in = new InputPort[I](this) {
     override val name = "in"
     override val description = "custom input"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: not used...
-    }
   }
 
   override def getOutputs = Some(Seq(out))
@@ -57,7 +53,10 @@ with In1 with Out1 with HwImplemented {
 
   override final def getIncludeCode = Nil
 
-  override final def getGlobalCode = {
+  override final def getGlobalCode: Option[String] = {
+    if(globalVars.isEmpty)
+      return None // No global definition
+
     // Global variables declaration
     val out = ListBuffer.empty[String]
     for (v <- globalVars) {
@@ -77,7 +76,7 @@ with In1 with Out1 with HwImplemented {
 
   override final def getLoopableCode = {
     // The custom component code to paste in the loop
-    val customLoopCode = s"\n// -- User input code of $name $loopCode // --\n"
+    val customLoopCode = s"\n// -- User input code of `$name` $loopCode // --\n"
     Some(customLoopCode)
   }
 

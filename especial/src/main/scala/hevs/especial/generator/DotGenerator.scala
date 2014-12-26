@@ -291,8 +291,7 @@ private class GraphDot(graphName: String, fileName: String) {
    * @return connections types as a String, displayed as edge label
    */
   private def labelName(w: Wire): String = {
-    // Display the type of the output port (from) -> the input port (to)
-    // Example: "bool -> bool"
-    s"${w.from.getTypeAsString}->${w.to.getTypeAsString}"
+    // Display the type of the input port (to). Example: "bool"
+    s"${w.to.getTypeAsString}"
   }
 }

@@ -219,23 +219,6 @@ object ComponentManager extends Logging {
     ret.map(x => x.value.asInstanceOf[Component]).toSet
   }
 
-  // Return a list of `InputPort`s that are connected
-  // FIXME: remove this ??
-  def findConnections(port: OutputPort[CType]): Seq[InputPort[CType]] = {
-    val cpFrom = cpGraph.nodes find (c => c.value.asInstanceOf[Component].equals(port.getOwner))
-    val edges = cpFrom.get.edges // all connections of this component (from and to components)
-
-    // Find all connections (wires/edges) of this component to OTHER components. This test must be included because
-    // it is not a filter on successors but on edges (because we need the label of the edge).
-    val connections = edges filter {
-      w => w.label.asInstanceOf[Wire].from == port && // Filter the OutputPort id
-        w.label.asInstanceOf[Wire].to.getOwnerId != port.getOwnerId // Must be another component
-    }
-    // Return only the InputPort of the connected component, extracted from the label of the edge
-    val tos = connections.toSeq.map(x => x.label.asInstanceOf[Wire].to)
-    tos
-  }
-
   /**
    * Get the [[OutputPort]] connected with the specified [[InputPort]].
    *

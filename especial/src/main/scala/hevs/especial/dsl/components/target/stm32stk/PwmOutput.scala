@@ -26,10 +26,6 @@ class PwmOutput private(private val pin: Pin) extends Gpio(pin) with In1 with Hw
   override val in = new InputPort[uint16](this) {
     override val name = s"in"
     override val description = "PWM output value"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: not used
-    }
   }
 
   override def getOutputs = None
@@ -41,13 +37,13 @@ class PwmOutput private(private val pin: Pin) extends Gpio(pin) with In1 with Hw
 
   override def getIncludeCode = Seq("pwmoutput.h")
 
-  override def getGlobalCode = Some(s"PwmOutput $valName($pinName); // $in")
+  override def getGlobalCode = Some(s"PwmOutput $valName($pinName);\t\t// $in")
 
   override def getInitCode = {
     // Initialize the output in the `initOutputs` function. Do it only once !
     if (!initialized) {
       initialized = true // Init code called once only
-      Some(s"$valName.initialize(); // Init of $this")
+      Some(s"$valName.initialize();")
     }
     else {
       // Output already initialized in the `initOutputs` function.

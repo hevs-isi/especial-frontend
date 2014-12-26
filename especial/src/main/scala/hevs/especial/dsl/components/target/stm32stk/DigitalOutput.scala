@@ -14,8 +14,7 @@ import hevs.especial.dsl.components._
  * @param pin the pin of the GPIO (port and pin number)
  * @param initValue the default value of the output when initialized
  */
-class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) extends
-  Gpio(pin) with In1 with HwImplemented {
+class DigitalOutput private(private val pin: Pin, initValue: Boolean) extends Gpio(pin) with In1 with HwImplemented {
 
   override val description = s"digital output\\non $pin"
 
@@ -28,10 +27,6 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) ex
   override val in = new InputPort[bool](this) {
     override val name = s"in"
     override val description = "digital output value"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: remove this
-    }
   }
 
   override def getOutputs = None
@@ -46,17 +41,19 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean = false) ex
 
   override def getIncludeCode = Seq("digitaloutput.h")
 
-  override def getGlobalCode = Some(s"DigitalOutput $valName($pinName); // $in")
+  override def getGlobalCode = Some(s"DigitalOutput $valName($pinName);\t// $in")
 
   override def getInitCode = {
     // Initialize the output in the `initOutputs` function. Do it only once !
     if (!initialized) {
       val res = new StringBuilder
-      res ++= s"$valName.initialize(); // Init of $this"
+      res ++= s"$valName.initialize();"
 
       // Default output value is off. Set to on afterwards if necessary.
-      if (initValue)
-        res ++= "\n" + in.setInputValue(String.valueOf(initValue)) + ";"
+      if (initValue) {
+        val value = String.valueOf(initValue)
+        res ++= s"\n$valName.set($value);"
+      }
 
       initialized = true // Init code called once only
       Some(res.result())

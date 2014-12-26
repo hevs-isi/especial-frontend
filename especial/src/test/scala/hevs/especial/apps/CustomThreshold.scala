@@ -6,18 +6,20 @@ import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.genenator.STM32TestSuite
 
 /**
- * Custom C component to create a simple threshold function.
+ * Sample application to create a custom threshold component.
+ * Read the input value of the potentiometer.
+ * If its value is bigger than the threshold, a led si ON, otherwise it is OFF.
  */
 class CustomThreshold extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
   def runDslCode(): Unit = {
-    val adc1 = Stm32stkIO.adc1
-    adc1.out --> Stm32stkIO.pwm3.in
+    val adc1 = Stm32stkIO.adc1.out
+    adc1 --> Stm32stkIO.pwm3.in
 
-    val threshold = Threshold()
-    adc1.out --> threshold.in
+    val threshold = Threshold(512)
+    adc1 --> threshold.in
     threshold.out --> Stm32stkIO.led1.in
   }
 
@@ -33,6 +35,7 @@ class CustomThreshold extends STM32TestSuite {
 
     /* I/O management */
     private val outVal = valName("threshold")
+
     override def getOutputValue: String = s"$outVal"
 
     /* Code generation */
@@ -40,10 +43,10 @@ class CustomThreshold extends STM32TestSuite {
       val outType = getTypeString[bool]
       val in = getInputValue
       s"""
-         |$outType $outVal = false;
-         |if($in > $threshold)
-         |  $outVal = true;
-      """.stripMargin
+       |$outType $outVal = false;
+       |if($in > $threshold)
+       |  $outVal = true;
+    """.stripMargin
     }
   }
 

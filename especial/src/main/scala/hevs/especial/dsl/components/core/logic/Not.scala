@@ -34,10 +34,6 @@ case class Not[T <: CType : TypeTag]() extends Component with In1 with Out1 with
   val in = new InputPort[T](this) {
     override val name = s"in"
     override val description = "input to invert"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: remove this ?
-    }
   }
 
   val out = new OutputPort[T](this) {

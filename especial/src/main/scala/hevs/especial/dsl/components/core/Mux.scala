@@ -30,10 +30,6 @@ abstract class Mux[T <: CType : TypeTag](nbrIn: Int) extends GenericCmp[T, T](nb
   val sel = new InputPort[uint8](this) {
     override val name = "sel"
     override val description = "the selection input"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: remove this ??
-    }
   }
   addCustomIn(sel)
 

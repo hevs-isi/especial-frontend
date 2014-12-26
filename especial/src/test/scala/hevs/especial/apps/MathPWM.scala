@@ -1,63 +1,56 @@
 package hevs.especial.apps
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.core.math.{Mul2, Add2, Div2, Sub2}
+import hevs.especial.dsl.components.core.logic.Not
+import hevs.especial.dsl.components.core.math.{Add2, Div2, Mul2, Sub2}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.dsl.components.{bool, uint16}
 import hevs.especial.genenator.STM32TestSuite
 
 /**
- * Use simple math blocks to create different PWM duty cycles.
- *
- * Generate different PWM duty cycles on LEDs 3 and 4 using math blocks.
+ * Use math blocks to compute different PWM duty cycles.
+ * Generate different PWM duty cycles on LEDs 3 and 4 using math operations from constant values.
  */
 class MathPWM extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
+  import hevs.especial.dsl.components.ImplicitTypes._
+
   def runDslCode(): Unit = {
-
-    import hevs.especial.dsl.components.ImplicitTypes._
-
     // Outputs
     val pwm3 = Stm32stkIO.pwm3.in
     val pwm4 = Stm32stkIO.pwm4.in
 
     // Input
-    val cst1 = Constant[uint16](4096)
-    val cst2 = Constant[uint16](2)
-    val cst3 = Constant[uint16](4)
-    val cst4 = Constant[uint16](2044)
-    val cst5 = Constant[uint16](512)
+    val cst1 = Constant[uint16](4096).out
+    val cst2 = Constant[uint16](2).out
+    val cst3 = Constant[uint16](4).out
+    val cst4 = Constant[uint16](2044).out
+    val cst5 = Constant[uint16](512).out
 
     // Logic
-    val tmp1 = Div2[uint16]()
-    cst1.out --> tmp1.in1
-    cst2.out --> tmp1.in2
 
-    val tmp2 = Div2[uint16]()
-    cst1.out --> tmp2.in1
-    cst3.out --> tmp2.in2
+    /*
+      val tmp1 = Div2()
+      cst1.out --> tmp1.in1
+      cst2.out --> tmp1.in2
+    */
 
-    val tmp3 = Add2[uint16]()
-    tmp1.out --> tmp3.in1
-    cst4.out --> tmp3.in2
+    val tmp1 = Div2(cst1, cst2)
+    val tmp2 = Div2(cst1, cst3)
+    val tmp3 = Add2(tmp1.out, cst4)
+    val tmp4 = Sub2(cst5, tmp2.out)
+    val tmp5 = Mul2(tmp3.out, cst5)
 
-    val tmp4 = Sub2[uint16]()
-    tmp2.out --> tmp4.in1
-    cst5.out --> tmp4.in2
+    tmp5.out --> pwm4 // PWM period = 4096 (100.0% duty)
+    tmp4.out --> pwm3 // PWM period = 1536 (037.5% duty)
 
-    val tmp5 = Mul2[uint16]()
-    tmp3.out --> tmp5.in1
-    cst5.out --> tmp5.in2
+    val cst = Constant[bool](false).out
 
-    //tmp5.out --> pwm4 // PWM period = 4096 (100.0% duty)
-    //tmp4.out --> pwm3 // PWM period = 1536 (037.5% duty)
+    val not = Not(cst)
 
-    Constant[uint16](2048).out --> pwm4
-    Constant[uint16](1024).out --> pwm3
-
-    Constant[bool](true).out --> Stm32stkIO.led2.in
+    not.out --> Stm32stkIO.led2.in
     Constant[bool](true).out --> Stm32stkIO.led1.in
   }
 

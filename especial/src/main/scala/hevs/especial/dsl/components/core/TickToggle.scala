@@ -4,6 +4,15 @@ import hevs.especial.dsl.components._
 
 import scala.reflect.runtime.universe._
 
+object TickToggle {
+
+  def apply[T <: CType : TypeTag](input: OutputPort[T]) = {
+    val c = new TickToggle[T]
+    input --> c.in
+    c
+  }
+}
+
 /**
  * Toggle the output value on each loop iteration.
  * Used for test purposes only. Useful to generate different values for each loop iterations.
@@ -26,10 +35,6 @@ case class TickToggle[T <: CType : TypeTag]() extends Component with Out1 with H
   val in = new InputPort[T](this) {
     override val name = s"in"
     override val description = "inverted value"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: remove this ?
-    }
   }
 
   val out = new OutputPort[T](this) {

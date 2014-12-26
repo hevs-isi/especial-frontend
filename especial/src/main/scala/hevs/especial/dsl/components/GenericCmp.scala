@@ -63,10 +63,6 @@ abstract class GenericCmp[S <: CType : TypeTag, T <: CType : TypeTag](nbrIn: Int
     // 'in' - or - 'in1', 'in2', etc. if more than 1 input
     override val name = if (nbrIn > 1) s"in${index + 1}" else "in"
     override val description = if (nbrIn > 1) s"input ${index + 1}" else "input"
-
-    override def setInputValue(s: String) = {
-      "" // FIXME: remove this ?
-    }
   }
 
   private def createOutput(index: Int) = new OutputPort[T](this) {
