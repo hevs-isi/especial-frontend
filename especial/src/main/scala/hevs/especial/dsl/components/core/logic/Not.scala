@@ -4,6 +4,16 @@ import hevs.especial.dsl.components._
 
 import scala.reflect.runtime.universe._
 
+object Not {
+
+  def apply[T <: CType : TypeTag](input: OutputPort[T]): Not[T] = {
+    // Connect automatically the single input
+    val n = Not[T]()
+    input --> n.in
+    n
+  }
+}
+
 /**
  * Inversion block use to invert a single input.
  *
