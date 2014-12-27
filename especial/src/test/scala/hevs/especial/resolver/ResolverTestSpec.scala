@@ -18,13 +18,16 @@ abstract class ResolverTestSpec extends FunSuite with Matchers {
    * Resolve the current graph and return the result of the resolver.
    * @return the result of the resolver
    */
-  def testResolver(): Map[Int, Set[Component]] = {
+  def testResolver(testId: Int = 0): Map[Int, Set[Component]] = {
+
+    ctx.log.info(s"Resolver started for 'ResolverCode$testId'.")
+
     // Create a new logger and a new resolver for each tests
     r = new Resolver
     val res = r.run(ctx)(Unit)
 
     ctx.log.terminateIfErrors(r)
-    ctx.log.info("Result:\n" + res.mkString("\n"))
+    ctx.log.info("--\n")
     res
   }
 }

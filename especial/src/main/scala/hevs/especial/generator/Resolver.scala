@@ -68,7 +68,7 @@ class Resolver extends Pipeline[Unit, O] {
       val warn = s"Nothing to resolve: $connectedNbr connected " +
         (if (connectedNbr < 2) "component" else "components") + s" ($unconnectedNbr unconnected)"
       log.warn(warn)
-      mapSolve += (0 -> Set(ComponentManager.findConnectedInputHardware.head))
+      mapSolve += (nbrOfPasses -> Set(ComponentManager.findConnectedInputHardware.head))
       return mapSolve.toMap
     }
     else if (connectedNbr == 0) {
@@ -85,8 +85,7 @@ class Resolver extends Pipeline[Unit, O] {
     } while (generatedCpId.size != connectedNbr && nbrOfPasses < Settings.RESOLVER_MAX_PASSES)
 
     // Last pass. Generate code for all outputs.
-    val out = genConnectedOutput(log)
-    mapSolve += (nbrOfPasses -> genConnectedOutput(log))
+    genConnectedOutput(log)
 
     if (generatedCpId.size == connectedNbr) {
       log.trace(s"Resolver ended successfully after $numberOfPasses passes for ${generatedCpId.size} connected " +
@@ -108,19 +107,9 @@ class Resolver extends Pipeline[Unit, O] {
    */
   def numberOfPasses = nbrOfPasses
 
-  private def genConnectedOutput(l: Logger): Set[Component] = {
-    val out = ComponentManager.findConnectedOutputHardware
-    for (c <- out if !generatedCpId.contains(c.getId)) {
-      l.trace(s" > Generate code for output: $c")
-      val cp = c.asInstanceOf[Component]
-      codeGeneratedFor(cp.getId)
-    }
-    endPass()
-    out // HW component to generate
-  }
-
   /**
    * Compute one pass of resolving the graph.
+   * @param l the logger to display debug information
    * @return component to generate for this pass
    */
   private def nextPass(l: Logger): Set[Component] = {
@@ -184,6 +173,25 @@ class Resolver extends Pipeline[Unit, O] {
         endPass()
         genCp.toSet // HW component to generate (immutable Set)
     }
+  }
+
+  /**
+   * Generate the code for all outputs for the last pass.
+   *
+   * @param l the logger to display debug information
+   * @return output components to generate for the last pass
+   */
+  private def genConnectedOutput(l: Logger): Set[Component] = {
+    // Find all output components
+    val out = ComponentManager.findConnectedOutputHardware
+    startPass(l)
+    for (c <- out)
+      l.trace(s" > Generate code for output: $c")
+
+    mapSolve += (nbrOfPasses -> out)
+    endPass()
+
+    out // Output components to generate
   }
 
   private def startPass(l: Logger) = {
