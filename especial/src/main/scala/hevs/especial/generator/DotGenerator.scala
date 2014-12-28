@@ -35,11 +35,6 @@ class DotGenerator extends Pipeline[Option[String], Unit] {
    * @return nothing (not used). Update the program graph directly.
    */
   def run(ctx: Context)(fileNameSuffix: Option[String]): Unit = {
-    // First block of the pipeline. Force to clean the output folder.
-    // FIXME. clear the output folder before starting the test task
-    // val folder: RichFile = new File("output/")
-    // folder.createEmptyFolder()
-
     if (!Settings.PIPELINE_RUN_DOT) {
       ctx.log.info(s"$currentName is disabled.")
       return
@@ -256,7 +251,7 @@ private class GraphDot(graphName: String, fileName: String) {
     // Return the ID of the port with a label
     l.map(
       x => {
-        val nc = if (x.isNotConnected) "\\n (NC)" else ""
+        val nc = if (x.isNotConnected) " (NC)" else ""
         x match {
           case _: InputPort[_] => s"<${portId(x)}> ${x.name}$nc"
           case _: OutputPort[_] => s"<${portId(x)}> ${x.name}$nc"

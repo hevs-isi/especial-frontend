@@ -4,8 +4,6 @@ import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.utils.ComponentNotFound
 
-import scala.collection.mutable
-import scalax.collection.edge.Implicits._
 import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
 
@@ -80,12 +78,18 @@ object ComponentManager extends Logging {
     cpGraph.remove(node)
   }
 
-  def numberOfNodes = cpGraph.order // order of a graph is the number of nodes
+  /**
+   * Order of the graph.
+   * @return the number of nodes in the graph (order of the graph)
+   */
+  def numberOfNodes = cpGraph.order
 
+  /**
+   * @return the number of edges
+   */
   def numberOfEdges = cpGraph.edges.size
 
-  // FIXME: should not have access to the graph "as is"
-  def getDotGraph = cpGraph
+  def getDotGraph = cpGraph // Used by the `dot` generator
 
   /**
    * Remove all components from the graph and clear all previous IDs.
@@ -116,6 +120,7 @@ object ComponentManager extends Logging {
     // Add the connection (wire) between these to ports.
     // The edge is directed with a key label. The label must be a key because an output can be connected to multiple
     // inputs. It must be possible to add multiple wire from an to the same nodes, with different labels.
+    import scalax.collection.edge.Implicits._
     val outer = (cpFrom ~+#> cpTo)(w)
     cpGraph += outer
   }

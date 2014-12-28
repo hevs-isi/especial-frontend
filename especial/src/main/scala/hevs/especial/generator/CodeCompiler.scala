@@ -14,6 +14,7 @@ class CodeCompiler extends Pipeline[String, String] {
 
   /**
    * Compile the generate code.
+   * The compilation works on Linux only for now.
    *
    * @param ctx the context of the program with the logger
    * @param input the path of the generated C file
@@ -39,14 +40,13 @@ class CodeCompiler extends Pipeline[String, String] {
         return "" // Fatal error
     }
 
-    // FIXME: Must be on Linux for now...
+    // FIXME: Must be on Linux for now... clean the project first ? Add a script for each platform.
     if (!OSUtils.isLinux) {
       ctx.log.error("Must be on Linux do compile the generated code !")
       return "" // Fatal error
     }
 
     // Ready to make
-    // FIXME: clean the project first ? Add a script for each platform.
     ctx.log.info("Start compiling for QEMU...")
     val makeRes = OSUtils.runWithCodeResult("/usr/bin/make -r -j4 -C csrc/target-qemu/ all")
     if (makeRes._1 != 0) {

@@ -93,7 +93,11 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
    */
   protected[components] def connect(): Unit
 
-  private[components] def disconnect(): Unit = {
+  /**
+   * Reset the number of connections for this port.
+   * Used for test purpose only.
+   */
+  def disconnect(): Unit = {
     // Just reset the number of connection.
     // The port is now considered as unconnected, but the graph will NOT be modified in this method.
     connections = 0
