@@ -116,6 +116,10 @@ class Resolver extends Pipeline[Unit, O] {
 
     startPass(l)
 
+    // Save components ID to generate in this pass.
+    // Save ID at the end of the pass only, or the result can be corrupted.
+    val idToGen = mutable.Set.empty[Int]
+
     nbrOfPasses match {
 
       // First passe. Generate code for all inputs.
@@ -124,7 +128,7 @@ class Resolver extends Pipeline[Unit, O] {
         for (c <- in) {
           l.trace(s" > Generate code for: $c")
           val cp = c.asInstanceOf[Component]
-          codeGeneratedFor(cp.getId)
+          idToGen += cp.getId
         }
 
         // All output are added manually at the end
@@ -134,7 +138,9 @@ class Resolver extends Pipeline[Unit, O] {
           generatedCpId += cp.getId
         }
 
+        idToGen foreach codeGeneratedFor
         endPass()
+
         in // HW component to generate
 
 
@@ -160,7 +166,7 @@ class Resolver extends Pipeline[Unit, O] {
               }
               else {
                 l.trace(s" > Generate code for: $cp")
-                codeGeneratedFor(cp.getId)
+                idToGen += cp.getId
                 genCp += cp
               }
             }
@@ -170,7 +176,11 @@ class Resolver extends Pipeline[Unit, O] {
             }
           }
         }
+
+        // At the end of the pass, save all ID to generate
+        idToGen foreach codeGeneratedFor
         endPass()
+
         genCp.toSet // HW component to generate (immutable Set)
     }
   }
