@@ -15,14 +15,16 @@ import scalax.collection.io.dot._
 /**
  * Generate a diagram of the current program. Export a `dot` and a `pdf` file.
  *
- * Export the component graph to a `dot` file using the Dot extension of the ScalaGraph library. Can be disabled
- * using the general [[hevs.especial.utils.Settings]].
+ * Export the component graph to a `dot` file using the Dot extension of the ScalaGraph library (must be at
+ * least version `1.10.0`, or shape record are not supported).
+ * Can be disabled using the general [[hevs.especial.utils.Settings]].
  *
  * The DOT diagram and the PDF are exported to the `output/<progName>/dot` folder.
  * The name of the generated file is the program name (available in the context). The user can add a suffix to the
  * generated file name so different diagrams of the same program can be exported..
  *
- * @version 2.0
+ * @version 2.1
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class DotGenerator extends Pipeline[Option[String], Unit] {
 
@@ -164,7 +166,11 @@ private class GraphDot(graphName: String, fileName: String) {
 
   // General diagram settings
   private val name = "\"\\n\\nVisualisation of the '" + graphName + "' program.\\n" + fileName + "\""
-  private val root = DotRootGraph(directed = true, id = Some("G"), kvList = Seq(DotAttr("label", name)))
+  private val root = DotRootGraph(
+    directed = true, // directed graph
+    id = Some(Id("G")), // graph name
+    attrList = Seq(DotAttr(Id("label"), Id(name))) // graph title displayed on the bottom
+  )
 
   /**
    * Generate the DOT diagram of the `ComponentManager` graph.
@@ -201,16 +207,16 @@ private class GraphDot(graphName: String, fileName: String) {
     // Different shape if no input and no output. Draw a rectangle.
     if (in.isEmpty && out.isEmpty) {
       shape = s"${nodeName(n)}"
-      attrs += DotAttr("color", "dimgrey")
-      attrs += DotAttr("shape", "record")
+      attrs += DotAttr(Id("color"), Id("dimgrey"))
+      attrs += DotAttr(Id("shape"), Id("record"))
     }
 
     // Change the border color for unconnected nodes
     else if (!n.isConnected)
-      attrs += DotAttr("color", "orange")
+      attrs += DotAttr(Id("color"), Id("orange"))
 
-    val node = "\"" + nodeId(n) + "\""
-    Some(root, DotNodeStmt(node, Seq(DotAttr("label", shape)) ++ attrs))
+    val node = NodeId(nodeId(n))
+    Some(root, DotNodeStmt(node, Seq(DotAttr(Id("label"), Id(shape))) ++ attrs))
   }
 
   /**
@@ -229,10 +235,10 @@ private class GraphDot(graphName: String, fileName: String) {
    * @param c the Component
    * @return the ID formatted as a String
    */
-  private def nodeId(c: Component): String = {
+  private def nodeId(c: Component): Id = {
     // String ID to create a `DotNodeStmt`.
     // According to the DOT grammar "http://www.graphviz.org/content/dot-language",
-    f"cmp${c.getId}%03d"
+    Id(f"cmp${c.getId}%03d")
   }
 
   /**
@@ -240,7 +246,7 @@ private class GraphDot(graphName: String, fileName: String) {
    * @param p the Port
    * @return the ID formatted as a String
    */
-  private def portId(p: Port[_]): String = f"p${p.getId}%02d"
+  private def portId(p: Port[_]): Id = Id(f"p${p.getId}%02d")
 
   /**
    * Format a list of input or output of a component. Check if it is connected or not and display it.
@@ -269,14 +275,14 @@ private class GraphDot(graphName: String, fileName: String) {
     val edge = innerEdge.edge
     val label: Wire = edge.label.asInstanceOf[Wire]
 
-    // Create the connection between two nodes. Example: "001:0 -> 002:0 [label = bool]"
+    // Create the connection between two nodes. Example: "cmp001:p00 -> cmp002:p00 [label = bool]"
     // Nodes are the components and identified by a unique ID, like ports.
     val from = edge.from.value.asInstanceOf[Component]
-    val sFrom = nodeId(from) + ":" + portId(label.from)
+    val sFrom = NodeId(nodeId(from), portId(label.from))
     val to = edge.to.value.asInstanceOf[Component]
-    val sTo = nodeId(to) + ":" + portId(label.to)
+    val sTo = NodeId(nodeId(to), portId(label.to))
 
-    val attrs = Seq(DotAttr("label", labelName(label)))
+    val attrs = Seq(DotAttr(Id("label"), labelName(label)))
     Some(root, DotEdgeStmt(sFrom, sTo, attrs))
   }
 
@@ -285,8 +291,8 @@ private class GraphDot(graphName: String, fileName: String) {
    * @param w the wire to display as a edge label
    * @return connections types as a String, displayed as edge label
    */
-  private def labelName(w: Wire): String = {
+  private def labelName(w: Wire): Id = {
     // Display the type of the input port (to). Example: "bool"
-    s"${w.to.getTypeAsString}"
+    Id(s"${w.to.getTypeAsString}")
   }
 }
