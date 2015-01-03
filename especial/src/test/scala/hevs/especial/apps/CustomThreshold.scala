@@ -6,9 +6,14 @@ import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.genenator.STM32TestSuite
 
 /**
- * Sample application to create a custom threshold component.
- * Read the input value of the potentiometer.
- * If its value is bigger than the threshold, a led si ON, otherwise it is OFF.
+ * Sample application using a custom C component and the extension board.
+ *
+ * Read the analog input value of the potentiometer.
+ * If its value is bigger than the threshold, the `led1` si ON, otherwise OFF.
+ * The analog value of the potentiometer is displayed using a PWM output on `led3`.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class CustomThreshold extends STM32TestSuite {
 

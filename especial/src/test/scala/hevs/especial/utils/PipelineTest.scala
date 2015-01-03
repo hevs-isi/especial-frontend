@@ -3,7 +3,10 @@ package hevs.especial.utils
 import org.scalatest.{FunSuite, Matchers}
 
 /**
- * Test the result and the type of some simple `Pipeline`.
+ * Test the result and the type of some simple pipeline blocks.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class PipelineTest extends FunSuite with Matchers {
 

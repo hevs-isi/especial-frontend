@@ -33,7 +33,8 @@ abstract class STM32TestSuite extends FunSuite {
       return checkErrors() // Execute the DSL code only once
     }
 
-    ComponentManager.reset() // Delete all previous components
+    // Reset. Delete all previous components.
+    ComponentManager.reset()
 
     // Add the target as a component with the logger or not
     ctx.isQemuLoggerEnabled match {
@@ -149,9 +150,6 @@ abstract class STM32TestSuite extends FunSuite {
       val res = optimizer.run(ctx)(Unit)
       assert(res, "Code optimizer not enabled !")
       assert(CodeChecker.hasWarnings == hasWarnings, "Warnings found after the optimizer !")
-
-      // assert(optimizer.numberOfPasses == 1)
-      // assert(optimizer.numberOfRemovedCmp == 1)
     }
   }
 

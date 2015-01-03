@@ -5,7 +5,12 @@ import hevs.especial.generator.VcdGenerator
 import hevs.especial.utils.Context
 import org.scalatest.FunSuite
 
-
+/**
+ * Generate a predefined output sequence to a VCD file.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ */
 class VcdGeneratorTest extends FunSuite {
 
   val gen = new VcdGenerator()

@@ -5,6 +5,12 @@ import java.io.IOException
 import grizzled.slf4j.Logging
 import org.scalatest.FunSuite
 
+/**
+ * Check the OS and run some valid and invalid commands.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ */
 class OSUtilsTest extends FunSuite with Logging {
 
   test("Check OS type") {

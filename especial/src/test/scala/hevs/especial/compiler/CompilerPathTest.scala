@@ -4,8 +4,13 @@ import hevs.especial.generator.VcdGenerator
 import hevs.especial.simulation.{Events, Monitor}
 import hevs.especial.utils.{Context, OSUtils, Settings}
 
+// TODO: check this ?
+
 /**
  * Path example from a program to the QEMU simulation.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class CompilerPathTest extends MonitorTest {
 

@@ -7,6 +7,9 @@ import org.scalatest.{FunSuite, Matchers}
 
 /**
  * Helper methods for the `Resolver` test suite using the `ScalaTest` library.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 abstract class ResolverTestSpec extends FunSuite with Matchers {
 

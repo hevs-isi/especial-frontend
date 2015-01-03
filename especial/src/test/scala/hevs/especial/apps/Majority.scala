@@ -1,15 +1,14 @@
 package hevs.especial.apps
 
-import hevs.especial.dsl.components.core.logic.{And2, Or2, Or3}
+import hevs.especial.dsl.components.core.logic.{And2, Or3}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.genenator.STM32TestSuite
 
 /**
  * Three inputs majority logic circuit.
  *
- * Buttons 2 (A), 3 (B) and 4 (C) are the 3 inputs.
- * The led1 (OA) is `ON` if at least two button are pressed (majority indication, method 1).
- * The led2 (OB) is `ON` if at least two button are pressed (majority indication, method 2).
+ * Buttons `btn1`(A), `btn2`(B) and `btn3`(C) are the 3 inputs.
+ * The `led1` (OA) is ON if at least two button are pressed (majority indication, method 1).
  *
  * A B C | O
  * ----- | -
@@ -24,13 +23,15 @@ import hevs.especial.genenator.STM32TestSuite
  *
  * OA = AB + BC + AC
  * OB = B(A + C) + AC
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class Majority extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
   // TODO: add boolean operators as syntactic sugar
-
   def runDslCode(): Unit = {
 
     // Inputs

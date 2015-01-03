@@ -2,6 +2,12 @@ package hevs.especial.utils
 
 import org.scalatest.FunSuite
 
+/**
+ * Print some debug and error messages to check the pipeline [[Logger]] behaviour.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ */
 class LoggerTest extends FunSuite {
   test("print various messages") {
 

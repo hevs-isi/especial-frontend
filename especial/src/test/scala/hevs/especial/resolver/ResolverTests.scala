@@ -64,8 +64,13 @@ class ResolverCode5 {
 }
 
 /**
- * Test specification for the `Resolver` class.
- * Contains some tests and checks for the `ComponentManager`.
+ * Test specification for the [[hevs.especial.generator.Resolver]] class.
+ * Contains also some tests and checks for the [[ComponentManager]].
+ *
+ * Create some specific test-case programs and check the resolver output.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class ResolverTest extends ResolverTestSpec {
 

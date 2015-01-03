@@ -7,11 +7,15 @@ import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch}
 import org.scalatest.{FunSuite, Matchers}
 
 /**
- * Test input and output port connections.
+ * Test input and output ports connections.
  *
  * Connection types must be the same, or a `PortTypeMismatch` exception is thrown.
  * An output can be connected to different inputs, but an input can only have one connection,
  * or a `PortInputShortCircuit` exception is thrown.
+ * Also check if the creation of anonymous components works.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class PortTests extends FunSuite with Matchers {
 
@@ -65,7 +69,6 @@ class PortTests extends FunSuite with Matchers {
     DigitalInput(Pin('A', 1)).out --> led1.in
     DigitalInput(Pin('A', 1)).out --> led2.in
   }
-
 
 
   test("Input to output") {
