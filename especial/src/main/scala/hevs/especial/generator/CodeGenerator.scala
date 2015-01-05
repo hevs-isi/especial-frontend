@@ -8,8 +8,16 @@ import hevs.especial.simulation.QemuLogger
 import hevs.especial.utils._
 
 /**
- * To generate the C code of a program, the `Resolver` class must be used to first resolve the graph,
- * and then generate the code for each connected components in the right order.
+ * Output code generator.
+ *
+ * To generate the C code of a program, the [[Resolver]] must be used to resolve the graph first, and then to generate
+ * the code for each connected components in the right order. Each component generates must generate its code, divided
+ * in different sections.
+ * The `while` loop is divided in 3 sections: 1) Read inputs 2) Loop logic and 3) Update outputs.
+ * Comments will be added to the generated code if [[Settings.GEN_VERBOSE_CODE]] is set.
+ *
+ * @author Christopher Metrailler (mei@hevs.ch)
+ * @version 2.0
  */
 class CodeGenerator extends Pipeline[Resolver.O, String] {
 
@@ -105,7 +113,8 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
         case _ =>
       }
 
-      result ++= beginSection(idx) // Print the section name
+      if (Settings.GEN_VERBOSE_CODE)
+        result ++= beginSection(idx) // Print the section name
 
       // Add static code when sections start
       idx match {
@@ -125,18 +134,26 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       cps.zipWithIndex map { c =>
 
         val cpNbr = c._2 // Iteration number
-        val cp = c._1 // Component to generate
+      val cp = c._1 // Component to generate
 
         // While loop code section for the first component
-        if (idx == 5 && cpNbr == 0)
-          result ++= "// 1) Read inputs\n"
+        if (idx == 5 && cpNbr == 0) {
+          if (Settings.GEN_VERBOSE_CODE)
+            result ++= "// 1) Read inputs"
+          result ++= "\n"
+        }
 
-        if (idx == 5 && cpNbr == firstLogicIdx)
-          result ++= "\n// 2) Loop logic\n"
+        if (idx == 5 && cpNbr == firstLogicIdx) {
+          if (Settings.GEN_VERBOSE_CODE)
+            result ++= "\n// 2) Loop logic"
+          result ++= "\n"
+        }
 
-        if(idx == 5 && cpNbr == firstOutputIndex)
-          result ++= "\n// 3) Update outputs\n"
-
+        if (idx == 5 && cpNbr == firstOutputIndex) {
+          if (Settings.GEN_VERBOSE_CODE)
+            result ++= "\n// 3) Update outputs"
+          result ++= "\n"
+        }
 
         // Add the component code for the section (if defined)
         sec._1(cp.asInstanceOf[HwImplemented]) match {
@@ -156,7 +173,8 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
         case _ =>
       }
 
-      result ++= endSection() // Print the end of the section
+      if (Settings.GEN_VERBOSE_CODE)
+        result ++= endSection() // Print the end of the section
     }
 
     if (ctx.isQemuLoggerEnabled)

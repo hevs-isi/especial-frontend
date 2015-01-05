@@ -34,6 +34,12 @@ object Settings {
   val RESOLVER_MAX_PASSES: Int = 64
 
 
+  /* CODE GENERATOR */
+
+  /** Generate a verbose C/C++ code with comments and section names or not. */
+  val GEN_VERBOSE_CODE: Boolean = true
+
+
   /* CODE FORMATTER */
 
   /**
