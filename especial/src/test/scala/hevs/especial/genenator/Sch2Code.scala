@@ -16,7 +16,7 @@ class Sch2Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  import hevs.especial.dsl.components.ImplicitTypes._
+  import hevs.especial.dsl.components.CType.Implicits._
 
   def runDslCode(): Unit = {
     // Inputs

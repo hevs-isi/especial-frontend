@@ -1,7 +1,6 @@
 package hevs.especial.apps
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.core.logic.Not
 import hevs.especial.dsl.components.core.math.{Add2, Div2, Mul2, Sub2}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.dsl.components.{bool, uint16}
@@ -18,7 +17,7 @@ class MathPWM extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  import hevs.especial.dsl.components.ImplicitTypes._
+  import hevs.especial.dsl.components.CType.Implicits._
 
   def runDslCode(): Unit = {
     // Outputs

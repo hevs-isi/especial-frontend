@@ -76,12 +76,6 @@ class PortTests extends FunSuite with Matchers {
   }
 
   class PortCode7 {
-
-    import hevs.especial.dsl.components.CType.Implicits._
-
-    val cst1 = Constant(uint8(128))
-    val cst2 = Constant[bool](true)
-
     // Thrown an error when the same I/O is used with different types
     val pin = Pin('A', 1)
     val out1 = DigitalOutput(pin)
