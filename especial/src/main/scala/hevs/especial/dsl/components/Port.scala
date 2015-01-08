@@ -13,13 +13,16 @@ import scala.reflect.runtime.universe._
  *
  * @param owner the component owner of the port
  * @tparam T the type of the data transported through the port
+ *
+ * @version 1.1
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
-  // Name required
+  /** The port name is required to identify it. */
   val name: String
 
-  // Optional description
+  /** Optional port description. */
   protected val description: String = ""
 
   // Unique port ID generated from the component owner
@@ -31,6 +34,7 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
   // - An output port can have many.
   protected var connections = 0
 
+  /** @see isConnected */
   def isNotConnected = !isConnected
 
   /**
@@ -41,6 +45,11 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
    */
   def isConnected = connections > 0
 
+  /**
+   * Check if two ports are the same (equals). Ports are identified by a unique ID.
+   * @param other other object to equals
+   * @return `true` if the port as the same ID
+   */
   override def equals(other: Any) = other match {
     // A port ID must be unique. The type of the Port is not checked here.
     case that: Port[_] => that.getId == this.id
@@ -48,9 +57,8 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
   }
 
   /**
-   * Get the unique ID of the `Port`.
-   * Use by the graph library to make edges between ports.
-   *
+   * Get the unique ID of the [[Port]].
+   * Used by the graph library to make edges between ports.
    * @return the unique id of the port
    */
   def getId: Int = id
@@ -65,7 +73,6 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
   /**
    * Return the value type of the port as a `String`.
-   *
    * @see getType
    * @return the value type of the port (ex: `bool`)
    */
@@ -118,7 +125,7 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
     val tpB = typeOf[A]
     // The output type must be the same type as the input type
     if (tpe != tpB)
-      throw PortTypeMismatch.create(this, that)
+      throw PortTypeMismatch(this, that)
     else
       true // Type are correct. Connection is valid !
   }
@@ -145,7 +152,7 @@ abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T
   final override def connect(): Unit = {
     // Cannot connect an input with more than one output
     if (connections > 0)
-      throw PortInputShortCircuit.create(this)
+      throw PortInputShortCircuit(this)
     else
       connections = 1
   }
@@ -161,6 +168,13 @@ abstract class InputPort[+T <: CType : TypeTag](owner: Component) extends Port[T
 abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[T](owner) {
 
   override def toString = "Output" + super.toString
+
+  /**
+   * Indicates if the port output is a constant value or not.
+   * Not a constant output by default.
+   * If all inputs are constant values, the output is automatically converted to a constant value.
+   */
+  val isConstant: Boolean = false // FIXME: test this ? Subclass CstOutputPort ?
 
   /**
    * Set this port as connected.
@@ -202,7 +216,9 @@ abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[
    * computation is stored in a local variable. To read the port value, the name of the local variable must be
    * simply returned as a String.
    *
-   * @return the C code to read the output value
+   * @return the C code to read the output value or the value itself (a variable name or a constant value)
    */
-  protected[components] def getValue: String
+  def getValue: String
 }
+
+

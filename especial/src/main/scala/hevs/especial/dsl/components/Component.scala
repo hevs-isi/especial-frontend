@@ -1,17 +1,23 @@
 package hevs.especial.dsl.components
 
 import hevs.especial.dsl.components.ComponentManager.IdGenerator
+
 import scala.reflect.runtime.universe._
 
 /**
- * Base class for all components (blocks) used in a program. These components, with there connections,
- * are stored only once in the graph. Methods `equals` and `hashCode` are used for that (class equality). Each
- * component has a unique `ìd` and each port of it has also a unique ID (`newUniquePortId` function) inside the
- * component. When a component is created, it is automatically added to the graph,
- * which is managed by the `ComponentManager`.
- * By default, a components has no input and no output.
+ * Base class for all components (blocks) used in a program.
+ *
+ * These components, with there connections, are stored only once in the graph. Methods `equals` and `hashCode` are used
+ * for that (class equality). Each component has a unique `ìd` and each port of it has also a unique ID
+ * (`newUniquePortId` function) inside the component. When a component is created, it is automatically added to the
+ * graph, which is managed by the [[ComponentManager]]. By default, a components has no input and no output.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 abstract class Component {
+
+  // TODO: extends HwImplemented et enlever partout ailleur ???
 
   /** Name of the component class. Default is the class name. */
   val name: String = this.getClass.getSimpleName // Example: Component
@@ -55,7 +61,7 @@ abstract class Component {
 
   protected def getTypeClass[T <: CType : TypeTag]: Class[_] = {
     val mirror = runtimeMirror(getClass.getClassLoader)
-     mirror.runtimeClass(typeOf[T].typeSymbol.asClass)
+    mirror.runtimeClass(typeOf[T].typeSymbol.asClass)
     // clazz.newInstance().asInstanceOf[T] // If instance is necessary
   }
 
@@ -83,7 +89,7 @@ abstract class Component {
    * Create a custom and unique variable name.
    * Used by the component in the generated code.
    * @param prefix name of the variable (used as prefix)
-   * @return variable name with the component number
+   * @return variable name with the component number (example prefix_cmp02)
    */
   def valName(prefix: String) = {
     val cmpId = f"$id%02d"
@@ -132,13 +138,18 @@ abstract class Component {
 
   override def toString = s"Cmp[$id] '$name'"
 
-  // Used by the graph library
+  /**
+   * Equals components.
+   * Each component are identified by a unique generated ID. Used by the graph library.
+   *
+   * @param other object to equals
+   * @return `true` if the component ID is the same, `false` otherwise
+   */
   override def equals(other: Any) = other match {
     // A component ID must be unique
     case that: Component => that.id == this.id
     case _ => false
   }
-
-  // Used by the graph library
-  override def hashCode = id.##
+  
+  override def hashCode = id.## // Used by the graph library
 }

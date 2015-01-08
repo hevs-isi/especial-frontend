@@ -2,19 +2,43 @@ package hevs.especial.dsl.components
 
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.utils.ComponentNotFound
+import hevs.especial.utils.{ComponentNotFound, IoTypeMismatch}
 
 import scalax.collection.edge.LDiEdge
 import scalax.collection.mutable.Graph
 
+//import scalax.collection.constrained.constraints.Acyclic
+//import scalax.collection.constrained.mutable._
+
+
 /**
- * Object used to store all components declared in the code. These components are stored in a graph. This data
- * structure is useful to find any types of components, connected or not, to fin its direct successors, etc.
+ * Object used to store all components declared in the code.
+ *
+ * Components are stored in single and shared graph.
+ * This data structure is useful to find any types of components, connected or not, to fin its direct successors, etc.
+ *
+ * Each component is identified by a unique generated ID (see [[hevs.especial.dsl.components.ComponentManager.IdGenerator]].
+ * It can be stored only once in the graph. A [[hevs.especial.dsl.components.ComponentManager.Wire]] is used as an
+ * edge label to store a connection of two components ports.
+ *
+ * @version 1.1
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 object ComponentManager extends Logging {
 
+  // FIXME: test DAG
+  // implicit val conf: Config = Acyclic
+
+  //def dagConstraint = Acyclic withStringPrefix "DAG"
+  /** Default (immutable) directed acyclic `Graph`. */
+  // type DAG[N] = Graph[N,DiEdge]
+  /** Companion module for default (immutable) directed acyclic `Graph`. */
+  // object DAG extends CompanionAlias[DiEdge](dagConstraint)
+
   /** Mutable graph representation of all the components of the program. */
   protected val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
+
+  import scala.language.higherKinds
 
   // Used to generate a unique ID for each component
   private val cmpIdGen: IdGenerator = {
@@ -33,9 +57,14 @@ object ComponentManager extends Logging {
    * Insert a component in the graph.
    *
    * Each component has a unique ID and can be only once in the graph.
-   * If the component cannot be added because it already exist in the graph, then the existing component is returned.
-   * The new instance is not used (not added to the graph). This works only if `equals` and `hashcode` functions of
-   * the components are implemented.
+   *
+   * - If the component cannot be added because it already exist in the graph, then the existing component is returned.
+   * This works only if `equals` and `hashcode` functions of the components are implemented.
+   *
+   * - If the component already exist, but with another type, an exception is thrown. This is the case when an I/O is
+   * used twice on the same pin, with different functions (PwmOutput and DigitalOutput for instance).
+   *
+   * - Else, the component is added normally.
    *
    * @param node the component to add in the graph (as node)
    * @return `None` if the component has been added successfully, or the existing instance if already in the graph
@@ -44,10 +73,25 @@ object ComponentManager extends Logging {
     // Try to add the component as a node to the graph. Not added if it exist already.
     // Components ports must be connected manually.
     cpGraph.add(node) match {
-      case true => None // Component added successfully
+
+      // Component added successfully
+      case true => None
+
+      // Component not added in the graph
       case false =>
-        // Return the existing component, directly with the correct type
-        Some(cpGraph.get(node).value.asInstanceOf[node.type])
+        val cmp = cpGraph.get(node).value
+
+        // If the component already exist, check if it has the same function (class) as the current component.
+        // If not (example: PwmOutput and DigitalOutput), an exception is thrown. See issue #14.
+        if (cmp.getClass != node.getClass) {
+          val extCmp = cmp.asInstanceOf[Component]
+          throw IoTypeMismatch(extCmp, node) // Already used with another type
+        }
+        else {
+          // Return the existing component, directly with the correct type.
+          // The type conversion is safe.
+          Some(cpGraph.get(node).value.asInstanceOf[node.type])
+        }
     }
   }
 
@@ -101,6 +145,7 @@ object ComponentManager extends Logging {
 
   /**
    * Add a connection between two `Port`s.
+   *
    * 1) Owners of port must be in the graph
    * 2) The input must be unconnected
    *
@@ -150,7 +195,7 @@ object ComponentManager extends Logging {
       case Some(c) => c
       case None =>
         // Fatal exception: must be in the graph
-        throw ComponentNotFound.create(cpId)
+        throw ComponentNotFound(cpId)
     }
   }
 

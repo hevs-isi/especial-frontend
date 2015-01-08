@@ -1,20 +1,25 @@
 package hevs.especial.ports
 
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, Stm32stk}
-import hevs.especial.dsl.components.{Pin, ComponentManager, bool, uint8}
-import hevs.especial.utils.{PortInputShortCircuit, PortTypeMismatch}
+import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, PwmOutput, Stm32stk}
+import hevs.especial.dsl.components.{ComponentManager, Pin, bool, uint8}
+import hevs.especial.utils.{IoTypeMismatch, PortInputShortCircuit, PortTypeMismatch}
 import org.scalatest.{FunSuite, Matchers}
 
 /**
- * Test input and output ports connections.
+ * Test cases for input and output ports.
  *
  * Connection types must be the same, or a `PortTypeMismatch` exception is thrown.
  * An output can be connected to different inputs, but an input can only have one connection,
  * or a `PortInputShortCircuit` exception is thrown.
- * Also check if the creation of anonymous components works.
  *
- * @version 1.0
+ * - Check if an input is connected once only (short circuits).
+ * - Check if ports type are the same. If not, they cannot be connected.
+ * - Check if components can be created anonymously using the same pin. Only one component should be created.
+ * - Check short circuits with anonymous components.
+ * - Check if an input is used with the same type only.
+ *
+ * @version 2.0
  * @author Christopher Metrailler (mei@hevs.ch)
  */
 class PortTests extends FunSuite with Matchers {
@@ -70,11 +75,24 @@ class PortTests extends FunSuite with Matchers {
     DigitalInput(Pin('A', 1)).out --> led2.in
   }
 
+  class PortCode7 {
+
+    import hevs.especial.dsl.components.CType.Implicits._
+
+    val cst1 = Constant(uint8(128))
+    val cst2 = Constant[bool](true)
+
+    // Thrown an error when the same I/O is used with different types
+    val pin = Pin('A', 1)
+    val out1 = DigitalOutput(pin)
+    val out2 = PwmOutput(pin)
+  }
+
 
   test("Input to output") {
     ComponentManager.reset()
     new PortCode1()
-    info("Connections are ok.")
+    info("Connections are ok." + "\n--")
   }
 
   test("Input short circuit") {
@@ -86,7 +104,7 @@ class PortTests extends FunSuite with Matchers {
     }
     // Short circuit !
     // The input 'in' of Cmp[3] 'DigitalOutput' is already connected.
-    info(e1.getMessage)
+    info(e1.getMessage + "\n--")
 
     val e2 = intercept[PortInputShortCircuit] {
       new PortCode3()
@@ -94,7 +112,7 @@ class PortTests extends FunSuite with Matchers {
 
     // Short circuit !
     // The input 'in' of Cmp[3] 'DigitalOutput' is already connected.
-    info(e2.getMessage)
+    info(e2.getMessage + "\n--")
   }
 
   test("Ports type mismatch") {
@@ -107,7 +125,7 @@ class PortTests extends FunSuite with Matchers {
     // Ports types mismatch. Connection error !
     // Cannot connect the output `out` (type `uint8`) of Cmp[1] 'Constant'
     // to the input `in` (type `bool`) of Cmp[3] 'DigitalOutput'.
-    info(e.getMessage)
+    info(e.getMessage + "\n--")
   }
 
   test("Anonymous short circuit") {
@@ -119,7 +137,7 @@ class PortTests extends FunSuite with Matchers {
 
     // Short circuit !
     // The input 'in' of Cmp[4] 'DigitalOutput' is already connected.
-    info(e.getMessage)
+    info(e.getMessage + "\n--")
   }
 
   test("Anonymous input") {
@@ -128,5 +146,16 @@ class PortTests extends FunSuite with Matchers {
     assert(ComponentManager.numberOfNodes == 3)
   }
 
+  test("Different IO types") {
+    ComponentManager.reset()
 
+    val e = intercept[IoTypeMismatch] {
+      new PortCode7() // Type error detected
+    }
+
+    // IO already used !
+    // The component Cmp[2] 'DigitalOutput' is already used as 'DigitalOutput'.
+    // Cannot be used as 'PwmOutput'.
+    info(e.getMessage + "\n--")
+  }
 }
