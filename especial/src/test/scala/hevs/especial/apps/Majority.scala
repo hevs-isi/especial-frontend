@@ -2,13 +2,14 @@ package hevs.especial.apps
 
 import hevs.especial.dsl.components.core.logic.{And2, Or3}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
-import hevs.especial.genenator.STM32TestSuite
+import hevs.especial.generator.STM32TestSuite
 
 /**
  * Three inputs majority logic circuit.
  *
  * Buttons `btn1`(A), `btn2`(B) and `btn3`(C) are the 3 inputs.
- * The `led1` (OA) is ON if at least two button are pressed (majority indication, method 1).
+ * The `led1` (OA) is ON if at least two button are pressed (majority function).
+ * Implicit conversion are available to use boolean operators directly with output ports.
  *
  * A B C | O
  * ----- | -
@@ -24,14 +25,13 @@ import hevs.especial.genenator.STM32TestSuite
  * OA = AB + BC + AC
  * OB = B(A + C) + AC
  *
- * @version 1.0
+ * @version 1.1
  * @author Christopher Metrailler (mei@hevs.ch)
  */
 class Majority extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  // TODO: add boolean operators as syntactic sugar
   def runDslCode(): Unit = {
 
     // Inputs
@@ -40,14 +40,21 @@ class Majority extends STM32TestSuite {
     val C = Stm32stkIO.btn3.out
 
     // Output
-    val OA = Stm32stkIO.led1.in
+    val O = Stm32stkIO.led1.in
 
-    // First method
-    // OA = AB + BC + AC
-    val andA1 = And2(A, B).out
-    val andA2 = And2(B, C).out
-    val andA3 = And2(A, C).out
-    Or3(andA1, andA3, andA2).out --> OA
+    import hevs.especial.dsl.components.core.logic._
+
+    // Majority: "O = AB + BC + AC" (associative and commutative)
+    (A & B | B & C | A & C) --> O
+    // Same as: "((A & B) | (B & C) | (A & C)) --> O"
+
+
+    // Without implicit conversions
+    // val andA1 = And2(A, B).out
+    // val andA2 = And2(B, C).out
+    // val andA3 = And2(A, C).out
+    // Or3(andA1, andA3, andA2).out --> O
+    // Or3(A & B, B & C, A & C).out --> O
 
     // Second method
     // OB = B(A + C) + AC
