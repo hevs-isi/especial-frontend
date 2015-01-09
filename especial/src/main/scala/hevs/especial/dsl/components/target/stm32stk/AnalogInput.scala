@@ -1,6 +1,7 @@
 package hevs.especial.dsl.components.target.stm32stk
 
 import hevs.especial.dsl.components._
+import hevs.especial.utils.Settings
 
 /**
  * Create an analog for a specific pin.
@@ -15,7 +16,7 @@ import hevs.especial.dsl.components._
  * @param channel the A/D channel used for the conversion
  */
 class AnalogInput private(private val pin: Pin, private val channel: Int) extends Gpio(pin)
-  with Out1 with HwImplemented {
+with Out1 with HwImplemented {
 
   override val description = s"analog input\\non $pin"
 
@@ -45,7 +46,13 @@ class AnalogInput private(private val pin: Pin, private val channel: Int) extend
 
   override def getIncludeCode = Seq("analoginput.h")
 
-  override def getGlobalCode = Some(s"AnalogInput $valName($pinName, $channel);\t// $out")
+  override def getGlobalCode = {
+    val res = s"AnalogInput $valName($pinName, $channel);"
+    if (Settings.GEN_VERBOSE_CODE)
+      Some(res + s"\t// $out") // Print a description of the input
+    else
+      Some(res)
+  }
 
   override def getInitCode = Some(s"$valName.initialize();")
 

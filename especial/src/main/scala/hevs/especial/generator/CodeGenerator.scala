@@ -113,8 +113,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
         case _ =>
       }
 
-      if (Settings.GEN_VERBOSE_CODE)
-        result ++= beginSection(idx) // Print the section name
+      result ++= beginSection(idx) // Print the section name
 
       // Add static code when sections start
       idx match {
@@ -134,7 +133,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       cps.zipWithIndex map { c =>
 
         val cpNbr = c._2 // Iteration number
-      val cp = c._1 // Component to generate
+        val cp = c._1 // Component to generate
 
         // While loop code section for the first component
         if (idx == 5 && cpNbr == 0) {
@@ -173,8 +172,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
         case _ =>
       }
 
-      if (Settings.GEN_VERBOSE_CODE)
-        result ++= endSection() // Print the end of the section
+      result ++= endSection() // Print the end of the section
     }
 
     if (ctx.isQemuLoggerEnabled)
@@ -211,9 +209,16 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
 
   /* Static code definitions */
 
-  private final def beginSection(idx: Int) = "//*// Section %02d\n".format(idx)
+  private final def beginSection(idx: Int) = Settings.GEN_VERBOSE_CODE match {
+    // Print the name of the section only if the output is verbose
+    case true => "//*// Section %02d\n".format(idx)
+    case _ => ""
+  }
 
-  private final def endSection() = "//*// ----------\n\n"
+  private final def endSection() = Settings.GEN_VERBOSE_CODE match {
+    case true => "//*// ----------\n\n"
+    case _ => "\n"
+  }
 
   private final def beginFile(progName: String) = {
     val file = s"Code for '$progName'."

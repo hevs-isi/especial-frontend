@@ -170,11 +170,11 @@ abstract class OutputPort[+T <: CType : TypeTag](owner: Component) extends Port[
   override def toString = "Output" + super.toString
 
   /**
-   * Indicates if the port output is a constant value or not.
-   * Not a constant output by default.
+   * Improvement for constant propagation. See issue #13.
+   * Indicates if the port output is a constant value or not (`false` by default).
    * If all inputs are constant values, the output is automatically converted to a constant value.
    */
-  val isConstant: Boolean = false // FIXME: test this ? Subclass CstOutputPort ?
+  // val isConstant: Boolean = false
 
   /**
    * Set this port as connected.

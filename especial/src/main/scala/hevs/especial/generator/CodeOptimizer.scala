@@ -11,6 +11,9 @@ import hevs.especial.utils.{Context, Logger, Pipeline, Settings}
  * all connected ports are disconnected.
  *
  * Several passes are necessary to remove all unconnected components. The optimizer directly update the component graph.
+ *
+ * @author Christopher Metrailler (mei@hevs.ch)
+ * @version 1.0
  */
 class CodeOptimizer extends Pipeline[Unit, Boolean] {
 

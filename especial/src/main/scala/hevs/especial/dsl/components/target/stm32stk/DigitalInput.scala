@@ -1,6 +1,7 @@
 package hevs.especial.dsl.components.target.stm32stk
 
 import hevs.especial.dsl.components._
+import hevs.especial.utils.Settings
 
 /**
  * Create a digital input for a specific pin.
@@ -42,7 +43,13 @@ class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 wit
   private val valName = inValName()
   private val varName = s"in_${pin.port}${pin.pinNumber}"
 
-  override def getGlobalCode = Some(s"DigitalInput $valName($pinName);\t\t// $out")
+  override def getGlobalCode = {
+    val res = s"DigitalInput $valName($pinName);"
+    if (Settings.GEN_VERBOSE_CODE)
+      Some(res + s"\t\t// $out") // Print a description of the input
+    else
+      Some(res)
+  }
 
   override def getInitCode = {
     val res = new StringBuilder

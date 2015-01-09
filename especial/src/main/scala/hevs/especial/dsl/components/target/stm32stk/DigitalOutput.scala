@@ -1,6 +1,7 @@
 package hevs.especial.dsl.components.target.stm32stk
 
 import hevs.especial.dsl.components._
+import hevs.especial.utils.Settings
 
 /**
  * Create a digital output for a specific pin.
@@ -41,7 +42,13 @@ class DigitalOutput private(private val pin: Pin, initValue: Boolean) extends Gp
 
   override def getIncludeCode = Seq("digitaloutput.h")
 
-  override def getGlobalCode = Some(s"DigitalOutput $valName($pinName);\t// $in")
+  override def getGlobalCode = {
+    val res = s"DigitalOutput $valName($pinName);"
+    if (Settings.GEN_VERBOSE_CODE)
+      Some(res + s"\t// $in") // Print a description of the output
+    else
+      Some(res)
+  }
 
   override def getInitCode = {
     // Initialize the output in the `initOutputs` function. Do it only once !

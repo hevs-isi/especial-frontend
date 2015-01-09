@@ -40,7 +40,7 @@ class CodeCompiler extends Pipeline[String, String] {
         return "" // Fatal error
     }
 
-    // FIXME: Must be on Linux for now... clean the project first ? Add a script for each platform.
+    // FIXME: Code compilation only compatible with Linux for now... Add a script should be added for each platform.
     if (!OSUtils.isLinux) {
       ctx.log.error("Must be on Linux do compile the generated code !")
       return "" // Fatal error

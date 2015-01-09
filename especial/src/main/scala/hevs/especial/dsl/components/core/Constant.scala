@@ -26,6 +26,9 @@ case class Constant[T <: CType : TypeTag](value: T) extends Component with Out1 
     override val name = s"out"
     override val description = "the constant value"
 
+    // Constant propagation improvement. See issue #13.
+    // override val isConstant = true
+
     // Print the value as a String (hardcoded because it cannot change)
     override def getValue: String = String.valueOf(value.v)
   }

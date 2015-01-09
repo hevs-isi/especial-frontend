@@ -17,8 +17,6 @@ import scala.reflect.runtime.universe._
  */
 abstract class Component {
 
-  // TODO: extends HwImplemented et enlever partout ailleur ???
-
   /** Name of the component class. Default is the class name. */
   val name: String = this.getClass.getSimpleName // Example: Component
 
