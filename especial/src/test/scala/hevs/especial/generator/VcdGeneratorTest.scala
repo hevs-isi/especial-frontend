@@ -1,7 +1,6 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.Pin
-import hevs.especial.generator.VcdGenerator
 import hevs.especial.utils.Context
 import org.scalatest.FunSuite
 

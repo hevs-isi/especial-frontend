@@ -1,4 +1,4 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.bool
 import hevs.especial.dsl.components.core.logic.Not
@@ -11,7 +11,7 @@ class Sch5SimCode extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  import hevs.especial.dsl.components.ImplicitTypes._
+  import hevs.especial.dsl.components.CType.Implicits._
 
   def runDslCode(): Unit = {
     // Inputs

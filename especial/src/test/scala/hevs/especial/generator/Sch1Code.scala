@@ -1,4 +1,4 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, Stm32stkIO}
 
@@ -12,6 +12,8 @@ import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, Stm32stkIO}
 class Sch1Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
+
+  // FIXME: check this with a constrained graph
 
   def runDslCode(): Unit = {
     val led1 = Stm32stkIO.led1.in

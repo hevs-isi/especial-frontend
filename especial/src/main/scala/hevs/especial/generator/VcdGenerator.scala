@@ -8,8 +8,6 @@ import hevs.especial.utils._
 
 import scala.collection.mutable
 
-//TODO: add the events as a bus. How to synchronize the event bus with I/O ?
-
 /**
  * Generate a VCD file to export values of outputs.
  *

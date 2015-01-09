@@ -1,4 +1,4 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.bool
 import hevs.especial.dsl.components.core.{Constant, TickToggle}
@@ -20,7 +20,7 @@ class Sch4SimCode extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  import hevs.especial.dsl.components.ImplicitTypes._
+  import hevs.especial.dsl.components.CType.Implicits._
 
   def runDslCode(): Unit = {
     // Input

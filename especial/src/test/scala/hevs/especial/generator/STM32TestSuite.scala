@@ -1,4 +1,4 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.ComponentManager
 import hevs.especial.dsl.components.target.stm32stk.Stm32stk

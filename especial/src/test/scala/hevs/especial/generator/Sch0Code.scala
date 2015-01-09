@@ -1,4 +1,4 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.bool
 import hevs.especial.dsl.components.core.Constant

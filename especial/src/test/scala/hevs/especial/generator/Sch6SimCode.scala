@@ -1,4 +1,4 @@
-package hevs.especial.genenator
+package hevs.especial.generator
 
 import hevs.especial.dsl.components.core.{Constant, Mux2, TickToggle}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
@@ -14,9 +14,9 @@ class Sch6SimCode extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
 
-  import hevs.especial.dsl.components.ImplicitTypes._
-
   // TODO: add variadic constructor for MUX
+
+  import hevs.especial.dsl.components.CType.Implicits._
 
   def runDslCode(): Unit = {
     // Inputs
