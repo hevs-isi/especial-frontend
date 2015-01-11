@@ -107,3 +107,26 @@ class OsNotSupported(msg: String) extends RuntimeException(msg)
  * @param msg exception details
  */
 class LoggerError(msg: String) extends RuntimeException(msg)
+
+
+/**
+ * A cycle has been found in the DAG graph. The current node or edge cannot be added.
+ * @param msg exception details
+ */
+class CycleException(msg: String) extends IllegalArgumentException(msg)
+
+object CycleException {
+
+  import hevs.especial.dsl.components.Wire
+
+  /**
+   * Format the exception message.
+   * @param wire the label of the edges (wire) which create the cycle
+   * @return the exception
+   */
+  def apply(wire: Wire) = {
+    val header = "Cycle found in the graph. This is not permitted. The graph must be a DAG !\n"
+    val w = "Addition refused. Wire error: " + wire
+    new CycleException(header + w)
+  }
+}

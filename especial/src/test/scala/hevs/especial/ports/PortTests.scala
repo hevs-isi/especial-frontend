@@ -1,9 +1,9 @@
 package hevs.especial.ports
 
-import hevs.especial.dsl.components.core.Constant
+import hevs.especial.dsl.components.core.{Mux2, Constant}
 import hevs.especial.dsl.components.target.stm32stk.{DigitalInput, DigitalOutput, PwmOutput, Stm32stk}
 import hevs.especial.dsl.components.{ComponentManager, Pin, bool, uint8}
-import hevs.especial.utils.{IoTypeMismatch, PortInputShortCircuit, PortTypeMismatch}
+import hevs.especial.utils.{CycleException, IoTypeMismatch, PortInputShortCircuit, PortTypeMismatch}
 import org.scalatest.{FunSuite, Matchers}
 
 /**
@@ -82,6 +82,19 @@ class PortTests extends FunSuite with Matchers {
     val out2 = PwmOutput(pin)
   }
 
+  class PortCode8 {
+    // Throw an exception when a cycle is found in the graph
+    val cst1 = Constant(bool(v = true)).out
+    val led1 = DigitalOutput(Stm32stk.led0_pin).in
+
+    val mux = Mux2[bool]()
+    cst1 --> mux.in2
+    mux.out --> led1
+
+    // This connection add a cycle in the graph. This is not permitted. Must be a DAG !
+    mux.out --> mux.in1
+  }
+
 
   test("Input to output") {
     ComponentManager.reset()
@@ -150,6 +163,18 @@ class PortTests extends FunSuite with Matchers {
     // IO already used !
     // The component Cmp[2] 'DigitalOutput' is already used as 'DigitalOutput'.
     // Cannot be used as 'PwmOutput'.
+    info(e.getMessage + "\n--")
+  }
+
+  test("Find graph cycle") {
+    ComponentManager.reset()
+
+    val e = intercept[CycleException] {
+      new PortCode8() // Cycle detected
+    }
+
+    // Cycle found in the graph. This is not permitted. The graph must be a DAG !
+    // Addition refused. Wire error: OutputPort[2] 'out' of Cmp[02] 'Mux2' --> InputPort[0] 'in1' of Cmp[02] 'Mux2'
     info(e.getMessage + "\n--")
   }
 }

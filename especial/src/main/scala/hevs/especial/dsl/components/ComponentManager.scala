@@ -1,15 +1,16 @@
 package hevs.especial.dsl.components
 
+import java.io.IOException
+
 import grizzled.slf4j.Logging
 import hevs.especial.dsl.components.core.Constant
-import hevs.especial.utils.{ComponentNotFound, IoTypeMismatch}
+import hevs.especial.utils.{ComponentNotFound, CycleException, IoTypeMismatch}
 
+import scala.language.higherKinds
+import scalax.collection.GraphPredef._
+import scalax.collection.constrained.mutable.Graph
+import scalax.collection.constrained.{Config, ConstraintCompanion}
 import scalax.collection.edge.LDiEdge
-import scalax.collection.mutable.Graph
-
-//import scalax.collection.constrained.constraints.Acyclic
-//import scalax.collection.constrained.mutable._
-
 
 /**
  * Object used to store all components declared in the code.
@@ -18,27 +19,48 @@ import scalax.collection.mutable.Graph
  * This data structure is useful to find any types of components, connected or not, to fin its direct successors, etc.
  *
  * Each component is identified by a unique generated ID (see [[hevs.especial.dsl.components.ComponentManager.IdGenerator]].
- * It can be stored only once in the graph. A [[hevs.especial.dsl.components.ComponentManager.Wire]] is used as an
- * edge label to store a connection of two components ports.
+ * It can be stored only once in the graph. A [[Wire]] is used as an edge label to store a connection composed by two
+ * components ports (an [[OutputPort]] source and an [[InputPort]] destination).
  *
- * @version 1.1
+ * The component graph is a directed acyclic graph (`DAG`). A dynamic constraint is used to prevent addition of
+ * cyclic nodes or edges to the graph.
+ *
+ * @version 2.1
  * @author Christopher Metrailler (mei@hevs.ch)
  */
 object ComponentManager extends Logging {
 
-  // FIXME: test DAG
-  // implicit val conf: Config = Acyclic
+  /* Dynamic acyclic constraint definition for the graph. */
+  object AcyclicWithException {
 
-  //def dagConstraint = Acyclic withStringPrefix "DAG"
-  /** Default (immutable) directed acyclic `Graph`. */
-  // type DAG[N] = Graph[N,DiEdge]
-  /** Companion module for default (immutable) directed acyclic `Graph`. */
-  // object DAG extends CompanionAlias[DiEdge](dagConstraint)
+    import scalax.collection.constrained.Graph
+    import scalax.collection.constrained.constraints.{Acyclic => AcyclicBase}
+
+    object Acyclic extends ConstraintCompanion[AcyclicBase] {
+
+      @throws[CycleException]("If a cycle is found (graph constraint to be a DAG).")
+      def apply[N, E[X] <: EdgeLikeIn[X]](self: Graph[N, E]) =
+        new AcyclicBase[N, E](self) {
+          override def onAdditionRefused(refusedNodes: Iterable[N],
+                                         refusedEdges: Iterable[E[N]],
+                                         graph: Graph[N, E]) = {
+            // Throw an exception if the node or edges cannot be added to the graph.
+            val label = refusedEdges.head.label.asInstanceOf[Wire]
+            throw CycleException(label)
+          }
+        }
+    }
+
+  }
+
+  import hevs.especial.dsl.components.ComponentManager.AcyclicWithException._
+
+  /** Constraint of the graph. The graph must be acyclic and unconnected nodes are allowed. */
+  implicit val config: Config = Acyclic // && Connected
 
   /** Mutable graph representation of all the components of the program. */
   protected val cpGraph: Graph[Component, LDiEdge] = Graph.empty[Component, LDiEdge]
 
-  import scala.language.higherKinds
 
   // Used to generate a unique ID for each component
   private val cmpIdGen: IdGenerator = {
@@ -58,40 +80,45 @@ object ComponentManager extends Logging {
    *
    * Each component has a unique ID and can be only once in the graph.
    *
-   * - If the component cannot be added because it already exist in the graph, then the existing component is returned.
+   * If the component already exist in the graph, then the existing node is returned.
    * This works only if `equals` and `hashcode` functions of the components are implemented.
    *
-   * - If the component already exist, but with another type, an exception is thrown. This is the case when an I/O is
+   * If the component already exist, but with another type, an exception is thrown. This is the case when an I/O is
    * used twice on the same pin, with different functions (PwmOutput and DigitalOutput for instance).
-   *
-   * - Else, the component is added normally.
    *
    * @param node the component to add in the graph (as node)
    * @return `None` if the component has been added successfully, or the existing instance if already in the graph
    */
+  @throws[CycleException]("If a cycle is found in the graph (not a DAG).")
+  @throws[IoTypeMismatch]("If an I/O is already configured with another type.")
+  @throws[IOException]("If the node cannot be added into the graph.")
   def addComponent(node: Component): Option[node.type] = {
     // Try to add the component as a node to the graph. Not added if it exist already.
     // Components ports must be connected manually.
-    cpGraph.add(node) match {
+    val extNodes = cpGraph.nodes.filter(p => p.value == node)
+    if (extNodes.size > 0) {
+      logger.trace(s"Component $node already exist in the graph.")
 
-      // Component added successfully
-      case true => None
-
-      // Component not added in the graph
-      case false =>
-        val cmp = cpGraph.get(node).value
-
-        // If the component already exist, check if it has the same function (class) as the current component.
-        // If not (example: PwmOutput and DigitalOutput), an exception is thrown. See issue #14.
-        if (cmp.getClass != node.getClass) {
-          val extCmp = cmp.asInstanceOf[Component]
-          throw IoTypeMismatch(extCmp, node) // Already used with another type
-        }
-        else {
-          // Return the existing component, directly with the correct type.
-          // The type conversion is safe.
-          Some(cpGraph.get(node).value.asInstanceOf[node.type])
-        }
+      // If the component already exist, check if it has the same function (class) as the current component.
+      // If not (example: PwmOutput and DigitalOutput), an exception is thrown. See issue #14.
+      val cmp = extNodes.head.value
+      if (cmp.getClass != node.getClass) {
+        val extCmp = cmp.asInstanceOf[Component]
+        throw IoTypeMismatch(extCmp, node) // Already used with another type
+      }
+      else {
+        // Return the existing component, directly with the correct type.
+        // The type conversion is safe.
+        Some(cpGraph.get(node).value.asInstanceOf[node.type])
+      }
+    }
+    else {
+      cpGraph.add(node) match {
+        case true =>
+          logger.trace(s"Component $node added to the graph.")
+          None
+        case _ => throw new IOException("Unable to add the component to the graph !")
+      }
     }
   }
 
@@ -176,6 +203,7 @@ object ComponentManager extends Logging {
    * @param cpId the component id to search for
    * @return the component node or an exception if not found
    */
+  @throws[ComponentNotFound]("If the component is not in the graph.")
   private def cp(cpId: Int): Component = {
     getNode(cpId).value.asInstanceOf[Component]
   }
@@ -186,10 +214,9 @@ object ComponentManager extends Logging {
    * All nodes of the graph have a unique id. Only one unique component can be returned.
    *
    * @param cpId the component id to search for
-   * @throws hevs.especial.utils.ComponentNotFound if the component was not found in the graph
    * @return the component as a graph node (`Component` as value, with edges)
    */
-  @throws(classOf[ComponentNotFound])
+  @throws[ComponentNotFound]("If the component is not in the graph.")
   def getNode(cpId: Int): cpGraph.NodeT = {
     cpGraph.nodes find (c => c.value.asInstanceOf[Component].getId == cpId) match {
       case Some(c) => c
@@ -200,14 +227,16 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Return all nodes of the graph as components.
-   * @return all nodes as components
+   * Return all nodes of the graph as [[Component]]s.
+   * @return all graph nodes as a [[Set]] of [[Component]]
    */
   def getComponents: Set[Component] = {
     cpGraph.nodes.map(node => node.value.asInstanceOf[Component]).toSet
   }
 
-
+  /**
+   * @return the number of connected nodes
+   */
   def numberOfConnectedHardware() = cpGraph.nodes.size - numberOfUnconnectedHardware()
 
   /**
@@ -295,21 +324,6 @@ object ComponentManager extends Logging {
     }
     else
       connections.head.label.asInstanceOf[Wire].from // Return the connected port
-  }
-
-
-  // This a basically a Tuple2, but they cannot be override
-  // Also used by the DotGenerator
-  class Wire(val from: OutputPort[CType], val to: InputPort[CType]) {
-
-    override def equals(other: Any) = other match {
-      case that: Wire => that.from == from && that.to == to
-      case _ => false
-    }
-
-    override def hashCode = 41 * from.hashCode() + to.hashCode()
-
-    override def toString = "Wire: " + from + "~" + to
   }
 
   /**
