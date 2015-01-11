@@ -24,6 +24,8 @@ abstract class STM32TestSuite extends FunSuite {
   private val progName = this.getClass.getSimpleName
   private val ctx = new Context(progName, isQemuLoggerEnabled)
 
+  def getContext: Context = ctx
+
   protected val optimizer = new CodeOptimizer()
   protected val resolver = new Resolver()
 
@@ -155,22 +157,29 @@ abstract class STM32TestSuite extends FunSuite {
 
 
   def runCodeGenTest(compile: Boolean = true): Unit = {
-
     // Generate the code once the program is optimized.
     test("Resolver and code gen") {
-      ctx.log.info(s"Code generator for '$progName' started.")
-
-      executeProg() // Run the DSL code
-
-      val gen = new CodeGenerator()
-      val formatter = new CodeFormatter()
-      val compiler = new CodeCompiler()
-
-      // The pipeline with or without the compile
-      val pipe = if (compile) resolver -> gen -> formatter -> compiler else resolver -> gen -> formatter
-
-      val res = pipe.run(ctx)(Unit)
+      val res = compileCode(compile)
       ctx.log.info("Final result: " + res)
     }
+  }
+
+  /**
+   * Execute and compile the specified test application.
+   * @param compile compile the DSL application (default is true)
+   * @return the pipeline result as a String
+   */
+  def compileCode(compile: Boolean = true): String = {
+    ctx.log.info(s"Code generator for '$progName' started.")
+
+    executeProg() // Run the DSL code
+
+    val gen = new CodeGenerator()
+    val formatter = new CodeFormatter()
+    val compiler = new CodeCompiler()
+
+    // The pipeline with or without the compile
+    val pipe = if (compile) resolver -> gen -> formatter -> compiler else resolver -> gen -> formatter
+    pipe.run(ctx)(Unit) // Run an return the pipeline result
   }
 }

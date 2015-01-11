@@ -3,16 +3,18 @@ package hevs.especial.generator
 import java.io.File
 import java.util.Date
 
-import hevs.especial.dsl.components.{HwImplemented, Component, ComponentManager}
+import hevs.especial.dsl.components.{Component, ComponentManager, HwImplemented}
 import hevs.especial.simulation.QemuLogger
 import hevs.especial.utils._
 
 /**
- * Output code generator.
+ * Output C/C++ code generator corresponding to the DSL program.
  *
- * To generate the C code of a program, the [[Resolver]] must be used to resolve the graph first, and then to generate
- * the code for each connected components in the right order. Each component generates must generate its code, divided
- * in different sections.
+ * To generate the C/C++ code of a program, the [[Resolver]] is used to resolve the graph, and then the code for each
+ * connected components can be generated in the right order. Each component generates is responsible to generated its
+ * own code. The generated code file is divided in different sections and every component can add a part of code in
+ * each of them, depending on its needs.
+ *
  * The `while` loop is divided in 3 sections: 1) Read inputs 2) Loop logic and 3) Update outputs.
  * Comments will be added to the generated code if [[Settings.GEN_VERBOSE_CODE]] is set.
  *
@@ -25,7 +27,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   private final val OUTPUT_PATH = "output/%s/"
 
   /**
-   * Define all sections of the code that compose the file generated C file.
+   * Define all sections of the code that compose the file generated C/C++ file.
    * The order is important and correspond to the generation order.
    */
   private final val codeSections = Seq(
@@ -39,18 +41,23 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
   )
 
   /**
-   * Generate the C code from the DSL program using the order given by the resolver. If the resolver failed,
-   * the code generator is not called.
-   * The code generator write the file to the output directory. The output of the pipeline is the path of the generated
-   * file.
+   * Generate the C/C++ code from the DSL program using the order given by the resolver.
+   *
+   * If the resolver failed, the code generator is not called. The code generator write the file to the output
+   * directory. The output of the pipeline is the path of the generated file.
    *
    * @param ctx the context of the program with the logger
    * @param input the result of the resolver
-   * @return the path of the C generated file
+   * @return the path of the generated file
    */
   def run(ctx: Context)(input: Resolver.O): String = {
-    // Generate the C file (the folder should exist and created by the resolver before)
-    val path = String.format(OUTPUT_PATH, ctx.progName) + ctx.progName + ".cpp"
+    // Test if the output directory already exist
+    val dirPath = String.format(OUTPUT_PATH, ctx.progName)
+    val dir: RichFile = new File(dirPath)
+    dir.createFolder() // Create if not exist only
+
+    // Generate the C file to the output folder
+    val path = dirPath + ctx.progName + ".cpp"
     val f: RichFile = new File(path)
 
     val code = generateCode(ctx)(input)
@@ -58,17 +65,17 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     if (res)
       ctx.log.info(s"Code generated to '$path'.")
     else
-      ctx.log.info(s"Unable to generate the C code.")
+      ctx.log.error(s"Unable to save the generated code to '$path'.")
 
     path // The file path as output
   }
 
   /**
-   * Generate the C source code as a String.
+   * Generate the C/C++ source code as a String.
    *
    * @param ctx the context of the program
    * @param resolve the resolver output
-   * @return the C code as a String (not formatted)
+   * @return the C/C++ code generated as a String (not formatted)
    */
   private def generateCode(ctx: Context)(resolve: Resolver.O): String = {
     // Order the result of the resolver by pass number (sort by key value).
@@ -133,7 +140,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       cps.zipWithIndex map { c =>
 
         val cpNbr = c._2 // Iteration number
-        val cp = c._1 // Component to generate
+      val cp = c._1 // Component to generate
 
         // While loop code section for the first component
         if (idx == 5 && cpNbr == 0) {
@@ -184,7 +191,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     result.result()
   }
 
-  // Include all necessary files and remove duplicates if necessary
+  // Include all necessary header files, needed by the components. Remove duplicate files.
   private def includeFiles(cps: Seq[Component]): String = {
     // List of list of all files to include
     val incs = for (c <- cps) yield c.asInstanceOf[HwImplemented].getIncludeCode
@@ -220,6 +227,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
     case _ => "\n"
   }
 
+  // Header of the file. Comments describing the program and the version used.
   private final def beginFile(progName: String) = {
     val file = s"Code for '$progName'."
     val out = new StringBuilder

@@ -2,7 +2,6 @@ package hevs.especial.generator
 
 import java.io.File
 
-import hevs.especial.dsl.components.ComponentManager.Wire
 import hevs.especial.dsl.components._
 import hevs.especial.utils._
 
@@ -16,15 +15,15 @@ import scalax.collection.io.dot._
  * Generate a diagram of the current program. Export a `dot` and a `pdf` file.
  *
  * Export the component graph to a `dot` file using the Dot extension of the ScalaGraph library (must be at
- * least version `1.10.0`, or shape record are not supported).
+ * least version `1.10.0`, or record shapes are not correctly supported).
  * Can be disabled using the general [[hevs.especial.utils.Settings]].
  *
  * The DOT diagram and the PDF are exported to the `output/<progName>/dot` folder.
  * The name of the generated file is the program name (available in the context). The user can add a suffix to the
  * generated file name so different diagrams of the same program can be exported..
  *
- * @version 2.1
  * @author Christopher Metrailler (mei@hevs.ch)
+ * @version 2.1
  */
 class DotGenerator extends Pipeline[Option[String], Unit] {
 
@@ -292,7 +291,7 @@ private class GraphDot(graphName: String, fileName: String) {
    * @return connections types as a String, displayed as edge label
    */
   private def labelName(w: Wire): Id = {
-    // Display the type of the input port (to). Example: "bool"
-    Id(s"${w.to.getTypeAsString}")
+    // Display the type of the input port (to). Example: "bool".
+    Id(w.to.getTypeAsString)
   }
 }

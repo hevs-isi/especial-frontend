@@ -6,11 +6,6 @@ import hevs.especial.utils.{Context, Logger, Pipeline, Settings}
 
 import scala.collection.mutable
 
-object Resolver {
-  // Output type of the resolver and the input of code generator.
-  type O = Map[Int, Set[Component]] // Shared by different blocks
-}
-
 /**
  * The `Resolver` object is be used to resolve the component graph.
  *
@@ -18,6 +13,7 @@ object Resolver {
  * its components successors, and finally all outputs together at the end.
  * Unconnected components are ignored.
  *
+ * @author Christopher Metrailler (mei@hevs.ch)
  * @version 2.0
  */
 class Resolver extends Pipeline[Unit, O] {
@@ -238,4 +234,9 @@ class Resolver extends Pipeline[Unit, O] {
     }
     ret.result()
   }
+}
+
+object Resolver {
+  // Output type of the resolver and the input of code generator.
+  type O = Map[Int, Set[Component]] // Shared by different blocks
 }

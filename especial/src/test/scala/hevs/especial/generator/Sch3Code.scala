@@ -47,6 +47,9 @@ class Sch3Code extends STM32TestSuite {
 
     mux2.out --> led1
     mux2.out --> led2
+
+    // This will create a cycle and is NOT permitted
+    // mux2.out --> mux2.in3
   }
 
   import scala.reflect.runtime.universe._

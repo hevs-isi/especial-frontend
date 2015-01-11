@@ -13,14 +13,12 @@ class Sch1Code extends STM32TestSuite {
 
   def isQemuLoggerEnabled = false
 
-  // FIXME: check this with a constrained graph
-
   def runDslCode(): Unit = {
     val led1 = Stm32stkIO.led1.in
     val led2 = Stm32stkIO.led2.in
 
-    // Inputs buttons are on the same pin.
-    // Only one button will be "created" in the graph.
+    // Inputs buttons are on the same pin. Only one button will be "created" in the graph.
+    // The graph will contains 3 I/O plus the board component (from ID 0 to 3).
     DigitalInput(Stm32stkIO.btn1_pin).out --> led1
     DigitalInput(Stm32stkIO.btn1_pin).out --> led2
   }

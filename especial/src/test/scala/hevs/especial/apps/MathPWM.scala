@@ -4,7 +4,7 @@ import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.core.math.{Add2, Div2, Mul2, Sub2}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.dsl.components.{bool, uint16}
-import hevs.especial.genenator.STM32TestSuite
+import hevs.especial.generator.STM32TestSuite
 
 /**
  * Use math blocks to compute different PWM duty cycles.
