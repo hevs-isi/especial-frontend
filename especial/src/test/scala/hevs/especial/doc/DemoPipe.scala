@@ -1,7 +1,7 @@
 package hevs.especial.doc
 
 import hevs.especial.utils.{Context, Pipeline}
-import org.scalatest.{FunSuite, Matchers}
+import org.scalatest.{Ignore, FunSuite, Matchers}
 
 import scala.util.Random
 
@@ -17,6 +17,9 @@ import scala.util.Random
  * [INFO] Random number is 76
  * [INFO] The result is 152.
  * }}
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class DemoPipe extends FunSuite with Matchers {
 

@@ -46,11 +46,11 @@ abstract class STM32TestSuite extends FunSuite {
     // Add the target as a component with the logger or not
     ctx.isQemuLoggerEnabled match {
       case true =>
-        new Stm32stk with QemuLogger
         ctx.log.trace("QEMU logger is enabled.")
-      case _ =>
-        new Stm32stk
+        new Stm32stk with QemuLogger
+      case false =>
         ctx.log.trace("QEMU logger is disabled.")
+        new Stm32stk
     }
 
     // Execute the DSL program

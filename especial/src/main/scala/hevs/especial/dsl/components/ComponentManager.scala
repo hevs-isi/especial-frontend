@@ -171,7 +171,7 @@ object ComponentManager extends Logging {
   }
 
   /**
-   * Add a connection between two `Port`s.
+   * Add a connection between two [[Port]].
    *
    * 1) Owners of port must be in the graph
    * 2) The input must be unconnected

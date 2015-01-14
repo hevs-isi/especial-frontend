@@ -1,3 +1,4 @@
+/* Copyright 2009-2014 EPFL, Lausanne */
 package hevs.especial.utils
 
 import grizzled.slf4j.{Logger => Log}
@@ -9,8 +10,10 @@ import grizzled.slf4j.{Logger => Log}
  * automatically terminate the program if any error has occurred.
  * The logger can be configured using the file `src/main/resources/simplelogger.properties`.
  *
- * Code adapter from:
- * @see https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Reporter.scala
+ * Code adapter from: [[https://github.com/epfl-lara/leon/blob/master/src/main/scala/leon/Reporter.scala]]
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class Logger {
 
@@ -81,11 +84,12 @@ class Logger {
    * @param p the pipeline currently executed or null if not used
    */
   def terminateIfErrors(p: Pipeline[_, _]): Unit = {
-    if (hasErrors)
+    if (hasErrors) {
+      // Print a verbose error with the name of the last pipeline block executed (if available).
       if (p != null)
-        // Print a verbose error with the name of the last pipeline block executed.
         throw new LoggerError(s"Program stopped because of errors in the '${p.currentName}' block !\nPipeline: $p")
       else
         throw new LoggerError(s"Program stopped because of errors !")
+    }
   }
 }

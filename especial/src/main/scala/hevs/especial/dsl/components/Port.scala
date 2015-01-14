@@ -102,12 +102,15 @@ abstract class Port[+T <: CType : TypeTag](owner: Component) {
 
   /**
    * Reset the number of connections for this port.
-   * Used for test purpose only.
+   * Used by the [[hevs.especial.generator.CodeOptimizer]] when a node is removed from the graph.
    */
   def disconnect(): Unit = {
     // Just reset the number of connection.
     // The port is now considered as unconnected, but the graph will NOT be modified in this method.
-    connections = 0
+    if(connections == 1)
+      connections = 0 // Cannot be negative
+    else if(connections > 2)
+      connections -= 1
   }
 
   protected[components] def getOwnerId = getOwner.getId

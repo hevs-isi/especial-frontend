@@ -1,3 +1,4 @@
+/* Copyright 2009-2014 EPFL, Lausanne */
 package hevs.especial.utils
 
 /**
@@ -14,6 +15,9 @@ package hevs.especial.utils
  *
  * @tparam I input type of the run method
  * @tparam O output type of the run method
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 abstract class Pipeline[-I, +O] {
 

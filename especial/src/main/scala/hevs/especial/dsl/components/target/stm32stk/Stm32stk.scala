@@ -15,6 +15,8 @@ import hevs.especial.dsl.components._
 class Stm32stk extends Component with HwImplemented with NoIO {
   override val name = "Stm32stk"
   override val description = "STM32-103STK board"
+
+  override def toString = s"Cmp[$getId] 'Stm32stk'"
 }
 
 /**
