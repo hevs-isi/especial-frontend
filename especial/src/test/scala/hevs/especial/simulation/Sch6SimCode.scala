@@ -1,20 +1,27 @@
-package hevs.especial.generator
+package hevs.especial.simulation
 
 import hevs.especial.dsl.components.core.{Constant, Mux2, TickToggle}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.dsl.components.{bool, uint8}
+import hevs.especial.generator.STM32TestSuite
 
 /**
- * Sample application using tick generators and a Mux.
+ * Test case for the QEMU simulation.
+ * Use [[TickToggle]] generator and a [[Mux2]] to produce output values to two LEDs.
+ *
+ * This program can be simulated in QEMU (see [[Sch6Simulation]] test case).
+ * After 6 loop ticks, output values are the following :
+ * {{
+ * Pin 'C#03' has 06 values:	1-0-1-0-1-0
+ * Pin 'C#04' has 06 values:	1-1-1-1-1-1
+ * }}
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
-
-// TODO: comment + test + VCD export
-
 class Sch6SimCode extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true
-
-  // TODO: add variadic constructor for MUX
 
   import hevs.especial.dsl.components.CType.Implicits._
 

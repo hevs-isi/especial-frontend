@@ -1,24 +1,30 @@
-package hevs.especial.generator
+package hevs.especial.simulation
 
 import hevs.especial.dsl.components.bool
 import hevs.especial.dsl.components.core.{Constant, TickToggle}
 import hevs.especial.dsl.components.target.stm32stk.{Stm32stk, Stm32stkIO}
+import hevs.especial.generator.STM32TestSuite
 
 /**
- * When the main button is pressed, the `led2` is ON.
+ * QEMU simulation: when the main button is pressed, the `led2` is ON.
  *
  * On each loop iterations, the state of the `led2` is toggle.
  * It toggle very fast (at loop cycle time). Its initial value is ON.
  *
+ * This program can be simulated in QEMU (see [[Sch4Simulation]] test case).
+ * After 6 loop ticks, output values are the following :
+ * {{
+ * Pin 'C#03' has 06 values:	1-0-1-0-1-0
+ * Pin 'C#04' has 06 values:	0-0-0-0-0-0
+ * }}
+ *
  * @version 1.0
  * @author Christopher Metrailler (mei@hevs.ch)
  */
-
-// TODO: comment + test + VCD export
-
 class Sch4SimCode extends STM32TestSuite {
 
-  def isQemuLoggerEnabled = false
+  // Add QEMU logger events in the generated code
+  def isQemuLoggerEnabled = true
 
   import hevs.especial.dsl.components.CType.Implicits._
 

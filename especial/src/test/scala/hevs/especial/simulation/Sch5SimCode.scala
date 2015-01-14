@@ -1,12 +1,25 @@
-package hevs.especial.generator
+package hevs.especial.simulation
 
 import hevs.especial.dsl.components.bool
 import hevs.especial.dsl.components.core.logic.Not
-import hevs.especial.dsl.components.core.{Constant, TickToggle}
+import hevs.especial.dsl.components.core.{TickToggle, Constant}
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
+import hevs.especial.generator.STM32TestSuite
 
-// TODO: comment + test + VCD export
-
+/**
+ * Test case for the QEMU simulation.
+ * A [[TickToggle]] generator is used to produce output values to two LEDs.
+ *
+ * This program can be simulated in QEMU (see [[Sch5Simulation]] test case).
+ * After 6 loop ticks, output values are the following :
+ * {{
+ * Pin 'C#03' has 06 values:	1-0-1-0-1-0
+ * Pin 'C#04' has 06 values:	0-1-0-1-0-1
+ * }}
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ */
 class Sch5SimCode extends STM32TestSuite {
 
   def isQemuLoggerEnabled = true

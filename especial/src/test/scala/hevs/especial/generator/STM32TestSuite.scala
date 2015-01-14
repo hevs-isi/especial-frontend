@@ -9,7 +9,12 @@ import org.scalatest.FunSuite
 
 /**
  * Base class used to run tests for the `STM32-103STK` board.
- * These tests are running automatically on the QEMU version. The logger is enabled to trace event from the code.
+ *
+ * These tests are running automatically on the QEMU version. The logger can be enabled to trace event from the code
+ * simulation on the QEMU side.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 abstract class STM32TestSuite extends FunSuite {
 
