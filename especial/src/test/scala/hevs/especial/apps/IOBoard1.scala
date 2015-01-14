@@ -3,7 +3,7 @@ package hevs.especial.apps
 import hevs.especial.dsl.components.bool
 import hevs.especial.dsl.components.core.Constant
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
-import hevs.especial.genenator.STM32TestSuite
+import hevs.especial.generator.STM32TestSuite
 
 /**
  * Sample application used to test the I/O extension board.

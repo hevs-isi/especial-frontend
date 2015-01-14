@@ -3,7 +3,7 @@ package hevs.especial.apps
 import hevs.especial.dsl.components._
 import hevs.especial.dsl.components.core.CFct
 import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
-import hevs.especial.genenator.STM32TestSuite
+import hevs.especial.generator.STM32TestSuite
 
 /**
  * Sample application using a custom C component and the extension board.
