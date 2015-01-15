@@ -23,7 +23,7 @@ class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 wit
   /* I/O management */
 
   /**
-   * The `uint1` value of this digital input.
+   * The [[bool]] value of this digital input.
    */
   override val out = new OutputPort[bool](this) {
     override val name = s"out"

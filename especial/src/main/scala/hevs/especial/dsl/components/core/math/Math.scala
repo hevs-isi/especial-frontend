@@ -4,6 +4,19 @@ import hevs.especial.dsl.components._
 
 import scala.reflect.runtime.universe._
 
+/**
+ * Provide basic math blocks.
+ *
+ * Implementation of some basic math operators, like adder, subtractor, multiplier and divider. These blocks are
+ * available for 2, 3 or 4 inputs.
+ * They can be connected easily using variadic constructors.
+ *
+ * TODO: add implicit conversions to used operators like '+' to replace these blocks.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ */
+
 case class Add2[T <: CType : TypeTag](inputs: OutputPort[T]*) extends MathOps[T](2, "+", inputs: _*) with In2 {
   override val description = s"Add$nbrIn"
 

@@ -43,7 +43,7 @@ with In1 with Out1 with HwImplemented {
     override val description = "custom input"
   }
 
-  override def getOutputs = Some(Seq(out))
+  override def getOutputs: Option[Seq[OutputPort[O]]] = Some(Seq(out))
 
   override def getInputs = Some(Seq(in))
 

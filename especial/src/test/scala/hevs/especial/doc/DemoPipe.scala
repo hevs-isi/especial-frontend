@@ -1,7 +1,7 @@
 package hevs.especial.doc
 
 import hevs.especial.utils.{Context, Pipeline}
-import org.scalatest.{Ignore, FunSuite, Matchers}
+import org.scalatest.{FunSuite, Matchers}
 
 import scala.util.Random
 
