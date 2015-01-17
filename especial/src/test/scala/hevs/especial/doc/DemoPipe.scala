@@ -7,6 +7,7 @@ import scala.util.Random
 
 /**
  * Code used for the documentation (report) only.
+ *
  * If the random number is odd:
  * {{
  * [INFO] Random number is 25
