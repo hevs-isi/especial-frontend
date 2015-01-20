@@ -76,7 +76,7 @@ with In1 with Out1 with HwImplemented {
 
   override final def getLoopableCode = {
     // The custom component code to paste in the loop
-    val customLoopCode = s"\n// -- User input code of `$name` $loopCode // --\n"
+    val customLoopCode = s"\n// -- User input code of `$name`\n $loopCode \n// --\n"
     Some(customLoopCode)
   }
 

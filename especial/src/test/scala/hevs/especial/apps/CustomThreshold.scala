@@ -6,11 +6,12 @@ import hevs.especial.dsl.components.target.stm32stk.Stm32stkIO
 import hevs.especial.generator.STM32TestSuite
 
 /**
- * Sample application using a custom C component and the extension board.
+ * Sample application which use a custom C component and the extension board.
  *
  * Read the analog input value of the potentiometer.
- * If its value is bigger than the threshold, the `led1` si ON, otherwise OFF.
+ * If its value is bigger than the threshold, the `led1` si ON, otherwise it is OFF.
  * The analog value of the potentiometer is displayed using a PWM output on `led3`.
+ * The custom threshold component is used, with a C/C++ code implementation.
  *
  * @version 1.0
  * @author Christopher Metrailler (mei@hevs.ch)
@@ -32,11 +33,13 @@ class CustomThreshold extends STM32TestSuite {
    * Custom threshold component.
    *
    * Logic implemented in C. The output is `false` when the input value is above the threshold value,
-   * and `true` otherwise (this is not a Schmitt trigger).
+   * and `true` otherwise (this is a basic trigger and not a Schmitt trigger).
    *
-   * @param threshold the threshold of the component (between 0x0 and 0xFFFF)
+   * @param threshold the threshold value (between 0x0 and 0xFFFF)
    */
   case class Threshold(threshold: Int = 512) extends CFct[uint16, bool]() {
+
+    override val description = s"value $threshold"
 
     /* I/O management */
     private val outVal = valName("threshold")
@@ -47,11 +50,9 @@ class CustomThreshold extends STM32TestSuite {
     override def loopCode = {
       val outType = getTypeString[bool]
       val in = getInputValue
-      s"""
-       |$outType $outVal = false;
-       |if($in > $threshold)
-       |  $outVal = true;
-    """.stripMargin
+      s"""| $outType $outVal = false;
+          | if($in > $threshold)
+          |   $outVal = true;   """.stripMargin
     }
   }
 

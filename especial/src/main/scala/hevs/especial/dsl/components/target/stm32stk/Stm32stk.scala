@@ -47,8 +47,7 @@ object Stm32stk {
   // The red LED is on `PC.12`
   val led0_pin = Pin('C', 12)
   lazy val led0 = {
-    // The board LED is active low. Use and inverter to make it active high.
-    val led = DigitalOutput(led0_pin)
+    val led = DigitalOutput(led0_pin) // The board LED is active low
     val invert = Not[bool]()
     invert.out --> led.in
     invert // the input is the inverter and not the LED directly
@@ -119,4 +118,11 @@ object Stm32stkIO {
   // PWM for led3 on `PB.8` (Timer4 channel 3)
   val pwm3_pin = led3_pin
   lazy val pwm3 = PwmOutput(pwm3_pin)
+
+  /** Fan pulse counter */
+
+  // Fan pulse counter on `PB.9` (Jumper must be set correctly)
+  val pulse_pin = led4_pin
+  lazy val pulse = PulseInputCounter(pulse_pin)
+
 }

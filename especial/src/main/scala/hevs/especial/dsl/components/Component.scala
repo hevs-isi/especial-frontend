@@ -81,7 +81,7 @@ abstract class Component {
   private[components] def outValName(index: Int) = valName("out" + String.valueOf(index + 1))
 
   /** @see valName */
-  private[components] def outValName() = valName("out")
+  def outValName() = valName("out")
 
   /**
    * Create a custom and unique variable name.

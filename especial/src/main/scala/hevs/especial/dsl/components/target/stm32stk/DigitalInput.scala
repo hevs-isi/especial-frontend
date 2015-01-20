@@ -14,8 +14,10 @@ import hevs.especial.utils.Settings
  * @author Christopher Metrailler (mei@hevs.ch)
  *
  * @param pin the pin of the GPIO (port and pin number)
+ * @param forceRead if `true`, read the input value, otherwise use the cached interrupt value (default)
  */
-class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 with HwImplemented {
+class DigitalInput private(private val pin: Pin, private val forceRead: Boolean = false)
+  extends Gpio(pin) with Out1 with HwImplemented {
 
   override val description = s"digital input\\non $pin"
 
@@ -60,8 +62,13 @@ class DigitalInput private(private val pin: Pin) extends Gpio(pin) with Out1 wit
   }
 
   override def getLoopableCode = {
+    // Get the cached value or force to read the input value
+    val sRead = forceRead match {
+      case true => s"$valName.read();"
+      case false => s"$valName.get();"
+    }
     // Store the input value in a local variable
-    Some(s"${bool().getType} $varName = $valName.get();")
+    Some(s"${bool().getType} $varName = $sRead")
   }
 
   override def getIncludeCode = Seq("digitalinput.h")

@@ -7,8 +7,8 @@ object Version {
 
   private val name = "ESPecIaL"
 
-  val major = "a1"
-  val minor = 1
+  val major = "B2"
+  val minor = 0
 
   override def toString = s"$name version $getVersion"
 
