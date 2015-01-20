@@ -31,7 +31,8 @@ scalacOptions ++= Seq("-unchecked", "-deprecation", "-feature")
 parallelExecution in ThisBuild := false
 
 // Remove some tests which must be ran manually, one after one.
-testOptions in Test := Seq(Tests.Filter(s => !(s.contains("apps.") || s.contains("generator."))))
+testOptions in Test := Seq(Tests.Filter(s => !(s.contains("apps.") || s.contains("generator.") ||
+  s.contains("simulation.") || s.contains("doc."))))
 
 
 // Generate ScalaDoc diagrams using dot
