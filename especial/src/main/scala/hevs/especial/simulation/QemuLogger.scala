@@ -10,6 +10,9 @@ import hevs.especial.utils.Settings
  * The logger is called automatically in the generated C code to trace event of the code. These events are received
  * by the Scala monitor to check code results and its behaviour.
  * See the `qemulogger.h` file for more information.
+ *
+ * @version 1.1
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 object QemuLogger {
 
@@ -20,14 +23,16 @@ object QemuLogger {
     LoopStart -> "SECTION_LOOP_START", LoopTick -> "SECTION_LOOP_TICK",
     MainEnd -> "SECTION_END")
 
-  val addStartEvent = addAckEvent(MainStart)  // ACK required
+  val addStartEvent = addEvent(MainStart)
   val addEndInitEvent = addEvent(EndInit)
   val addLoopStartEvent = addEvent(LoopStart)
-  val addLoopTickEvent = addAckEvent(LoopTick) // ACK required
+  val addLoopTickEvent = addAckEvent(LoopTick)    // ACK required on each loop iterations
   val addLoopExitEvent = addEvent(MainEnd)
 
+  /** Create a QEMU event which must be acknowledge from the Scala side. */
   private def addAckEvent(evt: Event): String = addEvent(evt, ack = true)
 
+  /** Create a QEMU event which print a debug information to the Scala side. */
   private def addEvent(evt: Event, ack: Boolean = false) = {
     val name = EVENTS_NAMES(evt)
 

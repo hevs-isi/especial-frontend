@@ -140,10 +140,15 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       cps.zipWithIndex map { c =>
 
         val cpNbr = c._2 // Iteration number
-      val cp = c._1 // Component to generate
+        val cp = c._1 // Component to generate
 
         // While loop code section for the first component
         if (idx == 5 && cpNbr == 0) {
+
+          // QEMU logger. Ack event to start one loop iteration.
+          if (ctx.isQemuLoggerEnabled)
+            result ++= "\n" + QemuLogger.addLoopTickEvent + "\n"
+
           if (Settings.GEN_VERBOSE_CODE)
             result ++= "// 1) Read inputs"
           result ++= "\n"
@@ -172,10 +177,7 @@ class CodeGenerator extends Pipeline[Resolver.O, String] {
       // Add static code when sections end
       idx match {
         case 3 => result ++= endInit
-        case 5 =>
-          if (ctx.isQemuLoggerEnabled)
-            result ++= "\n" + QemuLogger.addLoopTickEvent
-          result ++= endMainLoop
+        case 5 => result ++= endMainLoop
         case _ =>
       }
 

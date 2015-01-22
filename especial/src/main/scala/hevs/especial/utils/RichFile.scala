@@ -2,20 +2,15 @@ package hevs.especial.utils
 
 import java.io._
 
-import scala.language.implicitConversions
-
-
-object RichFile {
-  implicit def file2RichFile(file: File) = new RichFile(file)
-}
-
 /**
  * Some helper methods to work with files and folders.
  *
- * Code adapted from:
- * @see https://code.google.com/p/helgoboss-commons
+ * Code adapted from [[https://code.google.com/p/helgoboss-commons]].
  *
  * @param file the file to work with
+ *
+ * @version 1.1
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class RichFile(file: File) {
 
@@ -78,4 +73,12 @@ class RichFile(file: File) {
     val del = deleteFile _
     file.listFiles().foreach(del)
   }
+}
+
+object RichFile {
+
+  import scala.language.implicitConversions
+
+  // Convert any file to a [[RichFile]]
+  implicit def file2RichFile(file: File): RichFile = new RichFile(file)
 }
