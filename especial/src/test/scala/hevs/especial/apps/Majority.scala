@@ -30,7 +30,7 @@ import hevs.especial.generator.STM32TestSuite
  */
 class Majority extends STM32TestSuite {
 
-  def isQemuLoggerEnabled = false
+  def isQemuLoggerEnabled = true
 
   def runDslCode(): Unit = {
 
@@ -40,13 +40,20 @@ class Majority extends STM32TestSuite {
     val C = Stm32stkIO.btn3.out
 
     // Output
-    val O = Stm32stkIO.led1.in
+    val O = Stm32stkIO.led4.in
 
     import hevs.especial.dsl.components.core.logic._
 
     // Majority: "O = AB + BC + AC" (associative and commutative)
     (A & B | B & C | A & C) --> O
     // Same as: "((A & B) | (B & C) | (A & C)) --> O"
+
+
+    // Debug input values
+    A --> Stm32stkIO.led1.in
+    B --> Stm32stkIO.led2.in
+    C --> Stm32stkIO.led3.in
+
 
 
     // Without implicit conversions

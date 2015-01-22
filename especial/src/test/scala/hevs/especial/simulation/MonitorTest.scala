@@ -25,6 +25,10 @@ class MonitorTest extends FunSuite with Logging {
   /** Save the sequence of output values. */
   protected var pins = Map.empty[Pin, Seq[Int]]
 
+  /** Launch QEMU with a command line. */
+  protected val runQemu = s"./${Settings.PATH_QEMU_STM32}/arm-softmmu/qemu-system-arm -M stm32-p103 -kernel " +
+    "csrc/target-qemu/csrc.elf -serial null -monitor null -nographic"
+
   /**
    * Start a [[Monitor]] and wait for a client connection.
    * Wait until QEMU is connected to the monitor. Thrown an error after a timeout if no client are connected.
@@ -78,9 +82,6 @@ class MonitorTest extends FunSuite with Logging {
    */
   protected def simulateCode(code: STM32TestSuite) = {
     val m = new Monitor()
-
-    val runQemu = s"./${Settings.PATH_QEMU_STM32}/arm-softmmu/qemu-system-arm -M stm32-p103 -kernel " +
-      "csrc/target-qemu/csrc.elf -serial null -monitor null -nographic"
 
     info("Start QEMU in a new process...\n\n")
     val qemuProcess = OSUtils.runInBackground(runQemu)
