@@ -13,6 +13,9 @@ import grizzled.slf4j.Logging
  * initialized.
  *
  * @param s the socket to connect with
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 abstract class MonitorThread(s: Socket) extends Logging {
 

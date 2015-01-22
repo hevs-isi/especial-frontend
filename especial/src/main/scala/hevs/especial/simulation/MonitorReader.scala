@@ -10,6 +10,15 @@ import net.liftweb.json.JsonParser._
 
 import scala.collection.mutable
 
+/**
+ * TCP Thread used to read events sent from QEMU.
+ *
+ * Events are formatted in Json.
+ * All output values sent from QEMu are stored, so a VCD file can be generated at the end of the test.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
+ */
 class MonitorReader(s: Socket) extends MonitorThread(s) {
 
   // All outputs pins
@@ -34,9 +43,10 @@ class MonitorReader(s: Socket) extends MonitorThread(s) {
 
     // Return only the value of the output
     // Map(GPIOC#13 -> ListBuffer(1), GPIOC#12 -> ListBuffer(1, 0))
-    group.map {
-      case (pin, list) => pin -> list.map(x => x._2)
+    val res = group.map {
+      case (pin, list) => pin -> list.drop(2).map(x => x._2) // Remove initialization values
     }
+    res.filter(x => x._2.length > 0) // Remove entries with zero values
   }
 
   /**
@@ -78,18 +88,15 @@ class MonitorReader(s: Socket) extends MonitorThread(s) {
 
     while (connected) {
       val l = in.readLine()
-      if (l != null) {
-        trace("Read: " + l)
-
+      if (l != null)
         decodeJson(l) // Decode and store
-      }
     }
   }
 
   /**
    * Decode a Json message received from QEMU and store the message if valid.
    * @param jsonStr the received string from QEMU
-   * @return `true` if the Json message was decoded sucessfully, `false` otherwise
+   * @return `true` if the Json message was decoded successfully, `false` otherwise
    */
   private def decodeJson(jsonStr: String): Boolean = {
     // Parse the Json command received from QEMU
@@ -99,8 +106,8 @@ class MonitorReader(s: Socket) extends MonitorThread(s) {
     // Extract the message or the command from the Json message.
     implicit val formats = DefaultFormats // Brings in default date formats etc.
     val read = json \ "pin" match {
-        case _: JObject => json.extract[Command].asInstanceOf[Command]
-        case _ => json.extract[Event].asInstanceOf[Event]
+        case _: JObject => json.extract[Command] //.asInstanceOf[Command]
+        case _ => json.extract[Event] //.asInstanceOf[Event]
       }
 
     read.id match {
@@ -113,7 +120,7 @@ class MonitorReader(s: Socket) extends MonitorThread(s) {
     }
   }
 
-  // Save the command or the event
+  /** Save the command or the event. */
   private def logMessageOrEvent(msg: JsonMessage) = msg match {
     case cmd: Command =>
       ioPin add cmd.pin

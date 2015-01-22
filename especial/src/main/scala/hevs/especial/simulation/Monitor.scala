@@ -8,6 +8,9 @@ import hevs.especial.utils.Settings
 
 /**
  * Monitor used to communicate with a QEMU client over TCP.
+ *
+ * @version 1.0
+ * @author Christopher Metrailler (mei@hevs.ch)
  */
 class Monitor extends Logging {
 

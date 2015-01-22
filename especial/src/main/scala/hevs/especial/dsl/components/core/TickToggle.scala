@@ -53,9 +53,12 @@ case class TickToggle[T <: CType : TypeTag]() extends Component with Out1 with H
 
   override def getLoopableCode = {
     // Invert the global variable value
-    val sInvert = getTypeClass[T] match {
-      case _: `Class`[bool] => s"!$valName"
-      case _ => s"""($valName == 0) ? 1 : 0"""
+    val sInvert = {
+      val t = getTypeString[T]
+      if(t equals "bool")
+        s"!$valName"  // Invert boolean
+      else
+        s"""($valName == 0) ? 1 : 0""" // Invert all other values
     }
     Some(s"$valName = $sInvert;")
   }

@@ -22,6 +22,7 @@ object MsgId {
   }
 
   private class Id(id: Int) extends MsgId(id)
+
 }
 
 /* Available commands */
@@ -29,12 +30,19 @@ sealed abstract class MsgId(val id: Int) {
   override def toString = String.valueOf(id)
 }
 
-// According to the C structure `EventId` in file `stm32_p103_emul.h`
-private case object DigitalOut extends MsgId(0)
-private case object DigitalIn extends MsgId(1)
-private case object CEvent extends MsgId(16)
-private case object Empty extends MsgId(255)
+/* Events types according to the C structure `EventId` in file `stm32_p103_emul.h` */
 
+/** From QEMU to indicates when a digital output value has changed. */
+private case object DigitalOut extends MsgId(0)
+
+/** From QEMU to indicate when an event has been reached in the code. */
+private case object CEvent extends MsgId(16)
+
+/** To QEMU to set an input value. */
+private case object DigitalIn extends MsgId(1)
+
+/** Null or empty event (unknown ID). */
+private case object Empty extends MsgId(255)
 
 
 abstract class JsonMessage(msgId: Int) {
@@ -54,11 +62,12 @@ case class Command(msgId: Int, pin: Pin, value: Int) extends JsonMessage(msgId) 
 
 /**
  * Specialization of a command, without pin.
+ * A Json message is extracted to this class directly.
  *
- * @param msgId event ID
- * @param value value
+ * @param msgId the event ID
+ * @param value the event value
  */
-class Event(val msgId: Int, val value: Int) extends JsonMessage(msgId) {
+class Event(val msgId: Int, value: Int) extends JsonMessage(msgId) {
 
   override def toString = s"Evt[$msgId]: $value"
 
@@ -66,11 +75,22 @@ class Event(val msgId: Int, val value: Int) extends JsonMessage(msgId) {
   override def equals(that: Any) = {
     that.isInstanceOf[Event] &&
       msgId == that.asInstanceOf[Event].msgId &&
-      value == that.asInstanceOf[Event].value
+      value == that.asInstanceOf[Event].getValue
   }
 
   // Used only to create subclasses
   protected def this(id: MsgId, value: Int) = this(id.id, value)
+
+  def getValue: Int = value
+}
+
+/**
+ * Event sent to QEMU. Raw event value is a byte buffer.
+ * @param msgId the event ID
+ * @param byteValue the raw event value (typically 4 bytes)
+ */
+class ByteEvent(override val msgId: Int, val byteValue: Array[Byte]) extends Event(msgId, 0) {
+  override def toString = s"ByteEvent[$msgId]: ${byteValue.mkString(", ")}"
 }
 
 /**
@@ -85,4 +105,5 @@ object Events {
   case object LoopTick extends Event(CEvent, 'C')
   case object MainEnd extends Event(CEvent, 'F')
   case object NullEvent extends Event(Empty, '0')
+
 }
