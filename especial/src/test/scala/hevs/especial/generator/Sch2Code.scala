@@ -29,12 +29,14 @@ class Sch2Code extends STM32TestSuite {
     val btn1 = Stm32stkIO.btn1.out
 
     // Logic
-    val and1 = !cst1 & btn1 // true & btn1
-    /*
-      val and1 = And2()
-      cst1.out --> and1.in1
-      btn1.out --> and1.in2
-    */
+    val and1 = And(!cst1, btn1).out       // true & btn1
+    // val and1 = And2(!cst1, btn1).out
+    // val and1 = !cst1 & btn1
+
+    //  val and1 = And2()
+    //  cst1.out --> and1.in1
+    //  btn1.out --> and1.in2
+
 
     // Outputs
     val led1 = Stm32stkIO.led1.in
