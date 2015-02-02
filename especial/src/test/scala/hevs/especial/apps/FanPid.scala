@@ -74,11 +74,9 @@ class FanPid extends STM32TestSuite {
     override def loopCode = {
       val outType = getTypeString[int32]
       val in = getInputValue
-      s"""
-       |$outType $outVal = 4096 - (($in - 110) * $gain); // Speed gain
+      s"""|$outType $outVal = 4096 - (($in - 110) * $gain); // Speed gain
        |if ($outVal <= 0)
-       |  $outVal = 0;
-      """.stripMargin
+       |  $outVal = 0;""".stripMargin
     }
   }
 
