@@ -2,9 +2,10 @@ package hevs.especial.apps
 
 import hevs.especial.dsl.components._
 import hevs.especial.dsl.components.core.math.PID
-import hevs.especial.dsl.components.core.{CFct, Constant, Mux2}
+import hevs.especial.dsl.components.core.{Constant, Mux2}
 import hevs.especial.dsl.components.target.stm32stk.{PulseInputCounter, Stm32stkIO}
 import hevs.especial.generator.STM32TestSuite
+import hevs.especial.pres.{Not, SpeedGain, Threshold}
 
 /**
  * Complete demo application to control a fan using a PWM controller.
@@ -28,12 +29,12 @@ class FanPid extends STM32TestSuite {
   def runDslCode(): Unit = {
 
     // Inputs
-    val pid = PID(1, 1, 0, 255, 4095)
+    val pid = PID(1.0, 0.5, 0, 50, 4000)
     val pulse = PulseInputCounter(Pin('B', 9)).out
     val measure = Stm32stkIO.adc1.out
 
     // Logic
-    val speedGain = SpeedGain(50)
+    val speedGain = SpeedGain(4000.0 * 45.0)
     val mux = Mux2[uint16]()
     val not = Not()
 
@@ -44,10 +45,10 @@ class FanPid extends STM32TestSuite {
     pulse --> speedGain.in
     speedGain.out --> pid.measure
 
-    // PID input setpoint from the potentiometer
+    // Read setpoint from the potentiometer
     measure --> pid.setpoint
 
-    // Mux logic to stop the fan using the button 1
+    // Stop the fan using the button
     Constant(uint16(50)).out --> mux.in1
     pid.out --> mux.in2
     Stm32stkIO.btn1.out --> not.in
@@ -55,47 +56,11 @@ class FanPid extends STM32TestSuite {
 
     // Fan PWM command
     mux.out --> pwm.in
-  }
 
-  /**
-   * Math block used to adapt the speed of the fan.
-   * @param gain speed gain from measure
-   */
-  case class SpeedGain(gain: Int) extends CFct[uint32, int32]() {
-
-    override val description = "Custom gain"
-
-    /* I/O management */
-    private val outVal = outValName()
-
-    override def getOutputValue = outVal
-
-    /* Code generation */
-    override def loopCode = {
-      val outType = getTypeString[int32]
-      val in = getInputValue
-      s"""|$outType $outVal = 4096 - (($in - 110) * $gain); // Speed gain
-       |if ($outVal <= 0)
-       |  $outVal = 0;""".stripMargin
-    }
-  }
-
-  /** Custom C component to invert a [[bool]] value and return an [[uint8]] value. */
-  case class Not() extends CFct[bool, uint8]() {
-
-    override val description = "Inverter to uint8"
-
-    /* I/O management */
-    private val outVal = outValName()
-
-    override def getOutputValue = outVal
-
-    /* Code generation */
-    override def loopCode = {
-      val outType = getTypeString[uint8]
-      val in = getInputValue
-      s"$outType $outVal = ($in == 0) ? 1 : 0;"
-    }
+    // TODO: Add threshold
+    val trigger = Threshold(4096 / 2)
+    mux.out --> trigger.in
+    trigger.out --> Stm32stkIO.led1.in
   }
 
   runDotGeneratorTest()

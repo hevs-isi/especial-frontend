@@ -72,7 +72,7 @@ abstract class Component {
   private[components] def inValName(index: Int) = valName("in" + String.valueOf(index + 1))
 
   /** @see valName */
-  private[components] def inValName() = valName("in")
+  def inValName() = valName("in")
 
   /**
    * Output variable name if more than one. Add the index as suffix.

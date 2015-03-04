@@ -105,7 +105,7 @@ case class PID() extends Component with Out1 with HwImplemented {
     Some(res.result())
   }
 
-  override def getIncludeCode = Seq("demo/pid.h")
+  override def getIncludeCode = Seq("demo/pid.h", "utils/delay.h")
 }
 
 object PID {

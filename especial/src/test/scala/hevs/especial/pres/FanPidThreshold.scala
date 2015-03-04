@@ -28,12 +28,12 @@ class FanPidThreshold extends STM32TestSuite {
   def runDslCode(): Unit = {
 
     // Inputs
-    val pid = PID(1, 1, 0, 255, 4095)
+    val pid = PID(1.0, 0.5, 0, 50, 4000)
     val pulse = PulseInputCounter(Pin('B', 9)).out
     val measure = Stm32stkIO.adc1.out
 
     // Logic
-    val speedGain = SpeedGain(50)
+    val speedGain = SpeedGain(4000.0 * 45.0)
     val mux = Mux2[uint16]()
     val not = Not()
 

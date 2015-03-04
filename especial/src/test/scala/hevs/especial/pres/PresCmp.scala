@@ -7,9 +7,11 @@ import hevs.especial.dsl.components._
  * Math block used to adapt the speed of the fan.
  * @param gain speed gain from measure
  */
-case class SpeedGain(gain: Int) extends CFct[uint32, int32]() {
+case class SpeedGain(gain: Double) extends CFct[uint32, int32]() {
 
   override val description = "Custom gain"
+
+  override val globalVars: Map[String, double] = Map("rc" -> double(0))
 
   /* I/O management */
   private val outVal = outValName()
@@ -19,10 +21,15 @@ case class SpeedGain(gain: Int) extends CFct[uint32, int32]() {
   /* Code generation */
   override def loopCode = {
     val outType = getTypeString[int32]
-    val in = getInputValue
-    s"""|$outType $outVal = 4096 - (($in - 110) * $gain); // Speed gain
-        |if ($outVal <= 0)
-        |  $outVal = 0;""".stripMargin
+    val pid = ComponentManager.findPredecessorOutputPort(this.in)
+    val in = pid.getValue
+
+    s"""|${getTypeString[uint32]} timeDiff = time_diff_ms(time_get(), ${pid.getOwner.inValName()}.lastPulseTimestamp);
+        |$outType $outVal = MAX($in , timeDiff);
+        |rc = rc * 0.5 + $outVal * 0.5; // RC filter
+        |$outVal = $gain / rc;       // Speed gain
+        |
+        |delay_wait_ms(10);""".stripMargin
   }
 }
 
