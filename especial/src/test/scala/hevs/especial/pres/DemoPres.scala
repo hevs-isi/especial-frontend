@@ -1,4 +1,4 @@
-package hevs.especial.pres
+﻿package hevs.especial.pres
 
 import hevs.especial.dsl.components.{Pin, bool}
 import hevs.especial.dsl.components.core.{Constant, Mux2}
@@ -28,14 +28,13 @@ class DemoPres extends STM32TestSuite {
     val led1 = Stm32stkIO.led1
     val led2 = Stm32stkIO.led2
 
-    // TODO: Application - connecting stuff
-    cst1 --> led2.in        // Led is ON
+    // TODO: demo - connecting stuff
+    cst1 --> led2.in
+    cst1 --> mux.in1
+    !cst1 --> mux.in2
 
-    btn1.out --> not.in     // Not
+    btn1.out --> not.in
     not.out --> mux.sel
-
-    !cst1 --> mux.in1       // Mux
-    cst1 --> mux.in2
 
     mux.out --> led1.in
   }

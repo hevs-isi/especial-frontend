@@ -36,6 +36,7 @@ class FanPidThreshold extends STM32TestSuite {
     val speedGain = SpeedGain(4000.0 * 45.0)
     val mux = Mux2[uint16]()
     val not = Not()
+    val led1 = Stm32stkIO.led1
 
     // Output
     val pwm = Stm32stkIO.pwm3
@@ -56,12 +57,11 @@ class FanPidThreshold extends STM32TestSuite {
     // Fan PWM command
     mux.out --> pwm.in
 
-    // TODO: Add threshold
-    val trigger = Threshold(4096 / 2)
-    mux.out --> trigger.in
-    trigger.out --> Stm32stkIO.led1.in
+    // TODO: demo - add threshold component
+    val t = Threshold(4096 / 2)
+    mux.out --> t.in
+    t.out --> led1.in
   }
-
 
   runDotGeneratorTest()
 
