@@ -1,9 +1,0 @@
-target/
-
-# Eclipse
-.settings
-.worksheet
-.cache
-.classpath
-.project
-bin
