@@ -1,27 +1,20 @@
-# ESPecIal
+# An embedded systems programming language (ESPeciaL)
 
-Original code from `P.-A. Mudry (mui AT hevs.ch) - 22.09.2014`.
+> *ESPeciaL* proposes a novel approach aimed at simplifying the programming of embedded systems based on the dataflow paradigm.
 
-## How to run
+This programming framework removes the need of low-level programming in C/C++, as the application is written by connecting blocks that produce and consume data. Thus, an embedded application can be described in terms of ready-to-use blocks that correspond to various micro-controller peripherals and program function (multiplexers, logic gates, etc.). The user application itself is written as an embedded Scala DSL (Domain-Specific Language).
 
-Just import the `sbt` project in IntelliJ IDEA (the [Scala plugin](https://www.jetbrains.com/idea/features/scala.html) must be installed).
+From that code, the *ESPeciaL* compiler then generates the corresponding C++ code which can be tailored - using different back-ends - to match different embedded systems (such as `Arm Cortex M` boards) or a QEMU-based simulation environment.
 
--- OR --
+## Demonstration applications
 
-The `sbteclipse` plugin is installed if you prefer to use Eclipse as IDE :( To import the project, simply run the following task using `sbt`:
+To demonstrate the validity of the approach, typical embedded systems applications have been implemented using *ESPeciaL*. A few demonstration applications are available in the [apps package](https://github.com/hevs-isi/especial-frontend/tree/master/src/test/scala/hevs/especial/apps).
+* Have a look at the [fan PID regulation code](https://github.com/hevs-isi/especial-frontend/blob/master/src/test/scala/hevs/especial/apps/FanPid.scala) for a real-world demonstration application.
 
-	$ sbt
-	> compile
-	> eclipse
+## Back-end
 
-## How to test
+The *ESPeciaL* C++ back-end, the Hardware Abstraction Layer and the modified version of the QEMU emulator are available in [that repository](https://github.com/hevs-isi/especial-backend).
 
-To run tests (`sbt` must be installed):
+## Dependencies
 
-	$ sbt test
-	[...]
-	[info] All tests passed.
-
-## Requirements & dependencies
-
-Please look at the [`third_party`](https://github.com/metc/ScalaTest/tree/master/especial/third_party) folder for details.
+See the [`third_party`](https://github.com/hevs-isi/especial-frontend/tree/master/third_party) folder for details.
