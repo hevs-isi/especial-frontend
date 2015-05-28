@@ -4,6 +4,4 @@ jdk:
   - openjdk7
 
 scala:
-  - 2.11.2
-
-before_script: cd AndroiUino
+  - 2.11.4

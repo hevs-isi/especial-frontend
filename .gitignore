@@ -1,12 +1,7 @@
 # sbt folders
 /target/
-lib_managed/
-src_managed/
-project/boot/
-project/project
+project/project/
 project/target/
-.history
-.cache
 
 # Ignore generate files
 /output
