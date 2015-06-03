@@ -1,4 +1,4 @@
-package hevs.especial.tests
+package hevs.especial.utils.tests
 
 // A Tour of Scala: Generic Classes
 // http://www.scala-lang.org/old/node/113.html

@@ -1,6 +1,5 @@
 name := "especial"
 version := "1.0"
-
 scalaVersion := "2.11.4"
 
 // Graph for Scala - http://www.scala-graph.org/
