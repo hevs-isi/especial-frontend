@@ -8,6 +8,8 @@ package hevs.especial.dsl.components
  */
 object CType {
 
+  //TODO: add a new 'Event' type (based on a boolean value)
+
   /**
    * Map the [[CType]] class with the corresponding C type (according to `<stdint.h>`).
    */

@@ -24,7 +24,7 @@ abstract class Component {
   val description: String = ""
 
   // Id of component (must be unique)
-  private val id = ComponentManager.nextComponentId()
+  val cmpId = ComponentManager.nextComponentId()
 
   // Used to generate a unique ID for each port
   private val portIdGen = {
@@ -47,7 +47,7 @@ abstract class Component {
    * @see Component.hashCode
    * @return unique ID of the component
    */
-  def getId = id
+  def getId = cmpId
 
 
   // Helper method to get the type of the template class.
@@ -90,8 +90,8 @@ abstract class Component {
    * @return variable name with the component number (example prefix_cmp02)
    */
   def valName(prefix: String) = {
-    val cmpId = f"$id%02d"
-    s"${prefix}_cmp$cmpId" // Example: prefix_cmp02
+    val id = f"$cmpId%02d"
+    s"${prefix}_cmp$id" // Example: prefix_cmp02
   }
 
   /**
@@ -134,7 +134,7 @@ abstract class Component {
       "\n\t- Outputs: " + (if (getOutputs.isDefined) getOutputs.get.mkString(", ") else "None") + "\n"
   }
 
-  override def toString = s"Cmp[$id] '$name'"
+  override def toString = s"Cmp[$cmpId] '$name'"
 
   /**
    * Equals components.
@@ -145,9 +145,9 @@ abstract class Component {
    */
   override def equals(other: Any) = other match {
     // A component ID must be unique
-    case that: Component => that.id == this.id
+    case that: Component => that.cmpId == this.cmpId
     case _ => false
   }
   
-  override def hashCode = id.## // Used by the graph library
+  override def hashCode = cmpId.## // Used by the graph library
 }
