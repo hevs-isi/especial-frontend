@@ -3,5 +3,6 @@
 *.elf
 *.hex
 *.map
-main.*
 /target-qemu/
+*.cpp
+*.c

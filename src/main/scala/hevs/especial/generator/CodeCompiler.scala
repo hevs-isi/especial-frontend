@@ -36,7 +36,7 @@ class CodeCompiler extends Pipeline[String, String] {
     }
     catch {
       case e: Exception =>
-        ctx.log.error("Unable to copy the generated file.")
+        ctx.log.error(s"Unable to copy the generated file to '$dst'.")
         return "" // Fatal error
     }
 
