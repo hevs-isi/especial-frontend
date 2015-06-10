@@ -13,8 +13,12 @@ To demonstrate the validity of the approach, typical embedded systems applicatio
 
 ## Back-end
 
-The *ESPeciaL* C++ back-end, the Hardware Abstraction Layer and the modified version of the QEMU emulator are available in [that repository](https://github.com/hevs-isi/especial-backend).
+The *ESPeciaL* C++ back-end, the Hardware Abstraction Layer and the modified version of the QEMU emulator are available in [this repository](https://github.com/hevs-isi/especial-backend).
 
 ## Dependencies
 
 See the [`third_party`](https://github.com/hevs-isi/especial-frontend/tree/master/third_party) folder for details.
+
+## License
+
+ESPeciaL is licensed under the [MIT License](https://raw.githubusercontent.com/hevs-isi/especial-frontend/master/LICENSE).
