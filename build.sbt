@@ -1,5 +1,5 @@
 name := "especial"
-version := "1.0"
+version := "0.4"
 scalaVersion := "2.11.4"
 
 // Graph for Scala - http://www.scala-graph.org/
@@ -31,7 +31,7 @@ parallelExecution in ThisBuild := false
 
 // Remove some tests which must be ran manually, one after one.
 testOptions in Test := Seq(Tests.Filter(s => !(s.contains("apps.") || s.contains("generator.") ||
-  s.contains("simulation.") || s.contains("doc."))))
+  s.contains("simulation.") || s.contains("doc.") || s.contains("pres.") || s.contains("cmp."))))
 
 
 // Generate ScalaDoc diagrams using dot

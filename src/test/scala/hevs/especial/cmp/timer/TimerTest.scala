@@ -59,5 +59,5 @@ class TimerTest extends STM32TestSuite {
 
   runDotGeneratorTest(optimizedVersion = true)
 
-  runCodeGenTest()
+  runCodeGenTest(compile = false)
 }
