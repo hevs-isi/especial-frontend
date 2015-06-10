@@ -9,6 +9,26 @@ Graphviz
 Eclipse Public License - v 1.0
 http://www.graphviz.org/
 
+Graph for Scala
+BSD License
+http://www.scala-graph.org/
+
+ScalaTest
+Apache 2.0 license
+http://scalatest.org/
+
+Lift JSON
+Apache 2.0 license
+http://liftweb.net/
+
+SLF4J
+MIT license
+http://www.slf4j.org/
+
+Grizzled-SLF4J
+BSD License
+http://software.clapper.org/grizzled-slf4j/
+
 Artistic Style
 GNU Lesser General Public License (LGPL)
 http://astyle.sourceforge.net/
