@@ -11,6 +11,13 @@ From that code, the *ESPeciaL* compiler then generates the corresponding C++ cod
 To demonstrate the validity of the approach, typical embedded systems applications have been implemented using *ESPeciaL*. A few demonstration applications are available in the [apps package](https://github.com/hevs-isi/especial-frontend/tree/master/src/test/scala/hevs/especial/apps).
 * Have a look at the [fan PID regulation code](https://github.com/hevs-isi/especial-frontend/blob/master/src/test/scala/hevs/especial/apps/FanPid.scala) for a real-world demonstration application.
 
+## Documentation
+
+* ESPeciaL: an embedded systems programming language - [publication](http://dl.acm.org/citation.cfm?doid=2774975.2774982)
+* Scala Symposium 2015 - [slides](https://github.com/hevs-isi/especial-frontend/raw/master/doc/especial_scala15.pdf)
+* ESPeciaL overview - [poster](https://github.com/hevs-isi/especial-frontend/raw/master/doc/especial_poster.pdf)
+* Master Thesis - [full report](http://doc.rero.ch/record/255601)
+
 ## Back-end
 
 The *ESPeciaL* C++ back-end, the Hardware Abstraction Layer and the modified version of the QEMU emulator are available in [this repository](https://github.com/hevs-isi/especial-backend).
